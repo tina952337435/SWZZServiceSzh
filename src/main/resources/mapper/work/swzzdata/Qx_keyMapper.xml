@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzdata.Qx_keyData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzdata.Qx_keyPojo">
+        select a.* from "qx_key" a
+        <where>
+
+            <if test="ID != null and ID != ''">
+                and KEYID = #{ID}
+            </if>
+<!--            <if test="key != null and key != ''">-->
+<!--                and QX_NAME like concat('%',concat(#{key},'%'))-->
+<!--                or QX_NOTE like concat('%',concat(#{key},'%'))-->
+<!--            </if>-->
+<!--            <if test="stime != null and stime != ''">-->
+<!--                <![CDATA[ and TM >= #{stime} ]]>-->
+<!--            </if>-->
+<!--            <if test="etime != null and etime != ''">-->
+<!--                <![CDATA[ and TM <= #{etime} ]]>-->
+<!--            </if>-->
+<!--            <if test="type != null">-->
+<!--                and GROUPID in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM "qx_key"
+        <where>
+            <if test="ID != null and ID != ''">
+                and KEYID = #{ID}
+            </if>
+            <!--            <if test="key != null and key != ''">-->
+            <!--                and QX_NAME like concat('%',concat(#{key},'%'))-->
+            <!--                or QX_NOTE like concat('%',concat(#{key},'%'))-->
+            <!--            </if>-->
+            <!--            <if test="stime != null and stime != ''">-->
+            <!--                <![CDATA[ and TM >= #{stime} ]]>-->
+            <!--            </if>-->
+            <!--            <if test="etime != null and etime != ''">-->
+            <!--                <![CDATA[ and TM <= #{etime} ]]>-->
+            <!--            </if>-->
+            <!--            <if test="type != null">-->
+            <!--                and GROUPID in-->
+            <!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+            <!--                    #{item}-->
+            <!--                </foreach>-->
+            <!--            </if>-->
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.Qx_keyPojo">
+        insert into "qx_key"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="KEYID != null and KEYID != ''">
+                KEYID,
+            </if>
+            <if test="GROUPID != null and GROUPID != ''">
+                GROUPID,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="KEYID != null and KEYID != ''">
+                #{KEYID},
+            </if>
+            <if test="GROUPID != null and GROUPID != ''">
+                #{GROUPID},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.Qx_keyPojo">
+        update "qx_key"
+        <set>
+            <if test="GROUPID != null and GROUPID != ''">
+                GROUPID = #{GROUPID},
+            </if>
+        </set>
+        where KEYID = #{KEYID}
+    </update>
+    <delete id="deleteOne">
+        delete from "qx_key" where KEYID = #{ID}
+    </delete>
+
+
+</mapper>

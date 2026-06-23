@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_ZHANDIANData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANPojo">
+        select a.* from ES_ZHANDIAN a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+
+            <if test="ptype != null and ptype.size() > 0">
+                and PTYPE in
+                <foreach collection="ptype" open="(" close=")" item="obj" separator=",">
+                    #{obj}
+                </foreach>
+            </if>
+            <if test="key != null and key != ''">
+                and ZHANTYPE = #{key}
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANPojo">
+        insert into ES_ZHANDIAN
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID,
+            </if>
+            <if test="ZHANNAME != null and ZHANNAME != ''">
+                ZHANNAME,
+            </if>
+            <if test="ZHANTYPE != null and ZHANTYPE != ''">
+                ZHANTYPE,
+            </if>
+            <if test="PTYPE != null and PTYPE != ''">
+                PTYPE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="ZHANID != null and ZHANID != ''">
+                #{ZHANID},
+            </if>
+            <if test="ZHANNAME != null and ZHANNAME != ''">
+                #{ZHANNAME},
+            </if>
+            <if test="ZHANTYPE != null and ZHANTYPE != ''">
+                #{ZHANTYPE},
+            </if>
+            <if test="PTYPE != null and PTYPE != ''">
+                #{PTYPE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANPojo">
+        insert into ES_ZHANDIAN(ID,ZHANID,ZHANNAME,ZHANTYPE,PTYPE) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ID,jdbcType=VARCHAR},
+            #{obj.ZHANID,jdbcType=VARCHAR},
+            #{obj.ZHANNAME,jdbcType=VARCHAR},
+            #{obj.ZHANTYPE,jdbcType=VARCHAR},
+            #{obj.PTYPE,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANPojo">
+        update ES_ZHANDIAN
+        <set>
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID = #{ZHANID},
+            </if>
+            <if test="ZHANNAME != null and ZHANNAME != ''">
+                ZHANNAME = #{ZHANNAME},
+            </if>
+            <if test="ZHANTYPE != null and ZHANTYPE != ''">
+                ZHANTYPE = #{ZHANTYPE},
+            </if>
+            <if test="PTYPE != null and PTYPE != ''">
+                PTYPE = #{PTYPE},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_ZHANDIAN where ID = #{ID}
+    </delete>
+
+    <delete id="deleteALL" parameterType="list">
+        delete from ES_ZHANDIAN where
+        ID in
+        <foreach collection="bpPojo" open="(" close=")" item="item" separator=",">
+            #{item.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+
+    <delete id="deleteFangAn" parameterType="list">
+        delete from ES_ZHANDIANDATA where
+        SOLUTIONID in
+        <foreach collection="bpPojo" open="(" close=")" item="item" separator=",">
+            #{item.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+
+    <select id="selectES_ZHANDIANAndDATAByDay" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDto">
+        select m.ID,m.ZHANID,ZHANTIME,ZHANDATA from (
+        select a.ZHANID,date_format(ZHANTIME,'%Y-%m-%d') ZHANTIME,SUM(ZHANDATA) ZHANDATA
+        from ES_ZHANDIAN a LEFT JOIN ES_ZHANDIANDATA b on a.ZHANID = b.ZHANID
+        <where>
+            and LENGTH(ZHANDATA) = lengthb(ZHANDATA)
+            <if test="startdate != null and startdate != ''">
+                <![CDATA[ and ZHANTIME >= #{startdate}  ]]>
+            </if>
+            <if test="enddate != null and enddate != ''">
+                <![CDATA[ and ZHANTIME <= #{enddate} ]]>
+            </if>
+            <if test="solutionid != null and solutionid != ''">
+                and SOLUTIONID = #{solutionid}
+            </if>
+            <if test="datatype != null and datatype.size() > 0">
+                and PTYPE in
+                <foreach collection="datatype" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+        </where>
+        GROUP BY a.ZHANID,date_format(ZHANTIME,'%Y-%m-%d')
+        ) n RIGHT JOIN ES_ZHANDIAN m
+        on m.ZHANID = n.ZHANID
+    </select>
+
+    <select id="selectES_ZHANDIANAndDATAByHour" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDto">
+<!--         select a.ID,a.ZHANID,ZHANDATA,ZHANTIME-->
+<!--         from ES_ZHANDIAN a LEFT JOIN ES_ZHANDIANDATA b on a.ZHANID = b.ZHANID-->
+<!--        <where>-->
+<!--            <if test="startdate != null and startdate != ''">-->
+<!--                <![CDATA[ and ZHANTIME >= TO_DATE(#{startdate},'YYYY-MM-DD HH24:MI:SS')  ]]>-->
+<!--            </if>-->
+<!--            <if test="enddate != null and enddate != ''">-->
+<!--                <![CDATA[ and ZHANTIME <= TO_DATE(#{enddate},'YYYY-MM-DD HH24:MI:SS') ]]>-->
+<!--            </if>-->
+<!--            <if test="solutionid != null and solutionid != ''">-->
+<!--                and SOLUTIONID = #{solutionid}-->
+<!--            </if>-->
+<!--            <if test="datatype != null and datatype != ''">-->
+<!--                and PTYPE = #{datatype}-->
+<!--            </if>-->
+<!--        </where>-->
+        select b.ZHANID,date_format(ZHANTIME,'%Y-%m-%d %H:%i:%s') ZHANTIME, ZHANDATA
+        from ES_ZHANDIANDATA b inner JOIN ES_ZHANDIAN a on a.ZHANID = b.ZHANID
+        <where>
+            <if test="startdate != null and startdate != ''">
+                <![CDATA[ and ZHANTIME >= #{startdate}  ]]>
+            </if>
+            <if test="enddate != null and enddate != ''">
+                <![CDATA[ and ZHANTIME <= #{enddate} ]]>
+            </if>
+            <if test="solutionid != null and solutionid != ''">
+                and SOLUTIONID = #{solutionid}
+            </if>
+            <if test="datatype != null and datatype.size() > 0">
+                and PTYPE in
+                <foreach collection="datatype" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+        </where>
+        order by b.ZHANTIME asc
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_ZHANDIAN
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="ptype != null and ptype.size() > 0">
+                and PTYPE in
+                <foreach collection="ptype" open="(" close=")" item="obj" separator=",">
+                    #{obj}
+                </foreach>
+            </if>
+            <if test="key != null and key != ''">
+                and ZHANTYPE = #{key}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="list" item="obj" separator=";">
+            update ES_ZHANDIAN
+            <set>
+                <if test="obj.ZHANID != null and obj.ZHANID != ''">
+                    ZHANID = #{obj.ZHANID,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.ZHANNAME != null and obj.ZHANNAME != ''">
+                    ZHANNAME = #{obj.ZHANNAME,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.ZHANTYPE != null and obj.ZHANTYPE != ''">
+                    ZHANTYPE = #{obj.ZHANTYPE,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.PTYPE != null and obj.PTYPE != ''">
+                    PTYPE = #{obj.PTYPE,jdbcType=VARCHAR},
+                </if>
+            </set>
+            where ID = #{obj.ID}
+        </foreach>
+    </update>
+</mapper>

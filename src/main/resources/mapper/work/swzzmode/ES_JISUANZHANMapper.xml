@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_JISUANZHANData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_JISUANZHANPojo">
+        select a.* from ES_JISUANZHAN a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="type != null and type.size() > 0">
+                and TYPE in
+                <foreach collection="type" open="(" close=")" item="ty" separator=",">
+                    #{ty}
+                </foreach>
+            </if>
+            <if test="key != null and key != ''">
+                and NAME like concat('%',concat(#{key},'%'))
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM ES_JISUANZHAN
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="type != null and type.size() > 0">
+                and TYPE in
+                <foreach collection="type" open="(" close=")" item="ty" separator=",">
+                    #{ty}
+                </foreach>
+            </if>
+            <if test="key != null and key != ''">
+                and NAME like concat('%',concat(#{key},'%'))
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_JISUANZHANPojo">
+        insert into ES_JISUANZHAN
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="NAME != null and NAME != ''">
+                NAME,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="RIVERID != null and RIVERID != ''">
+                RIVERID,
+            </if>
+            <if test="D_ID != null and D_ID != ''">
+                D_ID,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="NAME != null and NAME != ''">
+                #{NAME},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="RIVERID != null and RIVERID != ''">
+                #{RIVERID},
+            </if>
+            <if test="D_ID != null and D_ID != ''">
+                #{D_ID},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_JISUANZHANPojo">
+        insert into ES_JISUANZHAN(ID,NAME,TYPE,STCD,RIVERID,D_ID) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.ID},#{obj.NAME},#{obj.TYPE},#{obj.STCD},#{obj.RIVERID},#{obj.D_ID})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_JISUANZHANPojo">
+        update ES_JISUANZHAN
+        <set>
+            <if test="NAME != null and NAME != ''">
+                NAME = #{NAME},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="RIVERID != null and RIVERID != ''">
+                RIVERID = #{RIVERID},
+            </if>
+            <if test="D_ID != null and D_ID != ''">
+                D_ID = #{D_ID},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_JISUANZHAN where ID = #{ID}
+    </delete>
+</mapper>

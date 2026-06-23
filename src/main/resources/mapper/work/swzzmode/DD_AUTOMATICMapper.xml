@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.DD_AUTOMATICData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.DD_AUTOMATICPojo">
+        select a.* from DD_AUTOMATIC a
+        <where>
+            <if test="ID != null and ID != ''">
+                and VALUE = #{ID}
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM DD_AUTOMATIC
+        <where>
+            <if test="ID != null and ID != ''">
+                and VALUE = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.DD_AUTOMATICPojo">
+        insert into DD_AUTOMATIC
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="VALUE != null and VALUE != ''">
+                VALUE,
+            </if>
+            <if test="TEXT != null and TEXT != ''">
+                TEXT,
+            </if>
+            <if test="ISJS != null and ISJS != ''">
+                ISJS,
+            </if>
+            <if test="NUM != null">
+                NUM,
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="VALUE != null and VALUE != ''">
+                #{VALUE},
+            </if>
+            <if test="TEXT != null and TEXT != ''">
+                #{TEXT},
+            </if>
+            <if test="ISJS != null and ISJS != ''">
+                #{ISJS},
+            </if>
+            <if test="NUM != null">
+                #{NUM},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                #{NOTE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.DD_AUTOMATICPojo">
+        insert into DD_AUTOMATIC(VALUE,TEXT,ISJS,NUM,NOTE) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.VALUE,jdbcType=VARCHAR},
+            #{obj.TEXT,jdbcType=VARCHAR},
+            #{obj.ISJS,jdbcType=VARCHAR},
+            #{obj.NUM,jdbcType=DOUBLE},
+            #{obj.NOTE,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.DD_AUTOMATICPojo">
+        update DD_AUTOMATIC
+        <set>
+            <if test="TEXT != null and TEXT != ''">
+                TEXT = #{TEXT},
+            </if>
+            <if test="ISJS != null and ISJS != ''">
+                ISJS = #{ISJS},
+            </if>
+            <if test="NUM != null">
+                NUM = #{NUM},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE = #{NOTE},
+            </if>
+        </set>
+        where VALUE = #{VALUE}
+    </update>
+    <delete id="deleteOne">
+        delete from DD_AUTOMATIC where VALUE = #{ID}
+    </delete>
+
+    <delete id="deleteALL" parameterType="list">
+        delete from DD_AUTOMATIC where
+        VALUE in
+        <foreach collection="bpPojo" open="(" close=")" item="item" separator=",">
+           #{item.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" item="obj" separator=";">
+            update DD_AUTOMATIC
+            <set>
+                <if test="obj.TEXT != null and obj.TEXT != ''">
+                    TEXT = #{obj.TEXT,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.ISJS != null and obj.ISJS != ''">
+                    ISJS = #{obj.ISJS,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.NUM != null">
+                    NUM = #{obj.NUM,jdbcType=DOUBLE},
+                </if>
+                <if test="obj.NOTE != null and obj.NOTE != ''">
+                    NOTE = #{obj.NOTE,jdbcType=VARCHAR},
+                </if>
+            </set>
+            where VALUE = #{obj.VALUE,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+</mapper>

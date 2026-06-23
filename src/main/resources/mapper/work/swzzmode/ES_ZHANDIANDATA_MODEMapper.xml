@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_ZHANDIANDATA_MODEData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATA_MODEPojo">
+        select a.* from ES_ZHANDIANDATA a
+        <where>
+            <if test="IDList != null and IDList.size() > 0">
+                and ID in
+                <foreach collection="IDList" open="(" close=")" item="ID" separator=",">
+                    #{ID}
+                </foreach>
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_ZHANDIANDATA
+        <where>
+            <if test="IDList != null and IDList.size() > 0">
+                and ID in
+                <foreach collection="IDList" open="(" close=")" item="ID" separator=",">
+                    #{ID}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATA_MODEPojo">
+        insert into ES_ZHANDIANDATA
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID,
+            </if>
+            <if test="ZHANTIME != null and ZHANTIME != ''">
+                ZHANTIME,
+            </if>
+            <if test="ZHANDATA != null and ZHANDATA != ''">
+                ZHANDATA,
+            </if>
+            <if test="SOLUTIONID != null and SOLUTIONID != ''">
+                SOLUTIONID,
+            </if>
+            <if test="YBTM != null and YBTM != ''">
+                YBTM,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="ZHANID != null and ZHANID != ''">
+                #{ZHANID},
+            </if>
+            <if test="ZHANTIME != null and ZHANTIME != ''">
+                #{ZHANTIME},
+            </if>
+            <if test="ZHANDATA != null and ZHANDATA != ''">
+                #{ZHANDATA},
+            </if>
+            <if test="SOLUTIONID != null and SOLUTIONID != ''">
+                #{SOLUTIONID},
+            </if>
+            <if test="YBTM != null and YBTM != ''">
+                #{YBTM},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATA_MODEPojo">
+        insert into ES_ZHANDIANDATA(ID,ZHANID,ZHANTIME,ZHANDATA,SOLUTIONID,YBTM,TYPE) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ID,jdbcType=VARCHAR},
+            #{obj.ZHANID,jdbcType=VARCHAR},
+            #{obj.ZHANTIME,jdbcType=VARCHAR},
+            #{obj.ZHANDATA,jdbcType=VARCHAR},
+            #{obj.SOLUTIONID,jdbcType=VARCHAR},
+            #{obj.YBTM,jdbcType=VARCHAR},
+            #{obj.TYPE,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATA_MODEPojo">
+        update ES_ZHANDIANDATA
+        <set>
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID = #{ZHANID},
+            </if>
+            <if test="ZHANTIME != null and ZHANTIME != ''">
+                ZHANTIME = #{ZHANTIME},
+            </if>
+            <if test="ZHANDATA != null and ZHANDATA != ''">
+                ZHANDATA = #{ZHANDATA},
+            </if>
+            <if test="SOLUTIONID != null and SOLUTIONID != ''">
+                SOLUTIONID = #{SOLUTIONID},
+            </if>
+            <if test="YBTM != null and YBTM != ''">
+                YBTM = #{YBTM},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_ZHANDIANDATA where ID = #{ID}
+    </delete>
+
+    <delete id="deleteALL" parameterType="list">
+        delete from ES_ZHANDIANDATA where
+        ID in
+        <foreach collection="bpPojo" open="(" close=")" item="item" separator=",">
+            #{item.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" item="obj" separator=";">
+            update ES_ZHANDIANDATA
+            <set>
+                <if test="obj.ZHANID != null and obj.ZHANID != ''">
+                    ZHANID = #{obj.ZHANID,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.ZHANTIME != null and obj.ZHANTIME != ''">
+                    ZHANTIME = #{obj.ZHANTIME,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.ZHANDATA != null and obj.ZHANDATA != ''">
+                    ZHANDATA = #{obj.ZHANDATA,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.SOLUTIONID != null and obj.SOLUTIONID != ''">
+                    SOLUTIONID = #{obj.SOLUTIONID,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.YBTM != null and obj.YBTM != ''">
+                    YBTM = #{obj.YBTM,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.TYPE != null and obj.TYPE != ''">
+                    TYPE = #{obj.TYPE,jdbcType=VARCHAR},
+                </if>
+            </set>
+            where ID = #{obj.ID,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+</mapper>

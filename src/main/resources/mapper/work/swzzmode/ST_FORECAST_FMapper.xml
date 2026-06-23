@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ST_FORECAST_FData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_FORECAST_FPojo">
+        select a.* from ST_FORECAST_F a
+        <where>
+            <if test="STCDList != null and STCDList.size() > 0">
+                and STCD in
+                <foreach collection="STCDList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="UNITNAMEList != null and UNITNAMEList.size() > 0">
+                and UNITNAME in
+                <foreach collection="UNITNAMEList" open="(" close=")" item="utitname" separator=",">
+                    #{utitname}
+                </foreach>
+            </if>
+            <if test="FYMDH != null and FYMDH != ''">
+                <![CDATA[ and FYMDH == #{FYMDH} ]]>
+            </if>
+        </where>
+        order by  YMDH asc
+    </select>
+
+<!--    距离依据时间最新的一次预报-->
+    <select id="selectListFast" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_FORECAST_FPojo">
+        select * from  ST_FORECAST_F  where 1=1
+        and FYMDH in (
+        select  max(FYMDH) as FYMDH  from ST_FORECAST_F
+        <where>
+            <if test="UNITNAME != null and UNITNAME != ''">
+                and UNITNAME=#{UNITNAME}
+            </if>
+            <if test="SFYMDH != null and SFYMDH != ''">
+                <![CDATA[ and FYMDH >= #{SFYMDH} ]]>
+            </if>
+            <if test="EFYMDH != null and EFYMDH != ''">
+                <![CDATA[ and FYMDH <= #{EFYMDH} ]]>
+            </if>
+        </where>
+        group BY UNITNAME
+         )
+        <if test="UNITNAME != null and UNITNAME != ''">
+            and UNITNAME=#{UNITNAME}
+        </if>
+        <if test="stime != null and stime != ''">
+            <![CDATA[ and YMDH >= #{stime} ]]>
+        </if>
+        <if test="etime != null and etime != ''">
+            <![CDATA[ and YMDH <= #{etime} ]]>
+        </if>
+        order by  YMDH asc
+    </select>
+
+    <select id="selectListFYMDH" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_FORECAST_FPojo">
+        select  FYMDH  from ST_FORECAST_F a
+        <where>
+            <if test="STCDList != null and STCDList.size() > 0">
+                and STCD in
+                <foreach collection="STCDList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="UNITNAMEList != null and UNITNAMEList.size() > 0">
+                and UNITNAME in
+                <foreach collection="UNITNAMEList" open="(" close=")" item="utitname" separator=",">
+                    #{utitname}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and FYMDH >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and FYMDH <= #{etime} ]]>
+            </if>
+        </where>
+        group by FYMDH
+        order by  FYMDH asc
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_FORECAST_FPojo">
+        insert into ST_FORECAST_F
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="UNITNAME != null and UNITNAME != ''">
+                UNITNAME,
+            </if>
+            <if test="PLCD != null and PLCD != ''">
+                PLCD,
+            </if>
+            <if test="FYMDH != null and FYMDH != ''">
+                FYMDH,
+            </if>
+            <if test="IYMDH != null and IYMDH != ''">
+                IYMDH,
+            </if>
+            <if test="YMDH != null and YMDH != ''">
+                YMDH,
+            </if>
+            <if test="Z != null">
+                Z,
+            </if>
+            <if test="Q != null">
+                Q,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="UNITNAME != null and UNITNAME != ''">
+                #{UNITNAME},
+            </if>
+            <if test="PLCD != null and PLCD != ''">
+                #{PLCD},
+            </if>
+            <if test="FYMDH != null and FYMDH != ''">
+                #{ FYMDH},
+            </if>
+            <if test="IYMDH != null and IYMDH != ''">
+                #{IYMDH},
+            </if>
+            <if test="YMDH != null and YMDH != ''">
+                #{YMDH},
+            </if>
+            <if test="Z != null">
+                #{Z},
+            </if>
+            <if test="Q != null">
+                #{Q},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_FORECAST_FPojo">
+        insert into ST_FORECAST_F(STCD,UNITNAME,PLCD, FYMDH,IYMDH,YMDH,Z,Q) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.STCD,jdbcType=VARCHAR},
+            #{obj.UNITNAME,jdbcType=VARCHAR},
+            #{obj.PLCD,jdbcType=VARCHAR},
+            #{obj.FYMDH,jdbcType=VARCHAR},
+            #{obj.IYMDH,jdbcType=VARCHAR},
+            #{obj.YMDH,jdbcType=VARCHAR},
+            #{obj.Z,jdbcType=FLOAT},
+            #{obj.Q,jdbcType=FLOAT}
+            )
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_FORECAST_FPojo">
+        update ST_FORECAST_F
+        <set>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="Z != null">
+                Z = #{Z},
+            </if>
+            <if test="Q != null">
+                Q = #{Q},
+            </if>
+        </set>
+        where STCD = #{STCD}
+        and UNITNAME=#{UNITNAME}
+        and FYMDH=#{FYMDH}
+        and IYMDH=#{IYMDH}
+        and YMDH=#{YMDH}
+    </update>
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" item="obj" separator=";">
+            update ST_FORECAST_F
+            <set>
+                <if test="obj.STCD != null and obj.STCD != ''">
+                    STCD = #{obj.STCD,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.Z != null">
+                    Z = #{obj.Z,jdbcType=FLOAT},
+                </if>
+                <if test="obj.Q != null">
+                    Q = #{obj.Q,jdbcType=FLOAT},
+                </if>
+            </set>
+            where STCD = #{STCD}
+            and UNITNAME=#{UNITNAME}
+            and FYMDH=#{FYMDH}
+            and IYMDH=#{IYMDH}
+            and YMDH=#{YMDH}
+        </foreach>
+    </update>
+
+    <delete id="deleteOne">
+        delete from ST_FORECAST_F where STCD = #{ID}
+                                    and UNITNAME=#{UNITNAME}
+                                    and FYMDH=#{FYMDH}
+                                    and IYMDH=#{IYMDH}
+                                    and YMDH=#{YMDH}
+    </delete>
+
+    <delete id="deleteMore">
+        delete from ST_FORECAST_F
+        <where>
+            <if test="IDList != null and IDList.size() > 0">
+                and STCD in
+                <foreach collection="IDList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+</mapper>

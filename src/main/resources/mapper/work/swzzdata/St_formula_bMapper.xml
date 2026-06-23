@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzdata.St_formula_bData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzdata.St_formula_bPojo">
+        select a.*,rownum rnum from "st_formula_b" a
+        <where>
+
+            <if test="ID != null and ID != ''">
+                and STCD = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                WINDDIR like concat('%',concat(#{key},'%'))
+                or TYPE like concat('%',concat(#{key},'%'))
+                )
+            </if>
+<!--            <if test="stime != null and stime != ''">-->
+<!--                <![CDATA[ and TM >= #{stime} ]]>-->
+<!--            </if>-->
+<!--            <if test="etime != null and etime != ''">-->
+<!--                <![CDATA[ and TM <= #{etime} ]]>-->
+<!--            </if>-->
+<!--            <if test="type != null">-->
+<!--                and GROUPID in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM "st_formula_b"
+        <where>
+            <if test="ID != null and ID != ''">
+                and STCD = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                WINDDIR like concat('%',concat(#{key},'%'))
+                or TYPE like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <!--            <if test="stime != null and stime != ''">-->
+            <!--                <![CDATA[ and TM >= #{stime} ]]>-->
+            <!--            </if>-->
+            <!--            <if test="etime != null and etime != ''">-->
+            <!--                <![CDATA[ and TM <= #{etime} ]]>-->
+            <!--            </if>-->
+            <!--            <if test="type != null">-->
+            <!--                and GROUPID in-->
+            <!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+            <!--                    #{item}-->
+            <!--                </foreach>-->
+            <!--            </if>-->
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.St_formula_bPojo">
+        insert into "st_formula_b"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="WINDDIR != null and WINDDIR != ''">
+                WINDDIR,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="FTYPE != null and FTYPE != ''">
+                FTYPE,
+            </if>
+            <if test="GSTCD != null and GSTCD != ''">
+                GSTCD,
+            </if>
+            <if test="WINDSQUAREXS != null">
+                WINDSQUAREXS,
+            </if>
+            <if test="WINDXS != null">
+                WINDXS,
+            </if>
+            <if test="CONSTANT != null">
+                CONSTANT,
+            </if>
+            <if test="RQUARE != null">
+                RQUARE,
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="WINDDIR != null and WINDDIR != ''">
+                #{WINDDIR},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="FTYPE != null and FTYPE != ''">
+                #{FTYPE},
+            </if>
+            <if test="GSTCD != null and GSTCD != ''">
+                #{GSTCD},
+            </if>
+            <if test="WINDSQUAREXS != null">
+                #{WINDSQUAREXS},
+            </if>
+            <if test="WINDXS != null">
+                #{WINDXS},
+            </if>
+            <if test="CONSTANT != null">
+                #{CONSTANT},
+            </if>
+            <if test="RQUARE != null">
+                #{RQUARE},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                #{NOTE},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.St_formula_bPojo">
+        update "st_formula_b"
+        <set>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="WINDDIR != null and WINDDIR != ''">
+                WINDDIR = #{WINDDIR},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+            <if test="FTYPE != null and FTYPE != ''">
+                FTYPE = #{FTYPE},
+            </if>
+            <if test="GSTCD != null and GSTCD != ''">
+                GSTCD = #{GSTCD},
+            </if>
+            <if test="WINDSQUAREXS != null">
+                WINDSQUAREXS = #{WINDSQUAREXS},
+            </if>
+            <if test="WINDXS != null">
+                WINDXS = #{WINDXS},
+            </if>
+            <if test="CONSTANT != null">
+                CONSTANT = #{CONSTANT},
+            </if>
+            <if test="RQUARE != null">
+                RQUARE = #{RQUARE},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE = #{NOTE},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from "st_formula_b" where ID = #{ID}
+    </delete>
+
+
+</mapper>

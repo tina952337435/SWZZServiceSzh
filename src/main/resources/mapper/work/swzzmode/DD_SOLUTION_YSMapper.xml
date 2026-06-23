@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.DD_SOLUTION_YSData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTION_YSPojo">
+        select a.* from DD_SOLUTION_YS a
+        <where>
+            <if test="ID != null and ID != ''">
+                and DD_ID = #{ID}
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM DD_SOLUTION_YS
+        <where>
+            <if test="ID != null and ID != ''">
+                and DD_ID = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTION_YSPojo">
+        insert into DD_SOLUTION_YS
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="DD_ID != null and DD_ID != ''">
+                DD_ID,
+            </if>
+            <if test="DD_FINISH != null and DD_FINISH != ''">
+                DD_FINISH,
+            </if>
+            <if test="DD_TM != null and DD_TM != ''">
+                DD_TM,
+            </if>
+            <if test="TM != null and TM != ''">
+                TM,
+            </if>
+            <if test="DD_JYTYPE != null and DD_JYTYPE != ''">
+                DD_JYTYPE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="DD_ID != null and DD_ID != ''">
+                #{DD_ID},
+            </if>
+            <if test="DD_FINISH != null and DD_FINISH != ''">
+                #{DD_FINISH},
+            </if>
+            <if test="DD_TM != null and DD_TM != ''">
+                #{DD_TM},
+            </if>
+            <if test="TM != null and TM != ''">
+                #{TM},
+            </if>
+            <if test="DD_JYTYPE != null and DD_JYTYPE != ''">
+                #{DD_JYTYPE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTION_YSPojo">
+        insert into DD_SOLUTION_YS(DD_ID,DD_FINISH,DD_TM,TM,DD_JYTYPE) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.DD_ID},
+            #{obj.DD_FINISH},
+            #{obj.DD_TM},
+            #{obj.TM},
+            #{obj.DD_JYTYPE})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTION_YSPojo">
+        update DD_SOLUTION_YS
+        <set>
+            <if test="DD_FINISH != null and DD_FINISH != ''">
+                DD_FINISH = #{DD_FINISH},
+            </if>
+            <if test="DD_TM != null and DD_TM != ''">
+                DD_TM = #{DD_TM},
+            </if>
+            <if test="TM != null and TM != ''">
+                TM = #{TM},
+            </if>
+            <if test="DD_JYTYPE != null and DD_JYTYPE != ''">
+                DD_JYTYPE = #{DD_JYTYPE},
+            </if>
+        </set>
+        where DD_ID = #{DD_ID}
+    </update>
+    <delete id="deleteOne">
+        delete from DD_SOLUTION_YS where DD_ID = #{ID}
+    </delete>
+</mapper>

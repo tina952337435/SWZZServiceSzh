@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.DD_SOLUTIONData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTIONPojo">
+        select a.* from DD_SOLUTION a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                DD_NAME like concat('%',concat(#{key},'%'))
+                or DD_BY like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="DD_DISTRIBY != null and DD_DISTRIBY != ''">
+                and DD_DISTRIBY = #{DD_DISTRIBY}
+            </if>
+            <if test="mindList != null and mindList.size() > 0">
+                and DD_MIND in
+                <foreach collection="mindList" open="(" close=")" item="mind" separator=",">
+                    #{mind}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and DD_CARRYTM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DD_CARRYTM <= #{etime} ]]>
+            </if>
+
+        </where>
+        order by DD_CARRYTM desc
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectListByDD_IDandDD_status" resultType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTIONPojo">
+        select * from (
+        select a.*,rownum rnum from DD_SOLUTION a
+        <where>
+            <if test="DD_ID != null and DD_ID != ''">
+                and DD_ID = #{DD_ID}
+            </if>
+            <if test="DD_status != null and DD_status != ''">
+                and DD_STATUS = #{DD_status}
+            </if>
+            <if test="DD_DISTRIBY != null and DD_DISTRIBY != ''">
+                and DD_DISTRIBY = #{DD_DISTRIBY}
+            </if>
+            <if test="DD_TM != null and DD_TM != ''">
+                <![CDATA[ and DD_TM = #{DD_TM} ]]>
+            </if>
+        </where>
+        )
+        order by DD_CARRYTM desc
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM DD_SOLUTION
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                DD_NAME like concat('%',concat(#{key},'%'))
+                or DD_BY like concat('%',concat(#{key},'%'))
+
+                )
+            </if>
+            <if test="mindList != null and mindList.size() > 0">
+                and DD_MIND in
+                <foreach collection="mindList" open="(" close=")" item="mind" separator=",">
+                    #{mind}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and DD_TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DD_TM <= #{etime} ]]>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTIONPojo">
+        insert into DD_SOLUTION
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="DD_ID != null and DD_ID != ''">
+                DD_ID,
+            </if>
+            <if test="DD_NAME != null and DD_NAME != ''">
+                DD_NAME,
+            </if>
+            <if test="DD_TM != null and DD_TM != ''">
+                DD_TM,
+            </if>
+            <if test="DD_FOR != null and DD_FOR != ''">
+                DD_FOR,
+            </if>
+            <if test="DD_BY != null and DD_BY != ''">
+                DD_BY,
+            </if>
+            <if test="DD_STANA != null and DD_STANA != ''">
+                DD_STANA,
+            </if>
+            <if test="DD_CHECKBY != null and DD_CHECKBY != ''">
+                DD_CHECKBY,
+            </if>
+            <if test="DD_DISTRIBY != null and DD_DISTRIBY != ''">
+                DD_DISTRIBY,
+            </if>
+            <if test="DD_NOTE != null and DD_NOTE != ''">
+                DD_NOTE,
+            </if>
+            <if test="DD_MIND != null and DD_MIND != ''">
+                DD_MIND,
+            </if>
+            <if test="DD_CARRYTM != null and DD_CARRYTM != ''">
+                DD_CARRYTM,
+            </if>
+            <if test="DD_EVALUE != null and DD_EVALUE != ''">
+                DD_EVALUE,
+            </if>
+            <if test="DD_CARRYBY != null and DD_CARRYBY != ''">
+                DD_CARRYBY,
+            </if>
+            <if test="DD_STATUS != null and DD_STATUS != ''">
+                DD_STATUS,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="DD_ID != null and DD_ID != ''">
+                #{DD_ID},
+            </if>
+            <if test="DD_NAME != null and DD_NAME != ''">
+                #{DD_NAME},
+            </if>
+            <if test="DD_TM != null and DD_TM != ''">
+                #{DD_TM},
+            </if>
+            <if test="DD_FOR != null and DD_FOR != ''">
+                #{DD_FOR},
+            </if>
+            <if test="DD_BY != null and DD_BY != ''">
+                #{DD_BY},
+            </if>
+            <if test="DD_STANA != null and DD_STANA != ''">
+                #{DD_STANA},
+            </if>
+            <if test="DD_CHECKBY != null and DD_CHECKBY != ''">
+                #{DD_CHECKBY},
+            </if>
+            <if test="DD_DISTRIBY != null and DD_DISTRIBY != ''">
+                #{DD_DISTRIBY},
+            </if>
+            <if test="DD_NOTE != null and DD_NOTE != ''">
+                #{DD_NOTE},
+            </if>
+            <if test="DD_MIND != null and DD_MIND != ''">
+                #{DD_MIND},
+            </if>
+            <if test="DD_CARRYTM != null and DD_CARRYTM != ''">
+                #{DD_CARRYTM},
+            </if>
+            <if test="DD_EVALUE != null and DD_EVALUE != ''">
+                #{DD_EVALUE},
+            </if>
+            <if test="DD_CARRYBY != null and DD_CARRYBY != ''">
+                #{DD_CARRYBY},
+            </if>
+            <if test="DD_STATUS != null and DD_STATUS != ''">
+                #{DD_STATUS},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTIONPojo">
+        insert into DD_SOLUTION(ID,DD_ID,DD_NAME,DD_TM,DD_FOR,DD_BY,DD_STANA,DD_CHECKBY,DD_DISTRIBY,DD_NOTE,DD_MIND,DD_CARRYTM,DD_EVALUE,DD_CARRYBY,DD_STATUS) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ID},
+            #{obj.DD_ID},
+            #{obj.DD_NAME},
+            #{obj.DD_TM},
+            #{obj.DD_FOR},
+            #{obj.DD_BY},
+            #{obj.DD_STANA},
+            #{obj.DD_CHECKBY},
+            #{obj.DD_DISTRIBY},
+            #{obj.DD_NOTE},
+            #{obj.DD_MIND},
+            #{obj.DD_CARRYTM},
+            #{obj.DD_EVALUE},
+            #{obj.DD_CARRYBY},
+            #{obj.DD_STATUS}
+            )
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTIONPojo">
+        update DD_SOLUTION
+        <set>
+            <if test="DD_ID != null and DD_ID != ''">
+                DD_ID = #{DD_ID},
+            </if>
+            <if test="DD_NAME != null and DD_NAME != ''">
+                DD_NAME = #{DD_NAME},
+            </if>
+            <if test="DD_TM != null and DD_TM != ''">
+                DD_TM = #{DD_TM},
+            </if>
+            <if test="DD_FOR != null and DD_FOR != ''">
+                DD_FOR = #{DD_FOR},
+            </if>
+            <if test="DD_BY != null and DD_BY != ''">
+                DD_BY = #{DD_BY},
+            </if>
+            <if test="DD_STANA != null and DD_STANA != ''">
+                DD_STANA = #{DD_STANA},
+            </if>
+            <if test="DD_CHECKBY != null and DD_CHECKBY != ''">
+                DD_CHECKBY = #{DD_CHECKBY},
+            </if>
+            <if test="DD_DISTRIBY != null and DD_DISTRIBY != ''">
+                DD_DISTRIBY = #{DD_DISTRIBY},
+            </if>
+            <if test="DD_NOTE != null and DD_NOTE != ''">
+                DD_NOTE = #{DD_NOTE},
+            </if>
+            <if test="DD_MIND != null and DD_MIND != ''">
+                DD_MIND = #{DD_MIND},
+            </if>
+            <if test="DD_CARRYTM != null and DD_CARRYTM != ''">
+                DD_CARRYTM = #{DD_CARRYTM},
+            </if>
+            <if test="DD_EVALUE != null and DD_EVALUE != ''">
+                DD_EVALUE = #{DD_EVALUE},
+            </if>
+            <if test="DD_CARRYBY != null and DD_CARRYBY != ''">
+                DD_CARRYBY = #{DD_CARRYBY,jdbcType=VARCHAR},
+            </if>
+            <if test="DD_STATUS != null and DD_STATUS != ''">
+                DD_STATUS = #{DD_STATUS},
+            </if>
+        </set>
+        where ID = #{ID,jdbcType=VARCHAR}
+    </update>
+    <delete id="deleteOne">
+        delete from DD_SOLUTION where ID = #{ID}
+    </delete>
+
+    <select id="selectListNew" resultType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTIONPojo">
+        select  a.*  from DD_SOLUTION a
+        where a.DD_CARRYTM=(
+        select max(DD_CARRYTM) from DD_SOLUTION
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and DD_CARRYTM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DD_CARRYTM <= #{etime}]]>
+            </if>
+            <if test="pathnameList != null and pathnameList.size() > 0">
+                and DD_DISTRIBY in
+                <foreach collection="pathnameList" open="(" close=")" item="mind" separator=",">
+                    #{mind}
+                </foreach>
+            </if>
+        </where>
+        )
+    </select>
+
+    <select id="selectListDuo" resultType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTIONPojo">
+        select a.* from DD_SOLUTION a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                DD_NAME like concat('%',concat(#{key},'%'))
+                or DD_BY like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="DD_DISTRIBY != null and DD_DISTRIBY != ''">
+                and DD_DISTRIBY = #{DD_DISTRIBY}
+            </if>
+            <if test="mindList != null and mindList.size() > 0">
+                and DD_ID in
+                <foreach collection="mindList" open="(" close=")" item="mind" separator=",">
+                    #{mind}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and DD_CARRYTM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DD_CARRYTM <= #{etime} ]]>
+            </if>
+
+        </where>
+        order by DD_CARRYTM desc
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+
+</mapper>

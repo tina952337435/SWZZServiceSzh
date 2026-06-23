@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.HD_BASE_BData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.HD_BASE_BPojo">
+        select ID,RVNM,BSNM,STARTPOINT,ENDPOINT,SHAPELENG,GN,TYPEID,DENGJI,CITYNAME,NT,ORDERBYID,LGTD,LTTD,SWPID,TGTQPID,GQPID,EXPID,WSJPID from HD_BASE_B
+        <where>
+            shapepath is not null
+            <if test="stcdList != null and stcdList.size() > 0">
+                AND ID IN
+                <foreach collection="stcdList" open="(" close=")" item="city" separator=",">
+                    #{city}
+                </foreach>
+            </if>
+            <if test="rvnmList != null and rvnmList.size() > 0">
+                AND RVNM IN
+                <foreach collection="rvnmList" open="(" close=")" item="city" separator=",">
+                    #{city}
+                </foreach>
+            </if>
+            <if test="KEY != null and KEY != ''">
+                and (RVNM like concat('%',concat(#{KEY},'%'))  or GN like  concat('%',concat(#{KEY},'%')) or BSNM like  concat('%',concat(#{KEY},'%')) or CITYNAME like  concat('%',concat(#{KEY},'%')))
+            </if>
+            <if test="PATHNAME != null and PATHNAME != ''">
+                and TYPEID =#{PATHNAME}
+            </if>
+        </where>
+        order by ORDERBYID
+    </select>
+
+    <select id="selectPathList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.HD_BASE_BPojo">
+        select * from HD_BASE_B
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                AND ID IN
+                <foreach collection="stcdList" open="(" close=")" item="city" separator=",">
+                    #{city}
+                </foreach>
+            </if>
+        </where>
+        order by ORDERBYID
+    </select>
+
+</mapper>

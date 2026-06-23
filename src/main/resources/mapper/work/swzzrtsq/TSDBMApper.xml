@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.RTSQST_PPTN_RData">
+    <select id="selectTSDBList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.TSDBPojo">
+        select  *  from  HPJSQ.TSDB
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and time >=#{stime}  ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and time <=#{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and  senid  in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        order by time asc
+    </select>
+
+    <select id="selectTSDBListtTop" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.TSDBPojo">
+        select  top 150 *  from  HPJSQ.TSDB
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and time >=#{stime}  ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and time <=#{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and  senid  in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        order by time asc
+    </select>
+</mapper>

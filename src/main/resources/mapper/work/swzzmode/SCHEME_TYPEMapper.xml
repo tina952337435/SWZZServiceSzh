@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.SCHEME_TYPEData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.SCHEME_TYPEPojo">
+        select a.* from SCHEME_TYPE a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                NAME like concat('%',concat(#{key},'%'))
+                or NOTE like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and YJ_TIME >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and YJ_TIME <= #{etime} ]]>
+            </if>
+            <if test="DDstime != null and DDstime != ''">
+                <![CDATA[ and DD_TIME >= #{DDstime} ]]>
+            </if>
+            <if test="DDetime != null and DDetime != ''">
+                <![CDATA[ and DD_TIME <= #{DDetime} ]]>
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+        order by YJ_TIME desc
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM SCHEME_TYPE
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                NAME like concat('%',concat(#{key},'%'))
+                or NOTE like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and YJ_TIME >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and YJ_TIME <= #{etime} ]]>
+            </if>
+        </where>
+        order by YJ_TIME desc
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.SCHEME_TYPEPojo">
+        insert into SCHEME_TYPE
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="NAME != null and NAME != ''">
+                NAME,
+            </if>
+            <if test="DD_TIME != null and DD_TIME != ''">
+                DD_TIME,
+            </if>
+            <if test="YJ_TIME != null and YJ_TIME != ''">
+                YJ_TIME,
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="NAME != null and NAME != ''">
+                #{NAME},
+            </if>
+            <if test="DD_TIME != null and DD_TIME != ''">
+                #{DD_TIME},
+            </if>
+            <if test="YJ_TIME != null and YJ_TIME != ''">
+                #{YJ_TIME},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                #{NOTE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.SCHEME_TYPEPojo">
+        insert into SCHEME_TYPE(ID,NAME,DD_TIME,YJ_TIME,NOTE) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ID},
+            #{obj.NAME},
+            #{obj.DD_TIME},
+            #{obj.YJ_TIME},
+            #{obj.NOTE}
+            )
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.SCHEME_TYPEPojo">
+        update SCHEME_TYPE
+        <set>
+            <if test="NAME != null and NAME != ''">
+                NAME = #{NAME},
+            </if>
+            <if test="DD_TIME != null and DD_TIME != ''">
+                DD_TIME = #{DD_TIME},
+            </if>
+            <if test="YJ_TIME != null and YJ_TIME != ''">
+                YJ_TIME = #{YJ_TIME},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE = #{NOTE},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from SCHEME_TYPE where ID = #{ID}
+    </delete>
+</mapper>

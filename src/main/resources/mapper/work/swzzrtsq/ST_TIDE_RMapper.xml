@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.RTSQST_TIDE_RData">
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_TIDE_RPojo">
+        insert into ST_TIDE_R(STCD, TM, TDZ, AIRP, TDCHRCD, TDPTN, HLTDMK, INTM) values
+        <foreach collection="quPojo" item="pojo" separator=",">
+            (#{pojo.STCD}, #{pojo.TM}, #{pojo.TDZ}, #{pojo.AIRP}, #{pojo.TDCHRCD}, #{pojo.TDPTN}, #{pojo.HLTDMK}, #{pojo.INTM})
+        </foreach>
+    </insert>
+</mapper>

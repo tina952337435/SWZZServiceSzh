@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.ST_RAINSTORMFREQUENCY_RData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_RAINSTORMFREQUENCY_RPojo">
+        select * from ST_RAINSTORMFREQUENCY_R
+        <where>
+            <if test="stcd != null and stcd != ''">
+                and STCD = #{stcd}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and BGTM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and BGTM <= #{etime} ]]>
+            </if>
+        </where>
+        order by BGTM desc
+    </select>
+    <select id="selectOne" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_RAINSTORMFREQUENCY_RPojo">
+        select * from ST_RAINSTORMFREQUENCY_R
+        where STCD = #{STCD} and BGTM = #{BGTM} and ENDTM = #{ENDTM}
+    </select>
+    <insert id="insertOne">
+        insert into ST_RAINSTORMFREQUENCY_R
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="BGTM != null and BGTM != ''">
+                BGTM,
+            </if>
+            <if test="ENDTM != null and ENDTM != ''">
+                ENDTM,
+            </if>
+            <if test="DRP != null">
+                DRP,
+            </if>
+            <if test="ISIN != null and ISIN != ''">
+                ISIN,
+            </if>
+            <if test="RTYPE != null and RTYPE != ''">
+                RTYPE,
+            </if>
+            <if test="HOUR != null">
+                HOUR,
+            </if>
+            <if test="BYCENTER != null and BYCENTER != ''">
+                BYCENTER,
+            </if>
+            <if test="AVGDRP != null">
+                AVGDRP,
+            </if>
+            <if test="AREA != null">
+                AREA,
+            </if>
+            <if test="MAXHOURDRP != null">
+                MAXHOURDRP,
+            </if>
+            <if test="DRP24 != null">
+                DRP24,
+            </if>
+            <if test="BGTM24 != null and BGTM24 != ''">
+                BGTM24,
+            </if>
+            <if test="ENDTM24 != null and ENDTM24 != ''">
+                ENDTM24,
+            </if>
+            <if test="SHIDRP != null">
+                SHIDRP,
+            </if>
+            <if test="DRP3 != null">
+                DRP3,
+            </if>
+            <if test="DRP6 != null">
+                DRP6,
+            </if>
+            <if test="DRP12 != null">
+                DRP12,
+            </if>
+            <if test="COUNTYDRP != null">
+                COUNTYDRP,
+            </if>
+            <if test="AREADRP != null">
+                AREADRP,
+            </if>
+            <if test="UPZCHA != null">
+                UPZCHA,
+            </if>
+            <if test="AREADRPBEFORE24 != null">
+                AREADRPBEFORE24,
+            </if>
+            <if test="COUNTYDRPBEFORE24 != null">
+                COUNTYDRPBEFORE24,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="BGTM != null and BGTM != ''">
+                #{BGTM},
+            </if>
+            <if test="ENDTM != null and ENDTM != ''">
+                #{ENDTM},
+            </if>
+            <if test="DRP != null">
+                #{DRP},
+            </if>
+            <if test="ISIN != null and ISIN != ''">
+                #{ISIN},
+            </if>
+            <if test="RTYPE != null and RTYPE != ''">
+                #{RTYPE},
+            </if>
+            <if test="HOUR != null">
+                #{HOUR},
+            </if>
+            <if test="BYCENTER != null and BYCENTER != ''">
+                #{BYCENTER},
+            </if>
+            <if test="AVGDRP != null">
+                #{AVGDRP},
+            </if>
+            <if test="AREA != null">
+                #{AREA},
+            </if>
+            <if test="MAXHOURDRP != null">
+                #{MAXHOURDRP},
+            </if>
+            <if test="DRP24 != null">
+                #{DRP24},
+            </if>
+            <if test="BGTM24 != null and BGTM24 != ''">
+                #{BGTM24},
+            </if>
+            <if test="ENDTM24 != null and ENDTM24 != ''">
+                #{ENDTM24},
+            </if>
+            <if test="SHIDRP != null">
+                #{SHIDRP},
+            </if>
+            <if test="DRP3 != null">
+                #{DRP3},
+            </if>
+            <if test="DRP6 != null">
+                #{DRP6},
+            </if>
+            <if test="DRP12 != null">
+                #{DRP12},
+            </if>
+            <if test="COUNTYDRP != null">
+                #{COUNTYDRP},
+            </if>
+            <if test="AREADRP != null">
+                #{AREADRP},
+            </if>
+            <if test="UPZCHA != null">
+                #{UPZCHA},
+            </if>
+            <if test="AREADRPBEFORE24 != null">
+                #{AREADRPBEFORE24},
+            </if>
+            <if test="COUNTYDRPBEFORE24 != null">
+                #{COUNTYDRPBEFORE24},
+            </if>
+        </trim>
+    </insert>
+    <update id="upDateOne">
+        update ST_RAINSTORMFREQUENCY_R
+        <set>
+            <if test="DRP != null">
+                DRP = #{DRP},
+            </if>
+            <if test="ISIN != null and ISIN != ''">
+                ISIN = #{ISIN},
+            </if>
+            <if test="RTYPE != null and RTYPE != ''">
+                RTYPE = #{RTYPE},
+            </if>
+            <if test="HOUR != null">
+                HOUR = #{HOUR},
+            </if>
+            <if test="BYCENTER != null and BYCENTER != ''">
+                BYCENTER = #{BYCENTER},
+            </if>
+            <if test="AVGDRP != null">
+                AVGDRP = #{AVGDRP},
+            </if>
+            <if test="AREA != null">
+                AREA = #{AREA},
+            </if>
+            <if test="MAXHOURDRP != null">
+                MAXHOURDRP = #{MAXHOURDRP},
+            </if>
+            <if test="DRP24 != null">
+                DRP24 = #{DRP24},
+            </if>
+            <if test="BGTM24 != null and BGTM24 != ''">
+                BGTM24 = #{BGTM24},
+            </if>
+            <if test="ENDTM24 != null and ENDTM24 != ''">
+                ENDTM24 = #{ENDTM24},
+            </if>
+            <if test="SHIDRP != null">
+                SHIDRP = #{SHIDRP},
+            </if>
+            <if test="DRP3 != null">
+                DRP3 = #{DRP3},
+            </if>
+            <if test="DRP6 != null">
+                DRP6 = #{DRP6},
+            </if>
+            <if test="DRP12 != null">
+                DRP12 = #{DRP12},
+            </if>
+            <if test="COUNTYDRP != null">
+                COUNTYDRP = #{COUNTYDRP},
+            </if>
+            <if test="AREADRP != null">
+                AREADRP = #{AREADRP},
+            </if>
+            <if test="UPZCHA != null">
+                UPZCHA = #{UPZCHA},
+            </if>
+            <if test="AREADRPBEFORE24 != null">
+                AREADRPBEFORE24 = #{AREADRPBEFORE24},
+            </if>
+            <if test="COUNTYDRPBEFORE24 != null">
+                COUNTYDRPBEFORE24 = #{COUNTYDRPBEFORE24},
+            </if>
+        </set>
+        where STCD = #{STCD} and BGTM = #{BGTM} and ENDTM = #{ENDTM}
+    </update>
+    <delete id="deleteOne">
+        delete from ST_RAINSTORMFREQUENCY_R where STCD = #{STCD} and BGTM = #{BGTM} and ENDTM = #{ENDTM}
+    </delete>
+</mapper>

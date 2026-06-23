@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_MODELGUANLIANData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELGUANLIANPojo">
+        select a.* from ES_MODELGUANLIAN a
+        <where>
+            <if test="ID != null and ID != ''">
+                and MKEYID = #{ID}
+            </if>
+            <if test="type != null and type != ''">
+                and TYPE like concat('%',concat(#{type},'%'))
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    
+    <select id="selectListByID" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELGUANLIANPojo">
+        select a.* from ES_MODELGUANLIAN a
+        <where>
+            <if test="IDList != null and IDList.size() > 0">
+                and MKEYID in
+                <foreach collection="IDList" open="(" close=")" item="id" separator=",">
+                    #{id,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="type != null and type != ''">
+                and TYPE like concat('%',concat(#{type},'%'))
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM ES_MODELGUANLIAN
+        <where>
+            <if test="ID != null and ID != ''">
+                and MKEYID = #{ID}
+            </if>
+            <if test="type != null and type != ''">
+                and TYPE = #{type}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELGUANLIANPojo">
+        insert into ES_MODELGUANLIAN
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="MKEYID != null and MKEYID != ''">
+                MKEYID,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="FIELD != null and FIELD != ''">
+                FIELD,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="MKEYID != null and MKEYID != ''">
+                #{MKEYID},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="FIELD != null and FIELD != ''">
+                #{FIELD},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELGUANLIANPojo">
+        insert into ES_MODELGUANLIAN(MKEYID,TYPE,STCD,FIELD) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.MKEYID},#{obj.TYPE},#{obj.STCD},#{obj.FIELD})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELGUANLIANPojo">
+        update ES_MODELGUANLIAN
+        <set>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="FIELD != null and FIELD != ''">
+                FIELD = #{FIELD},
+            </if>
+        </set>
+        where MKEYID = #{MKEYID} and TYPE = #{TYPE}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_MODELGUANLIAN where MKEYID = #{ID} and TYPE = #{type}
+    </delete>
+</mapper>

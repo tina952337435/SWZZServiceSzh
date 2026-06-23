@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.ST_WDWV_RData">
+    <select id="selecttb_wind_informationList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.tb_wind_informationPojo">
+        select  *  from  HPJSQ.tb_wind_information
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and dt_time >=#{stime}  ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and dt_time <=#{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and  st_stationid  in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        order by dt_time asc
+    </select>
+
+    <select id="selecttb_wind_informationListtTop" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.tb_wind_informationPojo">
+        select  top 2000 *  from  HPJSQ.tb_wind_information
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and dt_time >#{stime}  ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and dt_time <=#{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and  st_stationid  in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        order by dt_time asc
+    </select>
+</mapper>

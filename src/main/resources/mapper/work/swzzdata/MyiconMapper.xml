@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzdata.MyiconData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzdata.MyiconPojo">
+        select A.* from "myicon" A
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and CLASSNAME like concat('%',concat(#{key},'%'))
+            </if>
+<!--            <if test="stime != null and stime != ''">-->
+<!--                <![CDATA[ and TM >= #{stime} ]]>-->
+<!--            </if>-->
+<!--            <if test="etime != null and etime != ''">-->
+<!--                <![CDATA[ and TM <= #{etime} ]]>-->
+<!--            </if>-->
+<!--            <if test="type != null">-->
+<!--                and GROUPID in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM "myicon"
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and CLASSNAME like concat('%',concat(#{key},'%'))
+            </if>
+            <!--            <if test="stime != null and stime != ''">-->
+            <!--                <![CDATA[ and TM >= #{stime} ]]>-->
+            <!--            </if>-->
+            <!--            <if test="etime != null and etime != ''">-->
+            <!--                <![CDATA[ and TM <= #{etime} ]]>-->
+            <!--            </if>-->
+            <!--            <if test="type != null">-->
+            <!--                and GROUPID in-->
+            <!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+            <!--                    #{item}-->
+            <!--                </foreach>-->
+            <!--            </if>-->
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.MyiconPojo">
+        insert into "myicon"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="CLASSNAME != null and CLASSNAME != ''">
+                CLASSNAME,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="CLASSNAME != null and CLASSNAME != ''">
+                #{CLASSNAME},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.MyiconPojo">
+        update "myicon"
+        <set>
+            <if test="CLASSNAME != null and CLASSNAME != ''">
+                CLASSNAME = #{CLASSNAME},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from "myicon" where ID = #{ID}
+    </delete>
+</mapper>

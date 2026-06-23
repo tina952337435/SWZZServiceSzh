@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_TIDALFORECASTGCData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_TIDALFORECASTGCPojo">
+        select a.* from "es_tidalforecastgc" a
+        <where>
+            <if test="ID != null and ID != ''">
+                and a.STCD = #{ID}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+            <if test="ybstime != null and ybstime != ''">
+                <![CDATA[ and YBTM >= #{ybstime} ]]>
+            </if>
+            <if test="ybetime != null and ybetime != ''">
+                <![CDATA[ and YBTM <= #{ybetime} ]]>
+            </if>
+            <if test="type != null and type.size() > 0">
+                and TYPE in
+                <foreach collection="type" open="(" close=")" item="itemtype" separator=",">
+                    #{itemtype,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+        </where>
+        order by YBTM desc
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectMaxYBTM" resultType="java.util.Date">
+        SELECT MAX(YBTM) AS maxYBTM FROM "es_tidalforecastgc"
+        <where>
+            <if test="ybstime != null and ybstime != ''">
+                <![CDATA[ AND YBTM >= #{ybstime} ]]>
+            </if>
+            <if test="ybetime != null and ybetime != ''">
+                <![CDATA[ AND YBTM <= #{ybetime} ]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectMaxFast" resultType="java.util.Date">
+        SELECT top 1 * FROM "es_tidalforecastgc"
+        <where>
+            <if test="stcd != null and stcd != ''">
+                and stcd=#{stcd}
+            </if>
+        </where>
+        order by tm desc
+    </select>
+
+    <select id="selectMaxTBTIDE" resultType="swzzmodeserver.workserver.pojo.swzzflood.TB_TIDE_HIGHLOWPojo">
+        select * from hpjsq.TB_TIDE_HIGHLOW
+        <where>
+            <if test="stcd != null and stcd != ''">
+                and st_stationid=#{stcd}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ AND dt_timeforecast >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ AND dt_timeforecast <= #{etime} ]]>
+            </if>
+            order by dt_timeforecast asc
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_TIDALFORECASTGCPojo">
+        insert into "es_tidalforecastgc"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="STNM != null and STNM != ''">
+                STNM,
+            </if>
+            <if test="TM != null and TM != ''">
+                TM,
+            </if>
+            <if test="FTM != null and FTM != ''">
+                FTM,
+            </if>
+            <if test="YBTM != null and YBTM != ''">
+                YBTM,
+            </if>
+            <if test="TDZ != null">
+                TDZ,
+            </if>
+            <if test="ZS != null">
+                ZS,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="STNM != null and STNM != ''">
+                #{STNM},
+            </if>
+            <if test="TM != null and TM != ''">
+                #{TM},
+            </if>
+            <if test="YBTM != null and YBTM != ''">
+                #{YBTM},
+            </if>
+            <if test="FTM != null and FTM != ''">
+                #{FTM},
+            </if>
+            <if test="TDZ != null">
+                #{TDZ},
+            </if>
+            <if test="ZS != null">
+                #{ZS},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_TIDALFORECASTGCPojo">
+        insert into "es_tidalforecastgc"(
+        STCD,
+        STNM,
+        TM,
+        YBTM,
+        FTM,
+        TDZ,
+        ZS,
+        TYPE
+        )
+        values
+        <foreach collection="objList" item="item" separator=",">
+            (
+            #{item.STCD,jdbcType=VARCHAR},
+            #{item.STNM,jdbcType=VARCHAR},
+            #{item.TM,jdbcType=VARCHAR},
+            #{item.YBTM,jdbcType=VARCHAR},
+            #{item.FTM,jdbcType=VARCHAR},
+            #{item.TDZ,jdbcType=DOUBLE},
+            #{item.ZS,jdbcType=DOUBLE},
+            #{item.TYPE,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+</mapper>

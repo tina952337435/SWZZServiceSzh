@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_MODELFANGANZHANData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELFANGANZHANPojo">
+        select a.* from "es_modelfanganzhan" a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZHANID = #{ID}
+            </if>
+            <if test="FAID != null and FAID.size() > 0">
+                and FA_ID in
+                <foreach collection="FAID" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM "es_modelfanganzhan"
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZHANID = #{ID}
+            </if>
+            <if test="FAID != null and FAID.size() > 0">
+                and FA_ID in
+                <foreach collection="FAID" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELFANGANZHANPojo">
+        insert into "es_modelfanganzhan"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID,
+            </if>
+            <if test="FA_ID != null and FA_ID != ''">
+                FA_ID,
+            </if>
+            <if test="ZHANNAME != null and ZHANNAME != ''">
+                ZHANNAME,
+            </if>
+            <if test="NORMAL != null and NORMAL != ''">
+                NORMAL,
+            </if>
+            <if test="SPECIAL != null and SPECIAL != ''">
+                SPECIAL,
+            </if>
+            <if test="CZ != null">
+                CZ,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZHANID != null and ZHANID != ''">
+                #{ZHANID},
+            </if>
+            <if test="FA_ID != null and FA_ID != ''">
+                #{FA_ID},
+            </if>
+            <if test="ZHANNAME != null and ZHANNAME != ''">
+                #{ZHANNAME},
+            </if>
+            <if test="NORMAL != null and NORMAL != ''">
+                #{NORMAL},
+            </if>
+            <if test="SPECIAL != null and SPECIAL != ''">
+                #{SPECIAL},
+            </if>
+            <if test="CZ != null">
+                #{CZ},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELFANGANZHANPojo">
+        insert into "es_modelfanganzhan"(ZHANID,FA_ID,ZHANNAME,NORMAL,SPECIAL,CZ) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.ZHANID},#{obj.FA_ID},#{obj.ZHANNAME},#{obj.NORMAL},#{obj.SPECIAL},#{obj.CZ})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELFANGANZHANPojo">
+        update "es_modelfanganzhan"
+        <set>
+            <if test="FA_ID != null and FA_ID != ''">
+                FA_ID = #{FA_ID},
+            </if>
+            <if test="ZHANNAME != null and ZHANNAME != ''">
+                ZHANNAME = #{ZHANNAME},
+            </if>
+            <if test="NORMAL != null and NORMAL != ''">
+                NORMAL = #{NORMAL},
+            </if>
+            <if test="SPECIAL != null and SPECIAL != ''">
+                SPECIAL = #{SPECIAL},
+            </if>
+            <if test="CZ != null">
+                CZ = #{CZ},
+            </if>
+        </set>
+        where ZHANID = #{ZHANID}
+    </update>
+    <delete id="deleteOne">
+        delete from "es_modelfanganzhan" where ZHANID = #{ID}
+    </delete>
+    <delete id="deleteAll">
+        delete from "es_modelfanganzhan"
+    </delete>
+</mapper>

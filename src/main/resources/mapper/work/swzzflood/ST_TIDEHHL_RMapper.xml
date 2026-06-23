@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.ST_TIDEHHL_RData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_TIDEHHL_RPojo">
+        select A.* from ST_TIDEHHL_R A
+        <where>
+            <if test="ID != null and ID.size() > 0">
+                and STCD in
+                <foreach collection="ID" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                TDZRCD like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+<!--            <if test="type != null">-->
+<!--                and GROUPID in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM ST_TIDEHHL_R
+        <where>
+            <if test="ID != null and ID.size() > 0">
+                and STCD in
+                <foreach collection="ID" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                TDZRCD like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ST_TIDEHHL_RPojo">
+        insert into ST_TIDEHHL_R
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="TM != null and TM != ''">
+                TM,
+            </if>
+            <if test="TDZ != null">
+                TDZ,
+            </if>
+            <if test="TDTP != null  and TDTP != ''">
+                TDTP,
+            </if>
+            <if test="TDZRCD != null and TDZRCD != ''">
+                TDZRCD,
+            </if>
+            <if test="TDRNG != null and TDRNG != ''">
+                TDRNG,
+            </if>
+            <if test="DR != null and DR != ''">
+                DR,
+            </if>
+            <if test="NT != null and NT != ''">
+                NT,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="TM != null and TM != ''">
+                #{TM},
+            </if>
+            <if test="TDZ != null">
+                #{TDZ},
+            </if>
+            <if test="TDTP != null  and TDTP != ''">
+                #{TDTP},
+            </if>
+            <if test="TDZRCD != null and TDZRCD != ''">
+                #{TDZRCD},
+            </if>
+            <if test="TDRNG != null and TDRNG != ''">
+                #{TDRNG},
+            </if>
+            <if test="DR != null and DR != ''">
+                #{DR},
+            </if>
+            <if test="NT != null and NT != ''">
+                #{NT},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="upDateOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ST_TIDEHHL_RPojo">
+        update ST_TIDEHHL_R
+        <set>
+            <if test="TM != null and TM != ''">
+                #{TM},
+            </if>
+            <if test="TDZ != null">
+                #{TDZ},
+            </if>
+            <if test="TDTP != null  and TDTP != ''">
+                #{TDTP},
+            </if>
+            <if test="TDZRCD != null and TDZRCD != ''">
+                #{TDZRCD},
+            </if>
+            <if test="TDRNG != null and TDRNG != ''">
+                #{TDRNG},
+            </if>
+            <if test="DR != null and DR != ''">
+                #{DR},
+            </if>
+            <if test="NT != null and NT != ''">
+                #{NT},
+            </if>
+        </set>
+        where STCD = #{STCD}
+    </update>
+
+    <delete id="deleteOne" parameterType="string">
+        delete from ST_TIDEHHL_R where STCD = #{id}
+    </delete>
+
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ST_TIDEHHL_RPojo">
+        insert into ST_TIDEHHL_R
+        (
+            STCD,
+            TM,
+            TDZ,
+            TDTP,
+            TDZRCD,
+            TDRNG,
+            DR,
+            NT
+        )
+        values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.STCD},
+            #{obj.TM},
+            #{obj.TDZ},
+            #{obj.TDTP},
+            #{obj.TDZRCD},
+            #{obj.TDRNG},
+            #{obj.DR},
+            #{obj.NT}
+            )
+        </foreach>
+    </insert>
+
+    <update id="upDateAll" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ST_TIDEHHL_RPojo">
+        <foreach collection="objList" item="obj" separator=";">
+            update ST_TIDEHHL_R
+            <set>
+                <if test="obj.TM != null and obj.TM != ''">
+                    #{obj.TM},
+                </if>
+                <if test="obj.TDZ != null">
+                    #{obj.TDZ},
+                </if>
+                <if test="obj.TDTP != null  and obj.TDTP != ''">
+                    #{obj.TDTP},
+                </if>
+                <if test="obj.TDZRCD != null and obj.TDZRCD != ''">
+                    #{obj.TDZRCD},
+                </if>
+                <if test="obj.TDRNG != null and obj.TDRNG != ''">
+                    #{obj.TDRNG},
+                </if>
+                <if test="obj.DR != null and obj.DR != ''">
+                    #{obj.DR},
+                </if>
+                <if test="obj.NT != null and obj.NT != ''">
+                    #{obj.NT},
+                </if>
+            </set>
+            where STCD = #{obj.STCD}
+        </foreach>
+    </update>
+
+    <delete id="deleteAll" parameterType="list">
+        delete from ST_TIDEHHL_R where STCD in
+        <foreach collection="stcdList" open="(" close=")" item="id" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

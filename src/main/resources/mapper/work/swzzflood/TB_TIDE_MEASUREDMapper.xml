@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.TB_TIDE_MEASUREDData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.TB_TIDE_MEASUREDPojo">
+        select nm_id,st_stationid,dt_time,nm_watervalue from HPJSQ.TB_TIDE_MEASURED
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0 ">
+                and st_stationid in
+                <foreach collection="stcdList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and dt_time >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and dt_time <= #{etime} ]]>
+            </if>
+        </where>
+        order by dt_time asc
+    </select>
+</mapper>

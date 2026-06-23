@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.BDMS_PREDICTData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.BDMS_PREDICTPojo">
+        select a.* from BDMS_PREDICT a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and YMDHM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and YMDHM <= #{etime} ]]>
+            </if>
+            <if test="PLAN_N != null and PLAN_N.size() > 0">
+                and PLAN_N in
+                <foreach collection="PLAN_N" open="(" close=")" item="plan" separator=",">
+                    #{plan,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="STCD != null and STCD != ''">
+                and STCD = #{STCD}
+            </if>
+
+            <if test="stcdlist != null and stcdlist.size() > 0">
+                and STCD in
+                <foreach collection="stcdlist" open="(" close=")" item="stcd" separator=",">
+                    #{stcd,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="dataType != null and dataType != ''">
+                and DATA_TYPE = #{dataType}
+            </if>
+
+        </where>
+        <!-- <if test="order != null and order == 'asc'">
+            order by YMDHM asc
+        </if> -->
+        order by YMDHM asc
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM BDMS_PREDICT
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and YMDHM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and YMDHM <= #{etime} ]]>
+            </if>
+            <if test="PLAN_N != null and PLAN_N.size() > 0">
+                and PLAN_N in
+                <foreach collection="PLAN_N" open="(" close=")" item="plan" separator=",">
+                    #{plan,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="STCD != null and STCD != ''">
+                and STCD = #{STCD}
+            </if>
+            <if test="dataType != null and dataType != ''">
+                and DATA_TYPE = #{dataType}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.BDMS_PREDICTPojo">
+        insert into BDMS_PREDICT
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="USERID != null and USERID != ''">
+                USERID,
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="YMDHM != null and YMDHM != ''">
+                YMDHM,
+            </if>
+            <if test="PLAN_N != null and PLAN_N != ''">
+                PLAN_N,
+            </if>
+            <if test="DATA_TYPE != null and DATA_TYPE != ''">
+                DATA_TYPE,
+            </if>
+            <if test="DATA != null">
+                DATA,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="USERID != null and USERID != ''">
+                #{USERID},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="YMDHM != null and YMDHM != ''">
+                #{YMDHM},
+            </if>
+            <if test="PLAN_N != null and PLAN_N != ''">
+                #{PLAN_N},
+            </if>
+            <if test="DATA_TYPE != null and DATA_TYPE != ''">
+                #{DATA_TYPE},
+            </if>
+            <if test="DATA != null">
+                #{DATA},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.BDMS_PREDICTPojo">
+        insert into BDMS_PREDICT(ID,USERID,STCD,YMDHM,PLAN_N,DATA_TYPE,DATA) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.ID,jdbcType=VARCHAR},
+            #{obj.USERID,jdbcType=VARCHAR},
+            #{obj.STCD,jdbcType=VARCHAR},
+            #{obj.YMDHM,jdbcType=VARCHAR},
+            #{obj.PLAN_N,jdbcType=VARCHAR},
+            #{obj.DATA_TYPE,jdbcType=VARCHAR},
+            #{obj.DATA,jdbcType=FLOAT})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.BDMS_PREDICTPojo">
+        update BDMS_PREDICT
+        <set>
+            <if test="USERID != null and USERID != ''">
+                USERID = #{USERID},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="YMDHM != null and YMDHM != ''">
+                YMDHM = #{YMDHM},
+            </if>
+            <if test="PLAN_N != null and PLAN_N != ''">
+                PLAN_N = #{PLAN_N},
+            </if>
+            <if test="DATA_TYPE != null and DATA_TYPE != ''">
+                DATA_TYPE = #{DATA_TYPE},
+            </if>
+            <if test="DATA != null">
+                DATA = #{DATA},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from BDMS_PREDICT where ID = #{ID}
+    </delete>
+    <delete id="deleteALL">
+        delete from BDMS_PREDICT where ID in
+        <foreach collection="bpPojo" open="(" close=")" item="obj" separator=",">
+            #{obj.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+    <delete id="deleteFangAn">
+        delete from BDMS_PREDICT where PLAN_N in
+        <foreach collection="bpPojo" open="(" close=")" item="obj" separator=",">
+            #{obj.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" item="obj" separator=";">
+            update BDMS_PREDICT
+            <set>
+                <if test="obj.USERID != null and obj.USERID != ''">
+                    USERID = #{obj.USERID,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.STCD != null and obj.STCD != ''">
+                    STCD = #{obj.STCD,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.YMDHM != null and obj.YMDHM != ''">
+                    YMDHM = #{obj.YMDHM,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.PLAN_N != null and obj.PLAN_N != ''">
+                    PLAN_N = #{obj.PLAN_N,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.DATA_TYPE != null and obj.DATA_TYPE != ''">
+                    DATA_TYPE = #{obj.DATA_TYPE,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.DATA != null">
+                    DATA = #{obj.DATA,jdbcType=FLOAT},
+                </if>
+            </set>
+            where ID = #{obj.ID,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+</mapper>

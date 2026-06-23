@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.RTSQST_STBPRP_B_STCDData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_B_STCDPojo">
+        select * from ST_STBPRP_B_STCD
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="typeList != null and typeList.size() > 0">
+                and TYPE in
+                <foreach collection="typeList" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+            <if test="sourceList != null and sourceList.size() > 0">
+                and SOURCE in
+                <foreach collection="sourceList" open="(" close=")" item="source" separator=",">
+                    #{source}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <delete id="deleteOne">
+        delete from ST_STBPRP_B_STCD where STCD = #{STCD} AND TYPE = #{TYPE}
+    </delete>
+    <update id="upDateOne">
+        UPDATE "SZ_WATER"."ST_STBPRP_B_STCD" t
+        JOIN "SZ_WATER"."ST_STBPRP_B_STCDONE" tmp
+        ON t.stcd = tmp.stcd
+        AND t.ZSTCD = tmp.ZSTCD
+        AND t.TYPE = tmp.TYPE
+        AND t.MTYPE = tmp.MTYPE
+        AND t.tab = tmp.tab
+        SET t.upz = tmp.upz,t.dwz=tmp.dwz,t.ztm=tmp.ztm,t.zd=tmp.zd
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and tmp.ZTM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+    </update>
+    <insert id="autobhqinsert">
+        INSERT INTO "SZ_WATER"."ST_RIVER_BX_R" (STCD, TM, Z)
+        SELECT STCD, TM, Z FROM "SZ_WATER"."BINHUSW"
+        <where>
+                <![CDATA[
+TM > (SELECT MAX(TM) FROM "SZ_WATER"."ST_RIVER_BX_R" where tm>(SYSDATE -  24) and STCD=#{stcd})
+]]>
+        </where>
+    </insert>
+    <insert id="autobhqdrpinsert">
+        INSERT INTO "SZ_WATER"."ST_PPTN_BX_R" (STCD, TM, DRP) SELECT STCD, TM, DRP FROM "SZ_WATER"."BINHUDRP"
+        <where>
+            <![CDATA[
+         TM > (SELECT MAX(TM) FROM "SZ_WATER"."ST_PPTN_BX_R" where tm>(SYSDATE - 24) and STCD=#{stcd})
+         ]]>
+        </where>
+</insert>
+
+
+    <update id="UpdateWaterDataRiver">
+        UPDATE st_stbprp_b_stcd a
+        SET
+        a.ZTM = (SELECT v.TM FROM st_river_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1),
+        a.UPZ = (SELECT v.Z FROM st_river_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1)
+        <where>
+            <if test="type != null and type != ''">
+                a.TYPE = #{type}
+            </if>
+        </where>
+        AND EXISTS (SELECT 1 FROM st_river_r v WHERE v.STCD = a.STCD);
+    </update>
+
+    <update id="UpdateWaterDataWas">
+        UPDATE st_stbprp_b_stcd a
+        SET
+            a.ZTM = (SELECT v.TM FROM st_was_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1),
+            a.UPZ = (SELECT v.UPZ FROM st_was_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1),
+            a.DWZ = (SELECT v.DWZ FROM st_was_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1)
+         <where>
+            <if test="type != null and type != ''">
+                a.TYPE = #{type}
+            </if>
+        </where>
+          AND EXISTS (SELECT 1 FROM st_was_r v WHERE v.STCD = a.STCD);
+    </update>
+
+    <update id="UpdateWaterDataTide">
+        UPDATE st_stbprp_b_stcd a
+        SET
+            a.ZTM = (SELECT v.TM FROM st_tide_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1),
+            a.UPZ = (SELECT v.TDZ FROM st_tide_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1)
+        <where>
+            <if test="type != null and type != ''">
+                a.TYPE = #{type}
+            </if>
+        </where>
+          AND EXISTS (SELECT 1 FROM st_tide_r v WHERE v.STCD = a.STCD);
+    </update>
+
+
+    <update id="UpdateWaterDataPump">
+        UPDATE st_stbprp_b_stcd a
+        SET
+            a.ZTM = (SELECT v.TM FROM st_pump_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1),
+            a.UPZ = (SELECT v.PPUPZ FROM st_pump_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1),
+            a.DWZ = (SELECT v.PPDWZ FROM st_pump_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1)
+        <where>
+            <if test="type != null and type != ''">
+                a.TYPE = #{type}
+            </if>
+        </where>
+          AND EXISTS (SELECT 1 FROM st_pump_r v WHERE v.STCD = a.STCD);
+    </update>
+
+
+    <update id="UpdateWaterDataRsvr">
+        UPDATE st_stbprp_b_stcd a
+        SET
+            a.ZTM = (SELECT v.TM FROM st_rsvr_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1),
+            a.UPZ = (SELECT v.RZ FROM st_rsvr_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1)
+        <where>
+            <if test="type != null and type != ''">
+                a.TYPE = #{type}
+            </if>
+        </where>
+          AND EXISTS (SELECT 1 FROM st_rsvr_r v WHERE v.STCD = a.STCD);
+    </update>
+
+
+    <update id="UpdateWaterDataPptn">
+        UPDATE st_stbprp_b_stcd a
+        SET
+            a.ZTM = (SELECT v.TM FROM st_pptn_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1),
+            a.UPZ = (SELECT v.DRP FROM st_pptn_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1)
+        <where>
+            <if test="type != null and type != ''">
+                and a.TYPE = #{type}
+            </if>
+            <if test="stcd != null and stcd != ''">
+                and a.STCD = #{stcd}
+            </if>
+        </where>
+          AND EXISTS (SELECT 1 FROM st_pptn_r v WHERE v.STCD = a.STCD);
+    </update>
+
+
+    <update id="UpdateWaterDataFlow">
+        UPDATE st_stbprp_b_stcd a
+        SET
+        a.ZTM = (SELECT v.TM FROM st_flow_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1),
+        a.UPZ = (SELECT v.Q FROM st_flow_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1)
+        <where>
+            <if test="type != null and type != ''">
+                a.TYPE = #{type}
+            </if>
+        </where>
+        AND EXISTS (SELECT 1 FROM st_flow_r v WHERE v.STCD = a.STCD);
+    </update>
+
+
+    <update id="UpdateWaterDataFeng">
+        UPDATE st_stbprp_b_stcd a
+        SET
+        a.ZTM = (SELECT v.TM FROM st_wdwv_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1),
+        a.UPZ = (SELECT v.WNDV FROM st_wdwv_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1)
+        <where>
+            <if test="type != null and type != ''">
+                a.TYPE = #{type}
+            </if>
+        </where>
+        AND EXISTS (SELECT 1 FROM st_wdwv_r v WHERE v.STCD = a.STCD);
+    </update>
+
+
+    <update id="UpdateWaterDataGate">
+        UPDATE st_stbprp_b_stcd a
+        SET
+        a.ZTM =#{tm}
+        <where>
+            <if test="type != null and type != ''">
+                a.TYPE = #{type}
+            </if>
+            <if test="stcd != null and stcd != ''">
+                and a.STCD = #{stcd}
+            </if>
+        </where>
+    </update>
+
+    <update id="UpdateWaterDataGateAll">
+        UPDATE st_stbprp_b_stcd a
+        SET
+        a.ZTM = (SELECT v.TM FROM st_gate_r v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1)        
+        <where>
+            <if test="type != null and type != ''">
+                a.TYPE = #{type}
+            </if> 
+            <if test="stcd != null and stcd != ''">
+                and a.STCD = #{stcd}
+            </if> 
+        </where>
+        AND EXISTS (SELECT 1 FROM st_gate_r v WHERE v.STCD = a.STCD);
+    </update>
+</mapper>

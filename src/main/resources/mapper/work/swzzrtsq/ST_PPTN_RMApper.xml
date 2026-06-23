@@ -1,0 +1,654 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.RTSQST_PPTN_RData">
+    <select id="selectListIsDay" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select STCD,SUM(DRP) DRP from ST_PPTN_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        group by STCD order by DRP desc
+    </select>
+    <select id="queryList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select * from ST_PPTN_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+       order by TM desc
+    </select>
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+    select STCD,DATE_FORMAT(TM,'%Y-%m-%d') as TM,SUM(DRP) as DRP from ST_PPTN_R
+    <where>
+        <if test="stime != null and stime != ''">
+            <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+        </if>
+        <if test="etime != null and etime != ''">
+            <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+        </if>
+        <if test="stcdList != null and stcdList.size() > 0">
+            and STCD in
+            <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                #{stcd}
+            </foreach>
+        </if>
+    </where>
+    group by STCD,DATE_FORMAT(TM,'%Y-%m-%d')
+</select>
+
+    <select id="selectListByHouse" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select STCD,MAX(DRP) as DRP from (
+        select STCD,DATE_FORMAT(TM,'%Y-%m-%d %H') as TM,SUM(DRP) as DRP from ST_PPTN_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM > to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        group by STCD,DATE_FORMAT(TM,'%Y-%m-%d %H')
+        ) as PPTN group by STCD order by DRP desc
+    </select>
+
+    <select id="selectListByTime" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select STCD,TM,DRP from ST_PPTN_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM > to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <select id="selectListByTimeNull" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select STCD,TM,DRP from ST_PPTN_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM > to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            and drp > 0
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        insert into ST_PPTN_R(STCD,TM,DRP,INTV,PDR,DYP,WTH) values
+        <foreach collection="quPojo" item="pojo" separator=",">
+            (#{pojo.STCD},#{pojo.TM},#{pojo.DRP},#{pojo.INTV},#{pojo.PDR},#{pojo.DYP},#{pojo.WTH})
+        </foreach>
+    </insert>
+
+    <select id="selectListBySen" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RDto">
+       Select c.year,x.STCD,TM,CAST(x.z1 AS float) as z,case when x.stcd= #{stcd} and sum(x.z) is not null then count(x.stcd)+1 else count(x.stcd) end as orderIndex,ba.stnm
+       from (select b.ymdhm tm, b.STCD,b.z1, a.Z from (SELECT to_char(ST_RIVER_R.TM, 'MM-DD') as ymdhm,
+        ST_RIVER_R.TM, ST_RIVER_R.Z as z1,  ST_RIVER_R.STCD FROM ST_RIVER_R
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and ( ST_RIVER_R.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+                )
+            </if>
+            <if test="etime != null and etime != ''">
+                AND (ST_RIVER_R.TM = TO_DATE(#{etime},'YYYY-MM-DD HH24:MI:SS'))
+            </if>
+        </where>
+          ) b
+         left join (
+         SELECT stcd, Z, to_char(tt.TM, 'YYYY-MM-DD') as ymdhm
+        FROM st_river_th tt
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and (tt.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+                )
+            </if>
+            AND (to_char(tt.TM, 'HH24:MI:SS') = '08:00:00')
+            <if test="etime != null and etime != ''">
+                AND (to_char(tt.TM, 'MM-DD') = to_char(#{etime},'MM-DD'))
+            </if>
+        </where>
+        ) a  on a.stcd = b.stcd   and a.Z >= b.z1
+         order by b.stcd, b.ymdhm desc ) x
+        left join
+        (
+        select stcd,count(to_char(tm,'YYYY'))+1 as year from st_river_th
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and stcd in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            and to_char(tm,'MM-DD')='01-01'
+        </where>
+        group by stcd
+        ) c
+        on x.STCD=c.stcd
+        left join st_stbprp_b ba on x.STCD=ba.stcd
+        group by c.year,x.STCD,x.z1,ba.stnm,TM
+    </select>
+
+    <select id="selectListDanZhanByHouse" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select STCD,DATE_FORMAT(TM,'%Y-%m-%d %H') as TM,SUM(DRP) as DRP from ST_PPTN_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        group by STCD,DATE_FORMAT(TM,'%Y-%m-%d %H')
+    </select>
+
+    <select id="selectListSumByHour" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select STCD,DATE_FORMAT(DATEADD(MINUTE, -5 , TM),'%Y-%m-%d %H')  as TM,SUM(DRP) as DRP from ST_PPTN_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM > to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="flag != null and flag != '' and flag == '1'">
+                and drp > 0
+            </if>
+        </where>
+        group by STCD,DATE_FORMAT(DATEADD(MINUTE, -5 , TM),'%Y-%m-%d %H')  order by DRP desc
+    </select>
+
+    <select id="selectListSumByDay" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select STCD,DATE_FORMAT(DATEADD(MINUTE, -485 , TM),'%Y-%m-%d') as TM,SUM(DRP) as DRP from ST_PPTN_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM > to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="flag != null and flag != '' and flag == '1'">
+                and drp > 0
+            </if>
+        </where>
+        group by STCD,DATE_FORMAT(DATEADD(MINUTE, -485 , TM),'%Y-%m-%d') order by DRP desc
+    </select>
+
+
+    <select id="queryDRPList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select * from GETWATERVIEWPPTNR
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="listSTCD != null and listSTCD.size() > 0">
+                and STCD in
+                <foreach collection="listSTCD" open="(" close=")" item="STCD" separator=",">
+                    #{STCD}
+                </foreach>
+            </if>
+            <if test="MTYPE != null and MTYPE != ''">
+                and MTYPE = #{MTYPE}
+            </if>
+            order by tm desc
+        </where>
+    </select>
+    <select id="queryHOURDRPList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select stcd,max(stnm)stnm,max(lgtd)lgtd,max(lttd)lttd,sum(drp) drp,max(mtype) mtype,to_char(tm,'yyyy-MM-dd HH24')||':00:00' tm from GETWATERVIEWPPTNR
+        <where>
+            <if test="stime != null">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="listSTCD != null and listSTCD.size() > 0">
+                and STCD in
+                <foreach collection="listSTCD" open="(" close=")" item="STCD" separator=",">
+                    #{STCD}
+                </foreach>
+            </if>
+            <if test="MTYPE != null and MTYPE != ''">
+                and MTYPE = #{MTYPE}
+            </if>
+        </where>
+        group by stcd ,to_char(tm,'yyyy-MM-dd HH24')
+    </select>
+    <select id="queryDAYDRPList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select stcd,max(stnm)stnm,max(lgtd)lgtd,max(lttd)lttd,sum(drp) drp,max(mtype) mtype,to_char(tm,'yyyy-MM-dd') tm from GETWATERVIEWPPTNR
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="listSTCD != null and listSTCD.size() > 0">
+                and STCD in
+                <foreach collection="listSTCD" open="(" close=")" item="STCD" separator=",">
+                    #{STCD}
+                </foreach>
+            </if>
+            <if test="MTYPE != null and MTYPE != ''">
+                and MTYPE = #{MTYPE}
+            </if>
+            group by stcd ,to_char(tm,'yyyy-MM-dd')
+        </where>
+    </select>
+    <select id="querySUMDRPList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select stcd,max(stnm)stnm,max(lgtd)lgtd,max(lttd)lttd,sum(drp) drp,mtype,max(lgtd84)lgtd84,max(lttd84)lttd84,max(addvnm) as addvnm from GETWATERVIEWPPTNR
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="listSTCD != null and listSTCD.size() > 0">
+                and STCD in
+                <foreach collection="listSTCD" open="(" close=")" item="STCD" separator=",">
+                    #{STCD}
+                </foreach>
+            </if>
+            <if test="MTYPE != null and MTYPE != ''">
+                and MTYPE = #{MTYPE}
+            </if>
+            group by MTYPE,stcd
+        </where>
+    </select>
+    <select id="queryMAXHOURDRPList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select stcd,max(stnm) stnm,mtype,to_char(TM,'yyyy-MM-dd HH24')||':00:00' as TM,sum(drp) as drp from GETWATERVIEWPPTNR
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="listSTCD != null and listSTCD.size() > 0">
+                and STCD in
+                <foreach collection="listSTCD" open="(" close=")" item="STCD" separator=",">
+                    #{STCD}
+                </foreach>
+            </if>
+            <if test="MTYPE != null and MTYPE != ''">
+                and MTYPE = #{MTYPE}
+            </if>
+        </where>
+        group by mtype,stcd,to_char(TM,'yyyy-MM-dd HH24')
+        order by drp desc
+    </select>
+    <select id="queryDANZHANDRPList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        <choose>
+            <when test="dayhour=='DAY'">
+<!--                <choose>-->
+<!--                    <when test="mtype=='BX'">-->
+<!--                        select STCD,TM-1 TM,DYP as DRP from GETWATERVIEWPPTNR-->
+<!--                        <where>-->
+<!--                            INTV = '1'-->
+<!--                            and TO_CHAR(TM,'HH24:MI:SS')= '08:00:00'-->
+<!--                            and MTYPE='BX'-->
+<!--                            <if test="listSTCD != null and listSTCD.size() > 0">-->
+<!--                                and STCD in-->
+<!--                                <foreach collection="listSTCD" open="(" close=")" item="STCD" separator=",">-->
+<!--                                    #{STCD}-->
+<!--                                </foreach>-->
+<!--                            </if>-->
+<!--                            <if test="stime != null and stime != ''">-->
+<!--                                <![CDATA[ and TM-1>=to_date(#{stime},'YYYY-MM-DD HH24:MI:SS')]]>-->
+<!--                            </if>-->
+<!--                            <if test="etime != null and etime != ''">-->
+<!--                                <![CDATA[ and TM-1<= to_date(#{etime}, 'YYYY-MM-DD HH24:MI:SS') ]]>-->
+<!--                            </if>-->
+<!--                        </where>-->
+<!--                        ORDER BY TM-->
+<!--                    </when>-->
+<!--                    <otherwise>-->
+                        SELECT STCD,TRUNC(TM - INTERVAL '8' HOUR - INTERVAL '1' MINUTE, 'DD') AS TM,SUM(DRP) AS DRP
+                        FROM GETWATERVIEWPPTNR
+                        <where>
+                            <if test="listSTCD != null and listSTCD.size() > 0">
+                                and STCD in
+                                <foreach collection="listSTCD" open="(" close=")" item="STCD" separator=",">
+                                    #{STCD}
+                                </foreach>
+                            </if>
+                            <if test="mtype!='' and mtype!=null">
+                                and MTYPE=#{mtype}
+                            </if>
+                            <if test="stime != null and stime != ''">
+                                <![CDATA[ and TM>to_date(#{stime},'YYYY-MM-DD HH24:MI:SS')]]>
+                            </if>
+                            <if test="etime != null and etime != ''">
+                                <![CDATA[ and TM<= to_date(#{etime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+                            </if>
+                        </where>
+                        GROUP BY
+                        STCD,
+                        TRUNC(TM - INTERVAL '8' HOUR - INTERVAL '1' MINUTE, 'DD')
+                        ORDER BY
+                        TM
+<!--                    </otherwise>-->
+<!--                </choose>-->
+            </when>
+            <when test="dayhour=='HOUR'">
+                SELECT STCD , to_date(TO_CHAR(TRUNC(TM, 'HH24'), 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD HH24:MI:SS')  AS TM,
+                SUM(DRP) AS DRP FROM GETWATERVIEWPPTNR
+                <where>
+                    <if test="mtype!='' and mtype!=null">
+                        and MTYPE=#{mtype}
+                    </if>
+                    <if test="listSTCD != null and listSTCD.size() > 0">
+                        and STCD in
+                        <foreach collection="listSTCD" open="(" close=")" item="STCD" separator=",">
+                            #{STCD}
+                        </foreach>
+                    </if>
+                    <if test="stime != null and stime != ''">
+                        <![CDATA[ and TM > to_date(#{stime},'YYYY-MM-DD HH24:MI:SS')]]>
+                    </if>
+                    <if test="etime != null and etime != ''">
+                        <![CDATA[ and TM-1 <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+                    </if>
+                </where>
+                GROUP BY STCD,TRUNC(TM, 'HH24') ORDER BY  TM
+            </when>
+            <otherwise>
+                select STCD,TM, DRP from GETWATERVIEWPPTNR
+                <where>
+                    <if test="listSTCD != null and listSTCD.size() > 0">
+                        and STCD in
+                        <foreach collection="listSTCD" open="(" close=")" item="STCD" separator=",">
+                            #{STCD}
+                        </foreach>
+                    </if>
+                    <if test="mtype!='' ||mtype!=null">
+                        and MTYPE=#{mtype}
+                    </if>
+                    <if test="stime != null and stime != ''">
+                        <![CDATA[ and TM>=to_date(#{stime},'YYYY-MM-DD HH24:MI:SS')]]>
+                    </if>
+                    <if test="etime != null and etime != ''">
+                        <![CDATA[ and TM<= to_date(#{etime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+                    </if>
+                </where>
+                ORDER BY  TM
+            </otherwise>
+        </choose>
+
+    </select>
+    <select id="WARNINGDRPList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select * from WARNINGPPTNR
+    </select>
+    <select id="LGTDLTTDDRPList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        WITH StationDistance AS (
+        SELECT
+        stcd,
+        stnm,
+        lgtd,
+        lttd,
+        2 * 6371 * ASIN(
+        SQRT(
+        POWER(SIN((#{lttd} - lttd) * PI() / 180 / 2), 2) + COS(#{lttd} * PI() / 180) * COS(lttd * PI() / 180) * POWER(SIN((#{lgtd} - lgtd) * PI() / 180 / 2), 2)
+        )
+        ) AS distance_km
+        FROM
+        "SZ_WATER"."ATT_QXST_BASE"
+        WHERE
+        lgtd IS NOT NULL
+        AND lttd IS NOT NULL
+        ),
+        HourlyRainfall AS (
+        SELECT
+        stcd,
+        SUM(drp) AS drp
+        FROM
+        "SZ_WATER"."HRI_QXPPTN_R"
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        GROUP BY  stcd
+        )
+        SELECT
+        s.stcd,
+        s.stnm,
+        s.lgtd,
+        s.lttd,
+        s.distance_km,
+        COALESCE(r.drp, 0) AS DRP
+        FROM
+        StationDistance s
+        LEFT JOIN HourlyRainfall r ON s.stcd = r.stcd
+        ORDER BY
+        s.distance_km ASC
+    </select>
+
+
+    <!--    SQL Server兼容版本：5分钟雨量数据按小时聚合-->
+    <select id="selectListHourly" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        SELECT
+        STCD,
+        CASE
+        WHEN DATEPART(MINUTE, TM) >= 5 THEN
+        DATEADD(HOUR, 1, DATEADD(HOUR, DATEDIFF(HOUR, 0, TM), 0))
+        ELSE
+        DATEADD(HOUR, DATEDIFF(HOUR, 0, TM), 0)
+        END AS TM,
+        SUM(DRP) AS DRP,
+        COUNT(*) AS DataCount
+        FROM
+        ST_PPTN_R
+
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM > #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        GROUP BY
+        STCD,
+        CASE
+        WHEN DATEPART(MINUTE, TM) >= 5 THEN
+        DATEADD(HOUR, 1, DATEADD(HOUR, DATEDIFF(HOUR, 0, TM), 0))
+        ELSE
+        DATEADD(HOUR, DATEDIFF(HOUR, 0, TM), 0)
+        END
+        ORDER BY
+        STCD, TM
+    </select>
+
+
+    <!--    面平均雨量-->
+    <select id="selectListHourlyArea" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select TO_CHAR(TM - INTERVAL '1' HOUR  , 'YYYY-MM-DD HH24:MI:SS') AS TM,ROUND( AVG(DRP),1) as DRP  from (
+
+        SELECT
+        STCD,
+        CASE
+        WHEN DATEPART(MINUTE, TM) >= 5 THEN
+        DATEADD(HOUR, 1, DATEADD(HOUR, DATEDIFF(HOUR, 0, TM), 0))
+        ELSE
+        DATEADD(HOUR, DATEDIFF(HOUR, 0, TM), 0)
+        END AS TM,
+        SUM(DRP) AS DRP,
+        COUNT(*) AS DataCount
+        FROM
+        ST_PPTN_R
+
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM > #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <=to_date( #{etime}) ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        GROUP BY
+        STCD,
+        CASE
+        WHEN DATEPART(MINUTE, TM) >= 5 THEN
+        DATEADD(HOUR, 1, DATEADD(HOUR, DATEDIFF(HOUR, 0, TM), 0))
+        ELSE
+        DATEADD(HOUR, DATEDIFF(HOUR, 0, TM), 0)
+        END
+        ORDER BY
+        STCD, TM
+        )  as alldata
+        GROUP BY TM
+        order by TM
+    </select>
+
+    <select id="selectListMinuArea" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+            select TM,SUM(DRP) as DYP,ROUND(AVG(DRP),1) as DRP from ST_PPTN_R
+            <where>
+                <if test="stime != null and stime != ''">
+                    <![CDATA[ and TM > to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+                </if>
+                <if test="etime != null and etime != ''">
+                    <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+                </if>
+                <if test="stcdList != null and stcdList.size() > 0">
+                    and STCD in
+                    <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                        #{stcd}
+                    </foreach>
+                </if>
+            </where>
+            GROUP BY TM
+            ORDER BY TM ASC
+    </select>
+
+    <select id="queryDRPListAll" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select * from GETWATERVIEWPPTNR
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="listSTCD != null and listSTCD.size() > 0">
+                and STCD in
+                <foreach collection="listSTCD" open="(" close=")" item="STCD" separator=",">
+                    #{STCD}
+                </foreach>
+            </if>
+            <if test="MTYPE != null and MTYPE != ''">
+                and MTYPE = #{MTYPE}
+            </if>
+            order by tm asc
+            <if test="startindex != null and pagesize != null">
+               limit #{startindex},#{pagesize}
+            </if>
+        </where>
+    </select>
+    <select id="queryDRPListAllCount" resultType="integer">
+            SELECT count(1) FROM GETWATERVIEWPPTNR
+            <where>
+                <if test="stime != null and stime != ''">
+                    <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+                </if>
+                <if test="etime != null and etime != ''">
+                    <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+                </if>
+                <if test="listSTCD != null and listSTCD.size() > 0">
+                    and STCD in
+                    <foreach collection="listSTCD" open="(" close=")" item="STCD" separator=",">
+                        #{STCD}
+                    </foreach>
+                </if>
+                <if test="MTYPE != null and MTYPE != ''">
+                    and MTYPE = #{MTYPE}
+                </if>
+            </where>
+    </select>
+
+</mapper>

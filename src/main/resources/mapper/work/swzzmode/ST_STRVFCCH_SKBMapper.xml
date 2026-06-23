@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ST_STRVFCCH_SKBData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_STRVFCCH_SKBPojo">
+        select a.* from ST_STRVFCCH_SKB a
+        <where>
+            <if test="ID != null and ID != ''">
+                and STCD = #{ID}
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ST_STRVFCCH_SKB
+        <where>
+            <if test="ID != null and ID != ''">
+                and STCD = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_STRVFCCH_SKBPojo">
+        insert into ST_STRVFCCH_SKB
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="STNM != null and STNM != ''">
+                STNM,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="LOC != null and LOC != ''">
+                LOC,
+            </if>
+            <if test="GCTX != null and GCTX != ''">
+                GCTX,
+            </if>
+            <if test="AREA != null">
+                AREA,
+            </if>
+            <if test="JHHZ != null">
+                JHHZ,
+            </if>
+            <if test="SJHZ != null">
+                SJHZ,
+            </if>
+            <if test="FHGZ != null">
+                FHGZ,
+            </if>
+            <if test="SZ != null">
+                SZ,
+            </if>
+            <if test="ZCXZ != null">
+                ZCXZ,
+            </if>
+            <if test="ZKR != null">
+                ZKR,
+            </if>
+            <if test="FHKR != null">
+                FHKR,
+            </if>
+            <if test="SKR != null">
+                SKR,
+            </if>
+            <if test="XLKR != null">
+                XLKR,
+            </if>
+            <if test="WRZ1 != null">
+                WRZ1,
+            </if>
+            <if test="WRZ2 != null">
+                WRZ2,
+            </if>
+            <if test="WRZ3 != null">
+                WRZ3,
+            </if>
+            <if test="BDGC != null">
+                BDGC,
+            </if>
+            <if test="SKJMGC != null">
+                SKJMGC,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="STNM != null and STNM != ''">
+                #{STNM},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="LOC != null and LOC != ''">
+                #{LOC},
+            </if>
+            <if test="GCTX != null and GCTX != ''">
+                #{GCTX},
+            </if>
+            <if test="AREA != null">
+                #{AREA},
+            </if>
+            <if test="JHHZ != null">
+                #{JHHZ},
+            </if>
+            <if test="SJHZ != null">
+                #{SJHZ},
+            </if>
+            <if test="FHGZ != null">
+                #{FHGZ},
+            </if>
+            <if test="SZ != null">
+                #{SZ},
+            </if>
+            <if test="ZCXZ != null">
+                #{ZCXZ},
+            </if>
+            <if test="ZKR != null">
+                #{ZKR},
+            </if>
+            <if test="FHKR != null">
+                #{FHKR},
+            </if>
+            <if test="SKR != null">
+                #{SKR},
+            </if>
+            <if test="XLKR != null">
+                #{XLKR},
+            </if>
+            <if test="WRZ1 != null">
+                #{WRZ1},
+            </if>
+            <if test="WRZ2 != null">
+                #{WRZ2},
+            </if>
+            <if test="WRZ3 != null">
+                #{WRZ3},
+            </if>
+            <if test="BDGC != null">
+                #{BDGC},
+            </if>
+            <if test="SKJMGC != null">
+                #{SKJMGC},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_STRVFCCH_SKBPojo">
+        insert into ST_STRVFCCH_SKB(STCD,STNM,TYPE,LOC,GCTX,AREA,JHHZ,SJHZ,FHGZ,SZ,ZCXZ,ZKR,FHKR,SKR,XLKR,WRZ1,WRZ2,WRZ3,BDGC,SKJMGC) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.STCD},#{obj.STNM},#{obj.TYPE},#{obj.LOC},#{obj.GCTX},#{obj.AREA},#{obj.JHHZ},#{obj.SJHZ},#{obj.FHGZ},#{obj.SZ},#{obj.ZCXZ},#{obj.ZKR},#{obj.FHKR},
+            #{obj.SKR},#{obj.XLKR},#{obj.WRZ1},#{obj.WRZ2},#{obj.WRZ3},#{obj.BDGC},#{obj.SKJMGC})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_STRVFCCH_SKBPojo">
+        update ST_STRVFCCH_SKB
+        <set>
+            <if test="STNM != null and STNM != ''">
+                STNM = #{STNM},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+            <if test="LOC != null and LOC != ''">
+                LOC = #{LOC},
+            </if>
+            <if test="GCTX != null and GCTX != ''">
+                GCTX = #{GCTX},
+            </if>
+            <if test="AREA != null">
+                AREA = #{AREA},
+            </if>
+            <if test="JHHZ != null">
+                JHHZ = #{JHHZ},
+            </if>
+            <if test="SJHZ != null">
+                SJHZ = #{SJHZ},
+            </if>
+            <if test="FHGZ != null">
+                FHGZ = #{FHGZ},
+            </if>
+            <if test="SZ != null">
+                SZ = #{SZ},
+            </if>
+            <if test="ZCXZ != null">
+                ZCXZ = #{ZCXZ},
+            </if>
+            <if test="ZKR != null">
+                ZKR = #{ZKR},
+            </if>
+            <if test="FHKR != null">
+                FHKR = #{FHKR},
+            </if>
+            <if test="SKR != null">
+                SKR = #{SKR},
+            </if>
+            <if test="XLKR != null">
+                XLKR = #{XLKR},
+            </if>
+            <if test="WRZ1 != null">
+                WRZ1 = #{WRZ1},
+            </if>
+            <if test="WRZ2 != null">
+                WRZ2 = #{WRZ2},
+            </if>
+            <if test="WRZ3 != null">
+                WRZ3 = #{WRZ3},
+            </if>
+            <if test="BDGC != null">
+                BDGC = #{BDGC},
+            </if>
+            <if test="SKJMGC != null">
+                SKJMGC = #{SKJMGC},
+            </if>
+        </set>
+        where STCD = #{STCD}
+    </update>
+    <delete id="deleteOne">
+        delete from ST_STRVFCCH_SKB where STCD = #{ID}
+    </delete>
+</mapper>

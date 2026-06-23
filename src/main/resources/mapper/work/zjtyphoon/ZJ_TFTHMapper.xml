@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.zjtyphoon.ZJ_TFTHData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_TFTHPojo">
+        select A.* from ZJ_TFTH A
+        <where>
+<!--            <if test="ID != null and ID != ''">-->
+<!--                and ZJ_ID = #{ID}-->
+<!--            </if>-->
+            <if test="key != null and key != ''">
+                and (
+                ZJ_TM like concat('%',concat(#{key},'%'))
+                or ZJ_TM_N like concat('%',concat(#{key},'%'))
+                )
+            </if>
+<!--            <if test="stime != null and stime != ''">-->
+<!--                <![CDATA[ and ZJ_DATE >= #{stime} ]]>-->
+<!--            </if>-->
+<!--            <if test="etime != null and etime != ''">-->
+<!--                <![CDATA[ and ZJ_DATE <= #{etime} ]]>-->
+<!--            </if>-->
+<!--            <if test="type != null">-->
+<!--                and GROUPID in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM ZJ_TFTH
+        <where>
+            <if test="key != null and key != ''">
+                and (
+                ZJ_TM like concat('%',concat(#{key},'%'))
+                or ZJ_TM_N like concat('%',concat(#{key},'%'))
+                )
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_TFTHPojo">
+        insert into ZJ_TFTH
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZJ_TM != null and ZJ_TM != ''">
+                ZJ_TM,
+            </if>
+            <if test="ZJ_TH != null and ZJ_TH != ''">
+                ZJ_TH,
+            </if>
+            <if test="ZJ_YS != null">
+                ZJ_YS,
+            </if>
+            <if test="ZJ_FIND != null and ZJ_FIND != ''">
+                ZJ_FIND,
+            </if>
+            <if test="ZJ_SORT != null">
+                ZJ_SORT,
+            </if>
+            <if test="ZJ_YBTCOLOR != null and ZJ_YBTCOLOR != ''">
+                ZJ_YBTCOLOR,
+            </if>
+            <if test="ZJ_TM_N != null and ZJ_TM_N != ''">
+                ZJ_TM_N,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZJ_TM != null and ZJ_TM != ''">
+                #{ZJ_TM},
+            </if>
+            <if test="ZJ_TH != null and ZJ_TH != ''">
+                #{ZJ_TH},
+            </if>
+            <if test="ZJ_YS != null">
+                #{ZJ_YS},
+            </if>
+            <if test="ZJ_FIND != null and ZJ_FIND != ''">
+                #{ZJ_FIND},
+            </if>
+            <if test="ZJ_SORT != null">
+                #{ZJ_SORT},
+            </if>
+            <if test="ZJ_YBTCOLOR != null and ZJ_YBTCOLOR != ''">
+                #{ZJ_YBTCOLOR},
+            </if>
+            <if test="ZJ_TM_N != null and ZJ_TM_N != ''">
+                #{ZJ_TM_N},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_TFTHPojo">
+        update ZJ_TFTH
+        <set>
+            <if test="ZJ_YS != null">
+                ZJ_YS = #{ZJ_YS},
+            </if>
+            <if test="ZJ_FIND != null and ZJ_FIND != ''">
+                ZJ_FIND = #{ZJ_FIND},
+            </if>
+            <if test="ZJ_SORT != null">
+                ZJ_SORT = #{ZJ_SORT},
+            </if>
+            <if test="ZJ_YBTCOLOR != null and ZJ_YBTCOLOR != ''">
+                ZJ_YBTCOLOR = #{ZJ_YBTCOLOR},
+            </if>
+            <if test="ZJ_TM_N != null and ZJ_TM_N != ''">
+                ZJ_TM_N = #{ZJ_TM_N},
+            </if>
+        </set>
+        where ZJ_TM = #{ZJ_TM} and ZJ_TH = #{ZJ_TH}
+    </update>
+    <delete id="deleteOne">
+        delete from ZJ_TFTH where ZJ_TM = #{ID} and ZJ_TH = #{ID2}
+    </delete>
+
+    <insert id="insertALL" parameterType="list">
+        insert into ZJ_TFTH
+        (
+        ZJ_TM,
+        ZJ_TH,
+        ZJ_YS,
+        ZJ_FIND,
+        ZJ_SORT,
+        ZJ_YBTCOLOR,
+        ZJ_TM_N
+        )
+        values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ZJ_TM},
+            #{obj.ZJ_TH},
+            #{obj.ZJ_YS},
+            #{obj.ZJ_FIND},
+            #{obj.ZJ_SORT},
+            #{obj.ZJ_YBTCOLOR},
+            #{obj.ZJ_TM_N}
+            )
+        </foreach>
+    </insert>
+
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" item="obj" separator=";">
+            update ZJ_TFTH
+            <set>
+                <if test="obj.ZJ_YS != null">
+                    ZJ_YS = #{obj.ZJ_YS},
+                </if>
+                <if test="obj.ZJ_FIND != null and obj.ZJ_FIND != ''">
+                    ZJ_FIND = #{obj.ZJ_FIND},
+                </if>
+                <if test="obj.ZJ_SORT != null">
+                    ZJ_SORT = #{obj.ZJ_SORT},
+                </if>
+                <if test="obj.ZJ_YBTCOLOR != null and obj.ZJ_YBTCOLOR != ''">
+                    ZJ_YBTCOLOR = #{obj.ZJ_YBTCOLOR},
+                </if>
+                <if test="obj.ZJ_TM_N != null and obj.ZJ_TM_N != ''">
+                    ZJ_TM_N = #{obj.ZJ_TM_N},
+                </if>
+            </set>
+            where ZJ_TM = #{obj.ZJ_TM} and ZJ_TH = #{obj.ZJ_TH}
+        </foreach>
+    </update>
+
+    <delete id="deleteALL">
+        delete from ZJ_TFTH where
+        <foreach collection="objList" item="obj" separator="or">
+            (ZJ_TM = #{obj.ZJ_TM} and ZJ_TH = #{obj.ZJ_TH})
+        </foreach>
+    </delete>
+</mapper>

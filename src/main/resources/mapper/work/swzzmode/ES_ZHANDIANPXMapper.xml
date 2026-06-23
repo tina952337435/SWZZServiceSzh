@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_ZHANDIANPXData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANPXPojo">
+        select a.* from ES_ZHANDIANPX a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZHANID = #{ID}
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_ZHANDIANPX
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZHANID = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANPXPojo">
+        insert into ES_ZHANDIANPX
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID,
+            </if>
+            <if test="ZHANNAME != null and ZHANNAME != ''">
+                ZHANNAME,
+            </if>
+            <if test="PX != null and PX != ''">
+                PX,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZHANID != null and ZHANID != ''">
+                #{ZHANID},
+            </if>
+            <if test="ZHANNAME != null and ZHANNAME != ''">
+                #{ZHANNAME},
+            </if>
+            <if test="PX != null and PX != ''">
+                #{PX},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANPXPojo">
+        insert into ES_ZHANDIANPX(ZHANID,ZHANNAME,PX) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.ZHANID},#{obj.ZHANNAME},#{obj.PX})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANPXPojo">
+        update ES_ZHANDIANPX
+        <set>
+            <if test="ZHANNAME != null and ZHANNAME != ''">
+                ZHANNAME = #{ZHANNAME},
+            </if>
+            <if test="PX != null and PX != ''">
+                PX = #{PX},
+            </if>
+        </set>
+        where ZHANID = #{ZHANID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_ZHANDIANPX where ZHANID = #{ID}
+    </delete>
+</mapper>

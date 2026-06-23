@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ST_HIGHLOWTIDE_RData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_HIGHLOWTIDE_RPojo">
+        select a.* from ST_HIGHLOWTIDE_R a
+        <where>
+            <if test="ID != null and ID != ''">
+                and STCD = #{ID}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+            <if test="type != null and type.size() > 0">
+                and TYPE in
+                <foreach collection="type" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ST_HIGHLOWTIDE_R
+        <where>
+            <if test="ID != null and ID != ''">
+                and STCD = #{ID}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+            <if test="type != null and type.size() > 0">
+                and TYPE in
+                <foreach collection="type" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_HIGHLOWTIDE_RPojo">
+        insert into ST_HIGHLOWTIDE_R
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="ATM != null and ATM != ''">
+                ATM,
+            </if>
+            <if test="AZ != null">
+                AZ,
+            </if>
+            <if test="TM != null and TM != ''">
+                TM,
+            </if>
+            <if test="Z != null">
+                Z,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="WSPEED != null">
+                WSPEED,
+            </if>
+            <if test="WDIRECTION != null">
+                WDIRECTION,
+            </if>
+            <if test="INWATER != null">
+                INWATER,
+            </if>
+            <if test="PRESSURE != null">
+                PRESSURE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="ATM != null and ATM != ''">
+                #{ATM},
+            </if>
+            <if test="AZ != null">
+                #{AZ},
+            </if>
+            <if test="TM != null and TM != ''">
+                #{TM},
+            </if>
+            <if test="Z != null">
+                #{Z},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="WSPEED != null">
+                #{WSPEED},
+            </if>
+            <if test="WDIRECTION != null">
+                #{WDIRECTION},
+            </if>
+            <if test="INWATER != null">
+                #{INWATER},
+            </if>
+            <if test="PRESSURE != null">
+                #{PRESSURE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_HIGHLOWTIDE_RPojo">
+        insert into ST_HIGHLOWTIDE_R(STCD,ATM,AZ,TM,Z,TYPE,WSPEED,WDIRECTION,INWATER,PRESSURE) values
+        <foreach collection="objList" item="obj">
+            (
+            #{obj.STCD,jdbcType=VARCHAR},
+            #{obj.ATM,jdbcType=VARCHAR},
+            #{obj.AZ,jdbcType=DOUBLE},
+            #{obj.TM,jdbcType=VARCHAR},
+            #{obj.Z,jdbcType=DOUBLE},
+            #{obj.TYPE,jdbcType=VARCHAR},
+            #{obj.WSPEED,jdbcType=DOUBLE},
+            #{obj.WDIRECTION,jdbcType=DOUBLE},
+            #{obj.INWATER,jdbcType=DOUBLE},
+            #{obj.PRESSURE,jdbcType=DOUBLE}
+            )
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_HIGHLOWTIDE_RPojo">
+        update ST_HIGHLOWTIDE_R
+        <set>
+            <if test="ATM != null and ATM != ''">
+                ATM = #{ATM},
+            </if>
+            <if test="AZ != null">
+                AZ = #{AZ},
+            </if>
+<!--            <if test="TM != null and TM != ''">-->
+<!--                #{TM},-->
+<!--            </if>-->
+            <if test="Z != null">
+                Z = #{Z},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+            <if test="WSPEED != null">
+                WSPEED = #{WSPEED},
+            </if>
+            <if test="WDIRECTION != null">
+                WDIRECTION = #{WDIRECTION},
+            </if>
+            <if test="INWATER != null">
+                INWATER = #{INWATER},
+            </if>
+            <if test="PRESSURE != null">
+                PRESSURE = #{PRESSURE},
+            </if>
+        </set>
+        where STCD = #{STCD} and TM = #{TM}
+    </update>
+    <delete id="deleteOne">
+        delete from ST_HIGHLOWTIDE_R where STCD = #{ID} and TM = #{TM}
+    </delete>
+
+    <delete id="deleteALL" parameterType="list">
+        delete from ST_HIGHLOWTIDE_R where
+        <foreach collection="bpPojo" item="item" separator="or">
+            (
+            STCD = #{item.stcd,jdbcType=VARCHAR} and
+            TM = #{item.startdate,jdbcType=VARCHAR}
+            )
+
+        </foreach>
+    </delete>
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" open="begin" close=";end;" item="obj" separator=";">
+            update ST_HIGHLOWTIDE_R
+            <set>
+                <if test="obj.ATM != null and obj.ATM != ''">
+                    ATM = #{obj.ATM,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.AZ != null">
+                    AZ = #{obj.AZ,jdbcType=DOUBLE},
+                </if>
+                <if test="obj.Z != null">
+                    Z = #{obj.Z,jdbcType=DOUBLE},
+                </if>
+                <if test="obj.TYPE != null and obj.TYPE != ''">
+                    TYPE = #{obj.TYPE,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.WSPEED != null">
+                    WSPEED = #{obj.WSPEED,jdbcType=DOUBLE},
+                </if>
+                <if test="obj.WDIRECTION != null">
+                    WDIRECTION = #{obj.WDIRECTION,jdbcType=DOUBLE},
+                </if>
+                <if test="obj.INWATER != null">
+                    INWATER = #{obj.INWATER,jdbcType=DOUBLE},
+                </if>
+                <if test="obj.PRESSURE != null">
+                    PRESSURE = #{obj.PRESSURE,jdbcType=DOUBLE},
+                </if>
+            </set>
+            where STCD = #{obj.STCD,jdbcType=VARCHAR} and TM = #{obj.TM,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+</mapper>

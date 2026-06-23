@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_ZHANDIANDATAData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATAPojo">
+        select a.* from ES_ZHANDIANDATA a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="startdate != null and startdate != ''">
+                <![CDATA[ and ZHANTIME >= #{startdate} ]]>
+            </if>
+            <if test="enddate != null and enddate != ''">
+                <![CDATA[ and ZHANTIME <= #{enddate} ]]>
+            </if>
+            <if test="SOLUTIONID != null and SOLUTIONID != ''">
+                and SOLUTIONID = #{SOLUTIONID}
+            </if>
+            <if test="zhanid != null and zhanid.size() > 0">
+                and ZHANID in
+                <foreach collection="zhanid" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        order by ZHANTIME asc
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectListGC" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATAPojo">
+        select a.* from ES_ZHANDIANDATA a
+        inner join (select * from ES_ZHANDIAN
+        <where>
+            <if test="PTYPE != null and PTYPE != ''">
+                and PTYPE  like concat('%',concat(#{PTYPE},'%'))
+            </if>
+        </where>
+        )b on a.zhanid=b.zhanid
+        <where>
+            <if test="SOLUTIONID != null and SOLUTIONID != ''">
+                and SOLUTIONID = #{SOLUTIONID}
+            </if>
+        </where>
+        order by ZHANTIME asc
+    </select>
+
+    <select id="selectListGCID" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATAPojo">
+        select a.* from ES_ZHANDIANDATA a
+        inner join (select * from ES_ZHANDIAN
+        <where>
+            <if test="PTYPE != null and PTYPE != ''">
+                and PTYPE  like concat('%',concat(#{PTYPE},'%'))
+            </if>
+
+            <if test="IDList != null and IDList.size() > 0">
+                and ZHANID in
+                <foreach collection="IDList" open="(" close=")" item="id" separator=",">
+                    #{id,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+        </where>
+        )b on a.zhanid=b.zhanid
+        <where>
+            <if test="SOLUTIONID != null and SOLUTIONID != ''">
+                and SOLUTIONID = #{SOLUTIONID}
+            </if>
+        </where>
+        order by ZHANTIME asc
+    </select>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_ZHANDIANDATA
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="SOLUTIONID != null and SOLUTIONID != ''">
+                and SOLUTIONID = #{SOLUTIONID}
+            </if>
+            <if test="zhanid != null and zhanid.size() > 0">
+                and ZHANID in
+                <foreach collection="zhanid" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATAPojo">
+        insert into ES_ZHANDIANDATA
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID,
+            </if>
+            <if test="ZHANTIME != null and ZHANTIME != ''">
+                ZHANTIME,
+            </if>
+            <if test="ZHANDATA != null and ZHANDATA != ''">
+                ZHANDATA,
+            </if>
+            <if test="SOLUTIONID != null and SOLUTIONID != ''">
+                SOLUTIONID,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="ZHANID != null and ZHANID != ''">
+                #{ZHANID},
+            </if>
+            <if test="ZHANTIME != null and ZHANTIME != ''">
+                #{ZHANTIME},
+            </if>
+            <if test="ZHANDATA != null and ZHANDATA != ''">
+                #{ZHANDATA},
+            </if>
+            <if test="SOLUTIONID != null and SOLUTIONID != ''">
+                #{SOLUTIONID},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATAPojo">
+        insert into ES_ZHANDIANDATA(ID,ZHANID,ZHANTIME,ZHANDATA,SOLUTIONID) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ID,jdbcType=VARCHAR},
+            #{obj.ZHANID,jdbcType=VARCHAR},
+            #{obj.ZHANTIME,jdbcType=VARCHAR},
+            #{obj.ZHANDATA,jdbcType=VARCHAR},
+            #{obj.SOLUTIONID,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATAPojo">
+        update ES_ZHANDIANDATA
+        <set>
+<!--            <if test="ZHANID != null and ZHANID != ''">-->
+<!--                ,-->
+<!--            </if>-->
+<!--            <if test="ZHANTIME != null and ZHANTIME != ''">-->
+<!--                ,-->
+<!--            </if>-->
+            <if test="ZHANDATA != null and ZHANDATA != ''">
+                ZHANDATA = #{ZHANDATA,jdbcType=VARCHAR},
+            </if>
+<!--            <if test="SOLUTIONID != null and SOLUTIONID != ''">-->
+<!--                ,-->
+<!--            </if>-->
+        </set>
+        where
+        ZHANID = #{ZHANID,jdbcType=VARCHAR}
+        and ZHANTIME = #{ZHANTIME,jdbcType=VARCHAR}
+        and SOLUTIONID = #{SOLUTIONID,jdbcType=VARCHAR}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_ZHANDIANDATA where ID = #{ID}
+    </delete>
+
+    <delete id="deleteOneBySOLUTIONID">
+        delete from ES_ZHANDIANDATA where SOLUTIONID = #{ID}
+    </delete>
+
+    <delete id="deleteALL" parameterType="list">
+        delete from ES_ZHANDIANDATA where
+        ID in
+        <foreach collection="bpPojo" open="(" close=")" item="item" separator=",">
+            #{item.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+
+
+
+    <delete id="deleteFangAn" parameterType="list">
+        delete from ES_ZHANDIANDATA where
+        SOLUTIONID in
+        <foreach collection="bpPojo" open="(" close=")" item="item" separator=",">
+            #{item.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="list" item="obj" separator=";">
+            update ES_ZHANDIANDATA
+            <set>
+<!--                <if test="obj.ZHANID != null and obj.ZHANID != ''">-->
+<!--                    ,-->
+<!--                </if>-->
+<!--                <if test="obj.ZHANTIME != null and obj.ZHANTIME != ''">-->
+<!--                    ,-->
+<!--                </if>-->
+                <if test="obj.ZHANDATA != null and obj.ZHANDATA != ''">
+                    ZHANDATA = #{obj.ZHANDATA,jdbcType=VARCHAR},
+                </if>
+<!--                <if test="obj.SOLUTIONID != null and obj.SOLUTIONID != ''">-->
+<!--                    ,-->
+<!--                </if>-->
+            </set>
+            where
+            ZHANID = #{obj.ZHANID,jdbcType=VARCHAR}
+            and ZHANTIME = #{obj.ZHANTIME,jdbcType=VARCHAR}
+            and SOLUTIONID = #{obj.SOLUTIONID,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+
+
+    <update id="updateALLME" parameterType="list">
+        MERGE INTO ES_ZHANDIANDATA t
+        USING (
+            <foreach collection="list" item="obj" separator="UNION ALL">
+                SELECT 
+                    #{obj.ZHANID, jdbcType=VARCHAR} AS ZHANID,
+                    #{obj.ZHANTIME, jdbcType=VARCHAR} AS ZHANTIME,
+                    #{obj.SOLUTIONID, jdbcType=VARCHAR} AS SOLUTIONID,
+                    #{obj.ZHANDATA, jdbcType=VARCHAR} AS ZHANDATA
+                FROM DUAL
+            </foreach>
+        ) s
+        ON (t.ZHANID = s.ZHANID AND t.ZHANTIME = s.ZHANTIME AND t.SOLUTIONID = s.SOLUTIONID)
+        WHEN MATCHED THEN
+            UPDATE SET t.ZHANDATA = s.ZHANDATA
+    </update>
+
+    <update id="updateALLBatch" parameterType="list">
+        MERGE INTO ES_ZHANDIANDATA T1
+        USING (
+            <foreach collection="list" item="obj" separator="UNION ALL">
+                SELECT 
+                    #{obj.ZHANID,jdbcType=VARCHAR} AS ZHANID,
+                    #{obj.ZHANTIME,jdbcType=VARCHAR} AS ZHANTIME,
+                    #{obj.SOLUTIONID,jdbcType=VARCHAR} AS SOLUTIONID,
+                    #{obj.ZHANDATA,jdbcType=VARCHAR} AS ZHANDATA
+                FROM DUAL
+            </foreach>
+        ) T2
+        ON (T1.ZHANID = T2.ZHANID AND T1.ZHANTIME = T2.ZHANTIME AND T1.SOLUTIONID = T2.SOLUTIONID)
+        WHEN MATCHED THEN
+            UPDATE SET T1.ZHANDATA = T2.ZHANDATA
+    </update>
+
+    <insert id="insertALLDto" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATADto">
+        insert into ES_ZHANDIANDATA
+        (
+        ID,
+        ZHANID,
+        ZHANTIME,
+        ZHANDATA,
+        SOLUTIONID,
+        DD_FOR
+        )
+        values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ID,jdbcType=VARCHAR},
+            #{obj.ZHANID,jdbcType=VARCHAR},
+            #{obj.ZHANTIME,jdbcType=VARCHAR},
+            #{obj.ZHANDATA,jdbcType=VARCHAR},
+            #{obj.SOLUTIONID,jdbcType=VARCHAR},
+            #{obj.DD_FOR,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+</mapper>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.ZhuantiYlData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.ZhuantiYlPojo">
+        select * from "zhuanti_yl"
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0 ">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+            <if test="pathname != null and pathname != ''">
+                and ZTID = #{pathname}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ZhuantiYlPojo">
+        insert into "zhuanti_yl"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="TM != null and TM != ''">
+                TM,
+            </if>
+            <if test="DRP != null and DRP != ''">
+                DRP,
+            </if>
+            <if test="ZTID != null and ZTID != ''">
+                ZTID,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="TM != null and TM != ''">
+                #{TM},
+            </if>
+            <if test="DRP != null and DRP != ''">
+                #{DRP},
+            </if>
+            <if test="ZTID != null and ZTID != ''">
+                #{ZTID},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="upDateOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ZhuantiYlPojo">
+        update "zhuanti_yl"
+        <set>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="TM != null and TM != ''">
+                TM = #{TM},
+            </if>
+            <if test="DRP != null and DRP != ''">
+                DRP = #{DRP},
+            </if>
+            <if test="ZTID != null and ZTID != ''">
+                ZTID = #{ZTID},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+        </set>
+        where STCD = #{STCD} and TM = #{TM}
+    </update>
+
+    <delete id="deleteOne" parameterType="string">
+        delete from "zhuanti_yl" where STCD = #{stcd} and TM = #{tm}
+    </delete>
+
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ZhuantiYlPojo">
+        insert into "zhuanti_yl"
+        (
+            STCD,
+            TM,
+            DRP,
+            ZTID,
+            TYPE
+        )
+        values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.STCD},
+            #{obj.TM},
+            #{obj.DRP},
+            #{obj.ZTID},
+            #{obj.TYPE}
+            )
+        </foreach>
+    </insert>
+
+    <update id="upDateAll" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ZhuantiYlPojo">
+        <foreach collection="objList" item="obj" separator=";">
+            update "zhuanti_yl"
+            <set>
+                <if test="obj.STCD != null and obj.STCD != ''">
+                    STCD = #{obj.STCD},
+                </if>
+                <if test="obj.TM != null and obj.TM != ''">
+                    TM = #{obj.TM},
+                </if>
+                <if test="obj.DRP != null and obj.DRP != ''">
+                    DRP = #{obj.DRP},
+                </if>
+                <if test="obj.ZTID != null and obj.ZTID != ''">
+                    ZTID = #{obj.ZTID},
+                </if>
+                <if test="obj.TYPE != null and obj.TYPE != ''">
+                    TYPE = #{obj.TYPE},
+                </if>
+            </set>
+            where STCD = #{obj.STCD} and TM = #{obj.TM}
+        </foreach>
+    </update>
+
+    <delete id="deleteAll" parameterType="list">
+        delete from "zhuanti_yl" where STCD in
+        <foreach collection="stcdList" open="(" close=")" item="id" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.Flood_ST_STBPRP_BData">
+    <select id="getBASE_BTZ" resultType="swzzmodeserver.workserver.pojo.swzzflood.Flood_ST_STBPRP_BDto">
+        select ST_STBPRP_B.STCD,ST_STBPRP_B.STNM,ST_STBPRP_B.RVNM,ST_STBPRP_B.HNNM,
+        ST_STBPRP_B.BSNM,ST_STBPRP_B.LGTD,ST_STBPRP_B.LTTD,ST_STBPRP_B_STCD.ZSTCD,ST_STBPRP_B_STCD.TYPE,ST_STBPRP_B.XZDZ
+        from ST_STBPRP_B inner join ST_STBPRP_B_STCD on ST_STBPRP_B.STCD = ST_STBPRP_B_STCD.STCD
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and ST_STBPRP_B.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+</mapper>

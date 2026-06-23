@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.ST_RNFL_FData">
+    <select id="selectListByTmAsc" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RNFL_FPojo">
+        select * from ST_RNFL_F
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="type != null and type !=''">
+                and TYPE = #{type}
+            </if>
+            <if test="intv != null and intv !=''">
+                and INTV = #{intv}
+            </if>
+        </where>
+        order by TM asc
+    </select>
+    <select id="selectListByYbtmDesc" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RNFL_FPojo">
+        select * from ST_RNFL_F
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="type != null and type !=''">
+                and TYPE = #{type}
+            </if>
+            <if test="intv != null and intv !=''">
+                and INTV = #{intv}
+            </if>
+        </where>
+        order by YBTM desc
+    </select>
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RNFL_FPojo">
+        insert into ST_RNFL_F(STCD,YBTM,TM,DRP,INTV,TEMP,HUMIDITY,WINDDIR,WINDSPEED,WEATHERCODE,AIRPRESSURE,TYPE) values
+        <foreach collection="rnflList" item="rnfl" separator=",">
+            (#{rnfl.STCD},#{rnfl.YBTM},#{rnfl.TM},#{rnfl.DRP},#{rnfl.INTV},#{rnfl.TEMP},#{rnfl.HUMIDITY},#{rnfl.WINDDIR},
+            #{rnfl.WINDSPEED},#{rnfl.WEATHERCODE},#{rnfl.AIRPRESSURE},#{rnfl.TYPE})
+        </foreach>
+    </insert>
+    <select id="selectListNew" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RNFL_FPojo">
+        SELECT rf.* FROM st_rnfl_f rf RIGHT JOIN (
+        SELECT STCD,MAX(YBTM) YBTM,MAX(TM) TM  FROM st_rnfl_f
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="type != null and type !=''">
+                and TYPE = #{type}
+            </if>
+            <if test="intv != null and intv !=''">
+                and INTV = #{intv}
+            </if>
+        </where>
+        GROUP BY TM
+        ) rfNew on rf.stcd = rfNew.stcd and rf.tm = rfNew.tm and rf.YBTM = rfNew.YBTM ORDER BY TM
+    </select>
+</mapper>

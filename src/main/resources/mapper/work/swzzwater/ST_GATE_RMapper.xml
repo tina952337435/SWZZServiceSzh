@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzwater.ST_GATE_RData">
+
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzwater.ST_GATE_RPojo">
+        select * from ST_GATE_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        order by TM desc
+    </select>
+
+    <select id="selectListTwo" resultType="swzzmodeserver.workserver.pojo.swzzwater.ST_GATE_RPojo">
+        select * from ST_GATE_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="EXKEY != null and EXKEY != ''">
+                and EXKEY like concat('%',concat(#{EXKEY},'%'))
+            </if>
+            <if test="EQPTP != null and EQPTP != ''">
+                and EQPTP like concat('%',concat(#{EQPTP},'%'))
+            </if>
+        </where>
+        order by TM desc
+    </select>
+
+<!--    <select id="selectList" resultType="timertaskserver.workserver.pojo.swzzwater.ST_STBPRP_BPojo">-->
+<!--        select a.* from "st_stbprp_b" a-->
+<!--        <where>-->
+<!--            <if test="ID != null and ID != ''">-->
+<!--                and STCD = #{ID}-->
+<!--            </if>-->
+<!--            <if test="key != null and key != ''">-->
+<!--                and STNM like concat('%',concat(#{key},'%'))-->
+<!--                or RVNM like concat('%',concat(#{key},'%'))-->
+<!--                or STLC like concat('%',concat(#{key},'%'))-->
+<!--            </if>-->
+<!--            <if test="stime != null and stime != ''">-->
+<!--                <![CDATA[ and MODITIME >= #{stime} ]]>-->
+<!--            </if>-->
+<!--            <if test="etime != null and etime != ''">-->
+<!--                <![CDATA[ and MODITIME <= #{etime} ]]>-->
+<!--            </if>-->
+
+<!--            <if test="type != null and type.size() > 0">-->
+<!--                and SEASONTYPE in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        <if test="startindex != null and pagesize != null">-->
+<!--            limit #{startindex},#{pagesize}-->
+<!--        </if>-->
+<!--    </select>-->
+
+<!--    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_STBPRP_BPojo">-->
+<!--        insert into "st_stbprp_b"-->
+<!--        <trim prefix="(" suffix=")" suffixOverrides=",">-->
+<!--            <if test="STCD != null and STCD != ''">-->
+<!--                STCD,-->
+<!--            </if>-->
+<!--            <if test="STNM != null and STNM != ''">-->
+<!--                STNM,-->
+<!--            </if>-->
+<!--            <if test="RVNM != null and RVNM != ''">-->
+<!--                RVNM,-->
+<!--            </if>-->
+<!--            <if test="HNNM != null and HNNM != ''">-->
+<!--                HNNM,-->
+<!--            </if>-->
+<!--            <if test="BSNM != null and BSNM != ''">-->
+<!--                BSNM,-->
+<!--            </if>-->
+<!--            <if test="LGTD != null">-->
+<!--                LGTD,-->
+<!--            </if>-->
+<!--            <if test="LTTD != null">-->
+<!--                LTTD,-->
+<!--            </if>-->
+<!--            <if test="STLC != null and STLC != ''">-->
+<!--                STLC,-->
+<!--            </if>-->
+<!--            <if test="ADDVCD != null and ADDVCD != ''">-->
+<!--                ADDVCD,-->
+<!--            </if>-->
+<!--            <if test="DTMNM != null and DTMNM != ''">-->
+<!--                DTMNM,-->
+<!--            </if>-->
+<!--            <if test="DTMEL != null">-->
+<!--                DTMEL,-->
+<!--            </if>-->
+<!--            <if test="DTPR != null">-->
+<!--                DTPR,-->
+<!--            </if>-->
+<!--            <if test="STTP != null and STTP != ''">-->
+<!--                STTP,-->
+<!--            </if>-->
+<!--            <if test="FRGRD != null and FRGRD != ''">-->
+<!--                FRGRD,-->
+<!--            </if>-->
+<!--            <if test="ESSTYM != null and ESSTYM != ''">-->
+<!--                ESSTYM,-->
+<!--            </if>-->
+<!--            <if test="BGFRYM != null and BGFRYM != ''">-->
+<!--                BGFRYM,-->
+<!--            </if>-->
+<!--            <if test="ATCUNIT != null and ATCUNIT != ''">-->
+<!--                ATCUNIT,-->
+<!--            </if>-->
+<!--            <if test="ADMAUTH != null and ADMAUTH != ''">-->
+<!--                ADMAUTH,-->
+<!--            </if>-->
+<!--            <if test="LOCALITY != null and LOCALITY != ''">-->
+<!--                LOCALITY,-->
+<!--            </if>-->
+<!--            <if test="STBK != null and STBK != ''">-->
+<!--                STBK,-->
+<!--            </if>-->
+<!--            <if test="STAZT != null">-->
+<!--                STAZT,-->
+<!--            </if>-->
+<!--            <if test="DSTRVM != null">-->
+<!--                DSTRVM,-->
+<!--            </if>-->
+<!--            <if test="DRNA != null">-->
+<!--                DRNA,-->
+<!--            </if>-->
+<!--            <if test="PHCD != null and PHCD != ''">-->
+<!--                PHCD,-->
+<!--            </if>-->
+<!--            <if test="USFL != null and USFL != ''">-->
+<!--                USFL,-->
+<!--            </if>-->
+<!--            <if test="COMMENTS != null and COMMENTS != ''">-->
+<!--                COMMENTS,-->
+<!--            </if>-->
+<!--            <if test="MODITIME != null and MODITIME != ''">-->
+<!--                MODITIME,-->
+<!--            </if>-->
+<!--            <if test="SFLAG != null and SFLAG != ''">-->
+<!--                SFLAG,-->
+<!--            </if>-->
+<!--            <if test="YFLAG != null and YFLAG != ''">-->
+<!--                YFLAG,-->
+<!--            </if>-->
+<!--            <if test="AFLAG != null and AFLAG != ''">-->
+<!--                AFLAG,-->
+<!--            </if>-->
+<!--            <if test="FRITM != null and FRITM != ''">-->
+<!--                FRITM,-->
+<!--            </if>-->
+<!--            <if test="HNNMBK != null and HNNMBK != ''">-->
+<!--                HNNMBK,-->
+<!--            </if>-->
+<!--            <if test="MBDZ != null">-->
+<!--                MBDZ,-->
+<!--            </if>-->
+<!--            <if test="MDPR != null">-->
+<!--                MDPR,-->
+<!--            </if>-->
+<!--            <if test="BSNMBK != null and BSNMBK != ''">-->
+<!--                BSNMBK,-->
+<!--            </if>-->
+<!--            <if test="SHOW != null and SHOW != ''">-->
+<!--                SHOW,-->
+<!--            </if>-->
+<!--            <if test="XZDZ != null">-->
+<!--                XZDZ,-->
+<!--            </if>-->
+<!--        </trim>-->
+<!--        values-->
+<!--        <trim prefix="(" suffix=")" suffixOverrides=",">-->
+<!--            <if test="STCD != null and STCD != ''">-->
+<!--                #{STCD},-->
+<!--            </if>-->
+<!--            <if test="STNM != null and STNM != ''">-->
+<!--                #{STNM},-->
+<!--            </if>-->
+<!--            <if test="RVNM != null and RVNM != ''">-->
+<!--                #{RVNM},-->
+<!--            </if>-->
+<!--            <if test="HNNM != null and HNNM != ''">-->
+<!--                #{HNNM},-->
+<!--            </if>-->
+<!--            <if test="BSNM != null and BSNM != ''">-->
+<!--                #{BSNM},-->
+<!--            </if>-->
+<!--            <if test="LGTD != null">-->
+<!--                #{LGTD},-->
+<!--            </if>-->
+<!--            <if test="LTTD != null">-->
+<!--                #{LTTD},-->
+<!--            </if>-->
+<!--            <if test="STLC != null and STLC != ''">-->
+<!--                #{STLC},-->
+<!--            </if>-->
+<!--            <if test="ADDVCD != null and ADDVCD != ''">-->
+<!--                #{ADDVCD},-->
+<!--            </if>-->
+<!--            <if test="DTMNM != null and DTMNM != ''">-->
+<!--                #{DTMNM},-->
+<!--            </if>-->
+<!--            <if test="DTMEL != null">-->
+<!--                #{DTMEL},-->
+<!--            </if>-->
+<!--            <if test="DTPR != null">-->
+<!--                #{DTPR},-->
+<!--            </if>-->
+<!--            <if test="STTP != null and STTP != ''">-->
+<!--                #{STTP},-->
+<!--            </if>-->
+<!--            <if test="FRGRD != null and FRGRD != ''">-->
+<!--                #{FRGRD},-->
+<!--            </if>-->
+<!--            <if test="ESSTYM != null and ESSTYM != ''">-->
+<!--                #{ESSTYM},-->
+<!--            </if>-->
+<!--            <if test="BGFRYM != null and BGFRYM != ''">-->
+<!--                #{BGFRYM},-->
+<!--            </if>-->
+<!--            <if test="ATCUNIT != null and ATCUNIT != ''">-->
+<!--                #{ATCUNIT},-->
+<!--            </if>-->
+<!--            <if test="ADMAUTH != null and ADMAUTH != ''">-->
+<!--                #{ADMAUTH},-->
+<!--            </if>-->
+<!--            <if test="LOCALITY != null and LOCALITY != ''">-->
+<!--                #{LOCALITY},-->
+<!--            </if>-->
+<!--            <if test="STBK != null and STBK != ''">-->
+<!--                #{STBK},-->
+<!--            </if>-->
+<!--            <if test="STAZT != null">-->
+<!--                #{STAZT},-->
+<!--            </if>-->
+<!--            <if test="DSTRVM != null">-->
+<!--                #{DSTRVM},-->
+<!--            </if>-->
+<!--            <if test="DRNA != null">-->
+<!--                #{DRNA},-->
+<!--            </if>-->
+<!--            <if test="PHCD != null and PHCD != ''">-->
+<!--                #{PHCD},-->
+<!--            </if>-->
+<!--            <if test="USFL != null and USFL != ''">-->
+<!--                #{USFL},-->
+<!--            </if>-->
+<!--            <if test="COMMENTS != null and COMMENTS != ''">-->
+<!--                #{COMMENTS},-->
+<!--            </if>-->
+<!--            <if test="MODITIME != null and MODITIME != ''">-->
+<!--                #{MODITIME},-->
+<!--            </if>-->
+<!--            <if test="SFLAG != null and SFLAG != ''">-->
+<!--                #{SFLAG},-->
+<!--            </if>-->
+<!--            <if test="YFLAG != null and YFLAG != ''">-->
+<!--                #{YFLAG},-->
+<!--            </if>-->
+<!--            <if test="AFLAG != null and AFLAG != ''">-->
+<!--                #{AFLAG},-->
+<!--            </if>-->
+<!--            <if test="FRITM != null and FRITM != ''">-->
+<!--                #{FRITM},-->
+<!--            </if>-->
+<!--            <if test="HNNMBK != null and HNNMBK != ''">-->
+<!--                #{HNNMBK},-->
+<!--            </if>-->
+<!--            <if test="MBDZ != null">-->
+<!--                #{MBDZ},-->
+<!--            </if>-->
+<!--            <if test="MDPR != null">-->
+<!--                #{MDPR},-->
+<!--            </if>-->
+<!--            <if test="BSNMBK != null and BSNMBK != ''">-->
+<!--                #{BSNMBK},-->
+<!--            </if>-->
+<!--            <if test="SHOW != null and SHOW != ''">-->
+<!--                #{SHOW},-->
+<!--            </if>-->
+<!--            <if test="XZDZ != null">-->
+<!--                #{XZDZ},-->
+<!--            </if>-->
+<!--        </trim>-->
+<!--    </insert>-->
+<!--    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_STBPRP_BPojo">-->
+<!--        insert into "st_stbprp_b"(STCD,STNM,RVNM,HNNM,BSNM,LGTD,LTTD,STLC,ADDVCD,DTMNM,DTMEL,DTPR,STTP,FRGRD,ESSTYM,BGFRYM,-->
+<!--        ATCUNIT,ADMAUTH,LOCALITY,STBK,STAZT,DSTRVM,DRNA,PHCD,USFL,COMMENTS,MODITIME,SFLAG,YFLAG,AFLAG,FRITM,HNNMBK,MBDZ,MDPR,BSNMBK,SHOW,XZDZ) values-->
+<!--        <foreach collection="objList" item="obj" separator=",">-->
+<!--            (#{obj.STCD},#{obj.STNM},#{obj.RVNM},#{obj.HNNM},#{obj.BSNM},#{obj.LGTD},#{obj.LTTD},#{obj.STLC},#{obj.ADDVCD},#{obj.DTMNM},#{obj.DTMEL},-->
+<!--            #{obj.DTPR},#{obj.STTP},#{obj.FRGRD},#{obj.ESSTYM},#{obj.BGFRYM},#{obj.ATCUNIT},#{obj.ADMAUTH},#{obj.LOCALITY},#{obj.STBK},#{obj.STAZT},-->
+<!--            #{obj.DSTRVM},#{obj.DRNA},#{obj.PHCD},#{obj.USFL},#{obj.COMMENTS},#{obj.MODITIME},#{obj.SFLAG},#{obj.YFLAG},#{obj.AFLAG},#{obj.FRITM},-->
+<!--            #{obj.HNNMBK},#{obj.MBDZ},#{obj.MDPR},#{obj.BSNMBK},#{obj.SHOW},#{obj.XZDZ})-->
+<!--        </foreach>-->
+<!--    </insert>-->
+<!--    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_STBPRP_BPojo">-->
+<!--        update "st_stbprp_b"-->
+<!--        <set>-->
+<!--            <if test="STNM != null and STNM != ''">-->
+<!--                STNM = #{STNM},-->
+<!--            </if>-->
+<!--            <if test="RVNM != null and RVNM != ''">-->
+<!--                RVNM = #{RVNM},-->
+<!--            </if>-->
+<!--            <if test="HNNM != null and HNNM != ''">-->
+<!--                HNNM = #{HNNM},-->
+<!--            </if>-->
+<!--            <if test="BSNM != null and BSNM != ''">-->
+<!--                BSNM = #{BSNM},-->
+<!--            </if>-->
+<!--            <if test="LGTD != null">-->
+<!--                LGTD = #{LGTD},-->
+<!--            </if>-->
+<!--            <if test="LTTD != null">-->
+<!--                LTTD = #{LTTD},-->
+<!--            </if>-->
+<!--            <if test="STLC != null and STLC != ''">-->
+<!--                STLC = #{STLC},-->
+<!--            </if>-->
+<!--            <if test="ADDVCD != null and ADDVCD != ''">-->
+<!--                ADDVCD = #{ADDVCD},-->
+<!--            </if>-->
+<!--            <if test="DTMNM != null and DTMNM != ''">-->
+<!--                DTMNM = #{DTMNM},-->
+<!--            </if>-->
+<!--            <if test="DTMEL != null">-->
+<!--                DTMEL = #{DTMEL},-->
+<!--            </if>-->
+<!--            <if test="DTPR != null">-->
+<!--                DTPR = #{DTPR},-->
+<!--            </if>-->
+<!--            <if test="STTP != null and STTP != ''">-->
+<!--                STTP = #{STTP},-->
+<!--            </if>-->
+<!--            <if test="FRGRD != null and FRGRD != ''">-->
+<!--                FRGRD = #{FRGRD},-->
+<!--            </if>-->
+<!--            <if test="ESSTYM != null and ESSTYM != ''">-->
+<!--                ESSTYM = #{ESSTYM},-->
+<!--            </if>-->
+<!--            <if test="BGFRYM != null and BGFRYM != ''">-->
+<!--                BGFRYM = #{BGFRYM},-->
+<!--            </if>-->
+<!--            <if test="ATCUNIT != null and ATCUNIT != ''">-->
+<!--                ATCUNIT = #{ATCUNIT},-->
+<!--            </if>-->
+<!--            <if test="ADMAUTH != null and ADMAUTH != ''">-->
+<!--                ADMAUTH = #{ADMAUTH},-->
+<!--            </if>-->
+<!--            <if test="LOCALITY != null and LOCALITY != ''">-->
+<!--                LOCALITY = #{LOCALITY},-->
+<!--            </if>-->
+<!--            <if test="STBK != null and STBK != ''">-->
+<!--                STBK = #{STBK},-->
+<!--            </if>-->
+<!--            <if test="STAZT != null">-->
+<!--                STAZT = #{STAZT},-->
+<!--            </if>-->
+<!--            <if test="DSTRVM != null">-->
+<!--                DSTRVM = #{DSTRVM},-->
+<!--            </if>-->
+<!--            <if test="DRNA != null">-->
+<!--                DRNA = #{DRNA},-->
+<!--            </if>-->
+<!--            <if test="PHCD != null and PHCD != ''">-->
+<!--                PHCD = #{PHCD},-->
+<!--            </if>-->
+<!--            <if test="USFL != null and USFL != ''">-->
+<!--                USFL = #{USFL},-->
+<!--            </if>-->
+<!--            <if test="COMMENTS != null and COMMENTS != ''">-->
+<!--                COMMENTS = #{COMMENTS},-->
+<!--            </if>-->
+<!--            <if test="MODITIME != null and MODITIME != ''">-->
+<!--                MODITIME = #{MODITIME},-->
+<!--            </if>-->
+<!--            <if test="SFLAG != null and SFLAG != ''">-->
+<!--                SFLAG = #{SFLAG},-->
+<!--            </if>-->
+<!--            <if test="YFLAG != null and YFLAG != ''">-->
+<!--                YFLAG = #{YFLAG},-->
+<!--            </if>-->
+<!--            <if test="AFLAG != null and AFLAG != ''">-->
+<!--                AFLAG = #{AFLAG},-->
+<!--            </if>-->
+<!--            <if test="FRITM != null and FRITM != ''">-->
+<!--                FRITM = #{FRITM},-->
+<!--            </if>-->
+<!--            <if test="HNNMBK != null and HNNMBK != ''">-->
+<!--                HNNMBK = #{HNNMBK},-->
+<!--            </if>-->
+<!--            <if test="MBDZ != null">-->
+<!--                MBDZ = #{MBDZ},-->
+<!--            </if>-->
+<!--            <if test="MDPR != null">-->
+<!--                MDPR = #{MDPR},-->
+<!--            </if>-->
+<!--            <if test="BSNMBK != null and BSNMBK != ''">-->
+<!--                BSNMBK = #{BSNMBK},-->
+<!--            </if>-->
+<!--            <if test="SHOW != null and SHOW != ''">-->
+<!--                SHOW = #{SHOW},-->
+<!--            </if>-->
+<!--            <if test="XZDZ != null">-->
+<!--                XZDZ = #{XZDZ},-->
+<!--            </if>-->
+<!--        </set>-->
+<!--        where STCD = #{STCD}-->
+<!--    </update>-->
+<!--    <delete id="deleteOne">-->
+<!--        delete from "st_stbprp_b" where STCD = #{ID}-->
+<!--    </delete>-->
+
+<!--    <select id="selectListBandStcd" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_STBPRP_BDto">-->
+<!--        select a.STCD,a.STNM,a.RVNM,a.HNNM,a.BSNM,a.LGTD,a.LTTD,a.XZDZ,b.ZSTCD,b.TYPE-->
+<!--        from "st_stbprp_b" a inner join "st_stbprp_b_stcd" b on a.STCD = b.STCD-->
+<!--        <where>-->
+<!--            <if test="stcd != null and stcd != ''">-->
+<!--                and a.STCD = #{stcd}-->
+<!--            </if>-->
+<!--        </where>-->
+<!--    </select>-->
+<!--    <select id="selectListBandStcdByStcdList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_STBPRP_BDto">-->
+<!--        select a.STCD,a.STNM,a.RVNM,a.HNNM,a.BSNM,a.LGTD,a.LTTD,a.XZDZ,b.ZSTCD,b.TYPE-->
+<!--        from "st_stbprp_b" a inner join "st_stbprp_b_stcd" b on a.STCD = b.STCD-->
+<!--        <where>-->
+<!--            <if test="stcdList != null and stcdList.size() > 0">-->
+<!--                and a.STCD in-->
+<!--                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">-->
+<!--                    #{stcd}-->
+<!--                </foreach>-->
+<!--            </if>-->
+<!--        </where>-->
+<!--    </select>-->
+<!--    <select id="selectCount" resultType="java.lang.Integer">-->
+<!--        SELECT count(1) FROM "st_stbprp_b"-->
+<!--        <where>-->
+<!--            <if test="ID != null and ID != ''">-->
+<!--                and STCD = #{ID}-->
+<!--            </if>-->
+<!--            <if test="key != null and key != ''">-->
+<!--                and STNM like concat('%',concat(#{key},'%'))-->
+<!--                or RVNM like concat('%',concat(#{key},'%'))-->
+<!--                or STLC like concat('%',concat(#{key},'%'))-->
+<!--            </if>-->
+<!--            <if test="stime != null and stime != ''">-->
+<!--                <![CDATA[ and MODITIME >= #{stime} ]]>-->
+<!--            </if>-->
+<!--            <if test="etime != null and etime != ''">-->
+<!--                <![CDATA[ and MODITIME <= #{etime} ]]>-->
+<!--            </if>-->
+<!--        </where>-->
+<!--    </select>-->
+</mapper>

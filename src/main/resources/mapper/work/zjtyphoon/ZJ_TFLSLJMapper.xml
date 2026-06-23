@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.zjtyphoon.ZJ_TFLSLJData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_TFLSLJPojo">
+        select A.* from ZJ_TFLSLJ A
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZJ_ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                ZJ_YDFX like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and ZJ_RQSJ >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and ZJ_RQSJ <= #{etime} ]]>
+            </if>
+            <if test="tfidList != null and tfidList.size() > 0">
+                and ZJ_TFBH in
+                <foreach collection="tfidList" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM ZJ_TFLSLJ
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZJ_ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                ZJ_YDFX like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and ZJ_RQSJ >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and ZJ_RQSJ <= #{etime} ]]>
+            </if>
+            <if test="tfidList != null and tfidList.size() > 0">
+                and ZJ_TFBH in
+                <foreach collection="tfidList" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_TFLSLJPojo">
+        insert into ZJ_TFLSLJ
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZJ_ID != null">
+                ZJ_ID,
+            </if>
+            <if test="ZJ_TFBH != null and ZJ_TFBH != ''">
+                ZJ_TFBH,
+            </if>
+            <if test="ZJ_RQSJ != null and ZJ_RQSJ != ''">
+                ZJ_RQSJ,
+            </if>
+            <if test="ZJ_WD != null">
+                ZJ_WD,
+            </if>
+            <if test="ZJ_JD != null">
+                ZJ_JD,
+            </if>
+            <if test="ZJ_ZXQY != null">
+                ZJ_ZXQY,
+            </if>
+            <if test="ZJ_ZXFS != null">
+                ZJ_ZXFS,
+            </if>
+            <if test="ZJ_YDSD != null">
+                ZJ_YDSD,
+            </if>
+            <if test="ZJ_YDFX != null and ZJ_YDFX != ''">
+                ZJ_YDFX,
+            </if>
+            <if test="ZJ_SevenRadius != null">
+                ZJ_SevenRadius,
+            </if>
+            <if test="ZJ_TenRadius != null">
+                ZJ_TenRadius,
+            </if>
+            <if test="ZJ_Note != null and ZJ_Note != ''">
+                ZJ_Note,
+            </if>
+            <if test="ZJ_Radius7 != null and ZJ_Radius7 != ''">
+                ZJ_Radius7,
+            </if>
+            <if test="ZJ_Radius10 != null and ZJ_Radius10 != ''">
+                ZJ_Radius10,
+            </if>
+            <if test="ZJ_Radius12 != null and ZJ_Radius12 != ''">
+                ZJ_Radius12,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZJ_ID != null">
+                #{ZJ_ID},
+            </if>
+            <if test="ZJ_TFBH != null and ZJ_TFBH != ''">
+                #{ZJ_TFBH},
+            </if>
+            <if test="ZJ_RQSJ != null and ZJ_RQSJ != ''">
+                #{ZJ_RQSJ},
+            </if>
+            <if test="ZJ_WD != null">
+                #{ZJ_WD},
+            </if>
+            <if test="ZJ_JD != null">
+                #{ZJ_JD},
+            </if>
+            <if test="ZJ_ZXQY != null">
+                #{ZJ_ZXQY},
+            </if>
+            <if test="ZJ_ZXFS != null">
+                #{ZJ_ZXFS},
+            </if>
+            <if test="ZJ_YDSD != null">
+                #{ZJ_YDSD},
+            </if>
+            <if test="ZJ_YDFX != null and ZJ_YDFX != ''">
+                #{ZJ_YDFX},
+            </if>
+            <if test="ZJ_SevenRadius != null">
+                #{ZJ_SevenRadius},
+            </if>
+            <if test="ZJ_TenRadius != null">
+                #{ZJ_TenRadius},
+            </if>
+            <if test="ZJ_Note != null and ZJ_Note != ''">
+                #{ZJ_Note},
+            </if>
+            <if test="ZJ_Radius7 != null and ZJ_Radius7 != ''">
+                #{ZJ_Radius7},
+            </if>
+            <if test="ZJ_Radius10 != null and ZJ_Radius10 != ''">
+                #{ZJ_Radius10},
+            </if>
+            <if test="ZJ_Radius12 != null and ZJ_Radius12 != ''">
+                #{ZJ_Radius12},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_TFLSLJPojo">
+        update ZJ_TFLSLJ
+        <set>
+            <if test="ZJ_TFBH != null and ZJ_TFBH != ''">
+                ZJ_TFBH = #{ZJ_TFBH},
+            </if>
+            <if test="ZJ_RQSJ != null and ZJ_RQSJ != ''">
+                ZJ_RQSJ = #{ZJ_RQSJ},
+            </if>
+            <if test="ZJ_WD != null">
+                ZJ_WD = #{ZJ_WD},
+            </if>
+            <if test="ZJ_JD != null">
+                ZJ_JD = #{ZJ_JD},
+            </if>
+            <if test="ZJ_ZXQY != null">
+                ZJ_ZXQY = #{ZJ_ZXQY},
+            </if>
+            <if test="ZJ_ZXFS != null">
+                ZJ_ZXFS = #{ZJ_ZXFS},
+            </if>
+            <if test="ZJ_YDSD != null">
+                ZJ_YDSD = #{ZJ_YDSD},
+            </if>
+            <if test="ZJ_YDFX != null and ZJ_YDFX != ''">
+                ZJ_YDFX = #{ZJ_YDFX},
+            </if>
+            <if test="ZJ_SevenRadius != null">
+                ZJ_SevenRadius = #{ZJ_SevenRadius},
+            </if>
+            <if test="ZJ_TenRadius != null">
+                ZJ_TenRadius = #{ZJ_TenRadius},
+            </if>
+            <if test="ZJ_Note != null and ZJ_Note != ''">
+                ZJ_Note = #{ZJ_Note},
+            </if>
+            <if test="ZJ_Radius7 != null and ZJ_Radius7 != ''">
+                ZJ_Radius7 = #{ZJ_Radius7},
+            </if>
+            <if test="ZJ_Radius10 != null and ZJ_Radius10 != ''">
+                ZJ_Radius10 = #{ZJ_Radius10},
+            </if>
+            <if test="ZJ_Radius12 != null and ZJ_Radius12 != ''">
+                ZJ_Radius12 = #{ZJ_Radius12},
+            </if>
+        </set>
+        where ZJ_ID = #{ZJ_ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ZJ_TFLSLJ where ZJ_ID = #{ID}
+    </delete>
+
+    <insert id="insertALL" parameterType="list">
+        insert into ZJ_TFLSLJ
+        (
+        ZJ_ID,
+        ZJ_TFBH,
+        ZJ_RQSJ,
+        ZJ_WD,
+        ZJ_JD,
+        ZJ_ZXQY,
+        ZJ_ZXFS,
+        ZJ_YDSD,
+        ZJ_YDFX,
+        ZJ_SevenRadius,
+        ZJ_TenRadius,
+        ZJ_Note,
+        ZJ_Radius7,
+        ZJ_Radius10,
+        ZJ_Radius12
+        )
+        values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ZJ_ID},
+            #{obj.ZJ_TFBH},
+            #{obj.ZJ_RQSJ},
+            #{obj.ZJ_WD},
+            #{obj.ZJ_JD},
+            #{obj.ZJ_ZXQY},
+            #{obj.ZJ_ZXFS},
+            #{obj.ZJ_YDSD},
+            #{obj.ZJ_YDFX},
+            #{obj.ZJ_SevenRadius},
+            #{obj.ZJ_TenRadius},
+            #{obj.ZJ_Note},
+            #{obj.ZJ_Radius7},
+            #{obj.ZJ_Radius10},
+            #{obj.ZJ_Radius12}
+            )
+        </foreach>
+    </insert>
+
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" item="obj" separator=";">
+            update ZJ_TFLSLJ
+            <set>
+                <if test="obj.ZJ_TFBH != null and obj.ZJ_TFBH != ''">
+                    ZJ_TFBH = #{obj.ZJ_TFBH},
+                </if>
+                <if test="obj.ZJ_RQSJ != null and obj.ZJ_RQSJ != ''">
+                    ZJ_RQSJ = #{obj.ZJ_RQSJ},
+                </if>
+                <if test="obj.ZJ_WD != null">
+                    ZJ_WD = #{obj.ZJ_WD},
+                </if>
+                <if test="obj.ZJ_JD != null">
+                    ZJ_JD = #{obj.ZJ_JD},
+                </if>
+                <if test="obj.ZJ_ZXQY != null">
+                    ZJ_ZXQY = #{obj.ZJ_ZXQY},
+                </if>
+                <if test="obj.ZJ_ZXFS != null">
+                    ZJ_ZXFS = #{obj.ZJ_ZXFS},
+                </if>
+                <if test="obj.ZJ_YDSD != null">
+                    ZJ_YDSD = #{obj.ZJ_YDSD},
+                </if>
+                <if test="obj.ZJ_YDFX != null and obj.ZJ_YDFX != ''">
+                    ZJ_YDFX = #{obj.ZJ_YDFX},
+                </if>
+                <if test="obj.ZJ_SevenRadius != null">
+                    ZJ_SevenRadius = #{obj.ZJ_SevenRadius},
+                </if>
+                <if test="obj.ZJ_TenRadius != null">
+                    ZJ_TenRadius = #{obj.ZJ_TenRadius},
+                </if>
+                <if test="obj.ZJ_Note != null and obj.ZJ_Note != ''">
+                    ZJ_Note = #{obj.ZJ_Note},
+                </if>
+                <if test="obj.ZJ_Radius7 != null and obj.ZJ_Radius7 != ''">
+                    ZJ_Radius7 = #{obj.ZJ_Radius7},
+                </if>
+                <if test="obj.ZJ_Radius10 != null and obj.ZJ_Radius10 != ''">
+                    ZJ_Radius10 = #{obj.ZJ_Radius10},
+                </if>
+                <if test="obj.ZJ_Radius12 != null and obj.ZJ_Radius12 != ''">
+                    ZJ_Radius12 = #{obj.ZJ_Radius12},
+                </if>
+            </set>
+            where ZJ_ID = #{obj.ZJ_ID}
+        </foreach>
+    </update>
+
+    <delete id="deleteALL">
+        delete from ZJ_TFLSLJ where ZJ_ID in
+        <foreach collection="objList" open="(" close=")" item="obj" separator=",">
+            #{obj.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+</mapper>

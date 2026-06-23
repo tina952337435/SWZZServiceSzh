@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_RAINFALL_TREEData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_RAINFALL_TREEPojo">
+        select a.* from ES_RAINFALL_TREE a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and PATHNAME = #{key}
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_RAINFALL_TREE
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and PATHNAME = #{key}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_RAINFALL_TREEPojo">
+        insert into ES_RAINFALL_TREE
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="PID != null and PID != ''">
+                PID,
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                TITLE,
+            </if>
+            <if test="TM != null and TM != ''">
+                TM,
+            </if>
+            <if test="ORDERBYID != null">
+                ORDERBYID,
+            </if>
+            <if test="PATHNAME != null and PATHNAME != ''">
+                PATHNAME,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="PID != null and PID != ''">
+                #{PID},
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                #{TITLE},
+            </if>
+            <if test="TM != null and TM != ''">
+                #{TM},
+            </if>
+            <if test="ORDERBYID != null">
+                #{ORDERBYID},
+            </if>
+            <if test="PATHNAME != null and PATHNAME != ''">
+                #{PATHNAME},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_RAINFALL_TREEPojo">
+        insert into ES_RAINFALL_TREE(ID,PID,TITLE,TM,ORDERBYID,PATHNAME) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ID},
+            #{obj.PID},
+            #{obj.TITLE},
+            #{obj.TM},
+            #{obj.ORDERBYID},
+            #{obj.PATHNAME})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_RAINFALL_TREEPojo">
+        update ES_RAINFALL_TREE
+        <set>
+            <if test="PID != null and PID != ''">
+                PID = #{PID},
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                TITLE = #{TITLE},
+            </if>
+            <if test="TM != null and TM != ''">
+                TM = #{TM},
+            </if>
+            <if test="ORDERBYID != null">
+                ORDERBYID = #{ORDERBYID},
+            </if>
+            <if test="PATHNAME != null and PATHNAME != ''">
+                PATHNAME = #{PATHNAME},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_RAINFALL_TREE where ID = #{ID}
+    </delete>
+</mapper>

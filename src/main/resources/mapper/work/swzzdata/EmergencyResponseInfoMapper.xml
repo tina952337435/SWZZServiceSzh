@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzdata.EmergencyResponseInfoData">
+
+    <!-- 查询列表 -->
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzdata.EmergencyResponseInfoPojo">
+        SELECT 
+            ID, YJD_NUMBER, START_TIME, SIGNAL_STAGE, SIGNAL_LEVEL, 
+            SIGNAL_CATEGORY, EARLY_WARNING_NUM, TITLE, CONTENT, QXTYJ_DATE 
+        FROM EMERGENCY_RESPONSE_INFO
+        <where>
+            <!-- 响应发布编号 (ID) -->
+            <if test="ID != null and ID != ''">
+                AND ID = #{ID}
+            </if>
+            
+            <!-- 关键字搜索 (标题模糊) -->
+            <if test="key != null and key != ''">
+                AND TITLE LIKE CONCAT('%', #{key}, '%')
+            </if>
+            
+            <!-- 响应类型 (对应接口中的 type 列表) -->
+            <if test="type != null and type.size() > 0">
+                AND SIGNAL_CATEGORY IN
+                <foreach collection="type" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+
+            <!-- 修复点：将两个时间条件合并到一个 <if> 中，或者分别处理 AND -->
+            <!-- 方案：分别处理每个条件的 AND 前缀 -->
+            
+            <!-- 响应时间范围 (START_TIME) -->
+            <if test="stime != null and stime != ''">
+                <![CDATA[ 
+                    AND START_TIME >= #{stime} 
+                ]]>
+            </if>
+            
+            <!-- 气象预警时间范围 (QXTYJ_DATE) -->
+            <if test="etime != null and etime != ''">
+                <![CDATA[ 
+                    AND QXTYJ_DATE <= #{etime} 
+                ]]>
+            </if>
+        </where>
+        
+        <!-- 分页 -->
+        <if test="startindex != null and pagesize != null">
+            LIMIT #{startindex}, #{pagesize}
+        </if>
+    </select>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="integer">
+        SELECT COUNT(1) FROM EMERGENCY_RESPONSE_INFO
+        <where>
+            <!-- 响应发布编号 (ID) -->
+            <if test="ID != null and ID != ''">
+                AND ID = #{ID}
+            </if>
+            <!-- 关键字搜索 (标题模糊) -->
+            <if test="key != null and key != ''">
+                AND TITLE LIKE CONCAT('%', #{key}, '%')
+            </if>
+            <!-- 响应类型 (对应接口中的 type 列表) -->
+            <if test="type != null and type.size() > 0">
+                AND SIGNAL_CATEGORY IN
+                <foreach collection="type" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <!-- 响应时间范围 -->
+            <if test="stime != null and stime != ''">
+                <![CDATA[
+                AND START_TIME >= #{stime}
+                ]]>
+            </if>
+            <!-- 气象预警时间范围 -->
+            <if test="etime != null and etime != ''">
+                <![CDATA[
+                AND QXTYJ_DATE <= #{etime}
+                ]]>
+            </if>
+        </where>
+    </select>
+
+    <!-- 插入单条记录 -->
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.EmergencyResponseInfoPojo">
+        INSERT INTO EMERGENCY_RESPONSE_INFO
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="YJD_NUMBER != null and YJD_NUMBER != ''">
+                YJD_NUMBER,
+            </if>
+            <if test="START_TIME != null and START_TIME != ''">
+                START_TIME,
+            </if>
+            <if test="SIGNAL_STAGE != null and SIGNAL_STAGE != ''">
+                SIGNAL_STAGE,
+            </if>
+            <if test="SIGNAL_LEVEL != null and SIGNAL_LEVEL != ''">
+                SIGNAL_LEVEL,
+            </if>
+            <if test="SIGNAL_CATEGORY != null and SIGNAL_CATEGORY != ''">
+                SIGNAL_CATEGORY,
+            </if>
+            <if test="EARLY_WARNING_NUM != null">
+                EARLY_WARNING_NUM,
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                TITLE,
+            </if>
+            <if test="CONTENT != null and CONTENT != ''">
+                CONTENT,
+            </if>
+            <if test="QXTYJ_DATE != null and QXTYJ_DATE != ''">
+                QXTYJ_DATE,
+            </if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="YJD_NUMBER != null and YJD_NUMBER != ''">
+                #{YJD_NUMBER},
+            </if>
+            <if test="START_TIME != null and START_TIME != ''">
+                #{START_TIME},
+            </if>
+            <if test="SIGNAL_STAGE != null and SIGNAL_STAGE != ''">
+                #{SIGNAL_STAGE},
+            </if>
+            <if test="SIGNAL_LEVEL != null and SIGNAL_LEVEL != ''">
+                #{SIGNAL_LEVEL},
+            </if>
+            <if test="SIGNAL_CATEGORY != null and SIGNAL_CATEGORY != ''">
+                #{SIGNAL_CATEGORY},
+            </if>
+            <if test="EARLY_WARNING_NUM != null">
+                #{EARLY_WARNING_NUM},
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                #{TITLE},
+            </if>
+            <if test="CONTENT != null and CONTENT != ''">
+                #{CONTENT},
+            </if>
+            <if test="QXTYJ_DATE != null and QXTYJ_DATE != ''">
+                #{QXTYJ_DATE},
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 更新单条记录 -->
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.EmergencyResponseInfoPojo">
+        UPDATE EMERGENCY_RESPONSE_INFO
+        <set>
+            <if test="YJD_NUMBER != null and YJD_NUMBER != ''">
+                YJD_NUMBER = #{YJD_NUMBER},
+            </if>
+            <if test="START_TIME != null and START_TIME != ''">
+                START_TIME = #{START_TIME},
+            </if>
+            <if test="SIGNAL_STAGE != null and SIGNAL_STAGE != ''">
+                SIGNAL_STAGE = #{SIGNAL_STAGE},
+            </if>
+            <if test="SIGNAL_LEVEL != null and SIGNAL_LEVEL != ''">
+                SIGNAL_LEVEL = #{SIGNAL_LEVEL},
+            </if>
+            <if test="SIGNAL_CATEGORY != null and SIGNAL_CATEGORY != ''">
+                SIGNAL_CATEGORY = #{SIGNAL_CATEGORY},
+            </if>
+            <if test="EARLY_WARNING_NUM != null">
+                EARLY_WARNING_NUM = #{EARLY_WARNING_NUM},
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                TITLE = #{TITLE},
+            </if>
+            <if test="CONTENT != null and CONTENT != ''">
+                CONTENT = #{CONTENT},
+            </if>
+            <if test="QXTYJ_DATE != null and QXTYJ_DATE != ''">
+                QXTYJ_DATE = #{QXTYJ_DATE},
+            </if>
+        </set>
+        WHERE ID = #{ID}
+    </update>
+
+    <!-- 删除单条记录 -->
+    <delete id="deleteOne">
+        DELETE FROM EMERGENCY_RESPONSE_INFO WHERE ID = #{ID}
+    </delete>
+
+    <select id="selectByTMNew" resultType="swzzmodeserver.workserver.pojo.swzzdata.EmergencyResponseInfoPojo">
+        select Max(START_TIME) YBTM from EMERGENCY_RESPONSE_INFO
+         <where>
+            <!-- 响应时间范围 (START_TIME) -->
+            <if test="stime != null and stime != ''">
+                <![CDATA[ 
+                    AND START_TIME >= #{stime} 
+                ]]>
+            </if>
+            
+            <!-- 气象预警时间范围 (QXTYJ_DATE) -->
+            <if test="etime != null and etime != ''">
+                <![CDATA[ 
+                    AND QXTYJ_DATE <= #{etime} 
+                ]]>
+            </if>
+        </where>
+    </select>
+
+      <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzdata.EmergencyResponseInfoPojo">
+        insert into EMERGENCY_RESPONSE_INFO( ID, YJD_NUMBER, START_TIME, SIGNAL_STAGE, SIGNAL_LEVEL, 
+            SIGNAL_CATEGORY, EARLY_WARNING_NUM, TITLE, CONTENT, QXTYJ_DATE ) values
+        <foreach collection="quPojo" item="pojo" separator=",">
+            (#{pojo.ID},#{pojo.YJD_NUMBER},#{pojo.START_TIME},#{pojo.SIGNAL_STAGE},#{pojo.SIGNAL_LEVEL},
+            #{pojo.SIGNAL_CATEGORY},#{pojo.EARLY_WARNING_NUM},#{pojo.TITLE},#{pojo.CONTENT},#{pojo.QXTYJ_DATE})
+        </foreach>
+    </insert>
+</mapper>

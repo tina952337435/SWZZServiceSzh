@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.zjtyphoon.ZJ_TFPICData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_TFPICPojo">
+        select A.* from ZJ_TFPIC A
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZJ_ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                ZJ_CONTENT like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and ZJ_DATE >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and ZJ_DATE <= #{etime} ]]>
+            </if>
+<!--            <if test="type != null">-->
+<!--                and GROUPID in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM ZJ_TFPIC
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZJ_ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                ZJ_CONTENT like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and ZJ_DATE >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and ZJ_DATE <= #{etime} ]]>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_LANDPojo">
+        insert into ZJ_TFPIC
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZJ_ID != null ">
+                ZJ_ID,
+            </if>
+            <if test="ZJ_PIC != null and ZJ_PIC != ''">
+                ZJ_PIC,
+            </if>
+            <if test="ZJ_TYPE != null and ZJ_TYPE != ''">
+                ZJ_TYPE,
+            </if>
+            <if test="ZJ_DATE != null and ZJ_DATE != ''">
+                ZJ_DATE,
+            </if>
+            <if test="ZJ_CONTENT != null and ZJ_CONTENT != ''">
+                ZJ_CONTENT,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZJ_ID != null ">
+                #{ZJ_ID},
+            </if>
+            <if test="ZJ_PIC != null and ZJ_PIC != ''">
+                #{ZJ_PIC},
+            </if>
+            <if test="ZJ_TYPE != null and ZJ_TYPE != ''">
+                #{ZJ_TYPE},
+            </if>
+            <if test="ZJ_DATE != null and ZJ_DATE != ''">
+                #{ZJ_DATE},
+            </if>
+            <if test="ZJ_CONTENT != null and ZJ_CONTENT != ''">
+                #{ZJ_CONTENT},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_LANDPojo">
+        update ZJ_TFPIC
+        <set>
+            <if test="ZJ_PIC != null and ZJ_PIC != ''">
+                ZJ_PIC = #{ZJ_PIC},
+            </if>
+            <if test="ZJ_TYPE != null and ZJ_TYPE != ''">
+                ZJ_TYPE = #{ZJ_TYPE},
+            </if>
+            <if test="ZJ_DATE != null and ZJ_DATE != ''">
+                ZJ_DATE = #{ZJ_DATE},
+            </if>
+            <if test="ZJ_CONTENT != null and ZJ_CONTENT != ''">
+                ZJ_CONTENT = #{ZJ_CONTENT},
+            </if>
+        </set>
+        where ZJ_ID = #{ZJ_ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ZJ_TFPIC where ZJ_ID = #{ID}
+    </delete>
+
+    <insert id="insertALL" parameterType="list">
+        insert into ZJ_TFPIC
+        (
+        ZJ_ID,
+        ZJ_PIC,
+        ZJ_TYPE,
+        ZJ_DATE,
+        ZJ_CONTENT
+        )
+        values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ZJ_ID},
+            #{obj.ZJ_PIC},
+            #{obj.ZJ_TYPE},
+            #{obj.ZJ_DATE},
+            #{obj.ZJ_CONTENT}
+            )
+        </foreach>
+    </insert>
+
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" item="obj" separator=";">
+            update ZJ_TFPIC
+            <set>
+                <if test="obj.ZJ_PIC != null and obj.ZJ_PIC != ''">
+                    ZJ_PIC = #{obj.ZJ_PIC},
+                </if>
+                <if test="obj.ZJ_TYPE != null and obj.ZJ_TYPE != ''">
+                    ZJ_TYPE = #{obj.ZJ_TYPE},
+                </if>
+                <if test="obj.ZJ_DATE != null and obj.ZJ_DATE != ''">
+                    ZJ_DATE = #{obj.ZJ_DATE},
+                </if>
+                <if test="obj.ZJ_CONTENT != null and obj.ZJ_CONTENT != ''">
+                    ZJ_CONTENT = #{obj.ZJ_CONTENT},
+                </if>
+            </set>
+            where ZJ_ID = #{obj.ZJ_ID}
+        </foreach>
+    </update>
+
+    <delete id="deleteALL">
+        delete from ZJ_TFPIC where ZJ_ID in
+        <foreach collection="objList" open="(" close=")" item="obj" separator=",">
+            #{obj.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzdata.SmsData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzdata.SmsPojo">
+        select a.* from "sms" a
+        <where>
+
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                SENDER like concat('%',concat(#{key},'%'))
+                or ACCEPTER like concat('%',concat(#{key},'%'))
+                or CONTENT like concat('%',concat(#{key},'%'))
+                or TYPEID like concat('%',concat(#{key},'%'))
+                or FLAG like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TIME >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TIME <= #{etime} ]]>
+            </if>
+<!--            <if test="type != null">-->
+<!--                and GROUPID in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM "sms"
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                SENDER like concat('%',concat(#{key},'%'))
+                or ACCEPTER like concat('%',concat(#{key},'%'))
+                or CONTENT like concat('%',concat(#{key},'%'))
+                or TYPEID like concat('%',concat(#{key},'%'))
+                or FLAG like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TIME >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TIME <= #{etime} ]]>
+            </if>
+            <!--            <if test="type != null">-->
+            <!--                and GROUPID in-->
+            <!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+            <!--                    #{item}-->
+            <!--                </foreach>-->
+            <!--            </if>-->
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.SmsPojo">
+        insert into "sms"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="SENDER != null and SENDER != ''">
+                SENDER,
+            </if>
+            <if test="MOBILE != null and MOBILE != ''">
+                MOBILE,
+            </if>
+            <if test="ACCEPTER != null and ACCEPTER != ''">
+                ACCEPTER,
+            </if>
+            <if test="PHONE != null and PHONE != ''">
+                PHONE,
+            </if>
+            <if test="CONTENT != null and CONTENT != ''">
+                CONTENT,
+            </if>
+            <if test="TIME != null and TIME != ''">
+                TIME,
+            </if>
+            <if test="TYPEID != null and TYPEID != ''">
+                TYPEID,
+            </if>
+            <if test="FLAG != null and FLAG != ''">
+                FLAG,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="SENDER != null and SENDER != ''">
+                #{SENDER},
+            </if>
+            <if test="MOBILE != null and MOBILE != ''">
+                #{MOBILE},
+            </if>
+            <if test="ACCEPTER != null and ACCEPTER != ''">
+                #{ACCEPTER},
+            </if>
+            <if test="PHONE != null and PHONE != ''">
+                #{PHONE},
+            </if>
+            <if test="CONTENT != null and CONTENT != ''">
+                #{CONTENT},
+            </if>
+            <if test="TIME != null and TIME != ''">
+                #{TIME},
+            </if>
+            <if test="TYPEID != null and TYPEID != ''">
+                #{TYPEID},
+            </if>
+            <if test="FLAG != null and FLAG != ''">
+                #{FLAG},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.SmsPojo">
+        update "sms"
+        <set>
+            <if test="SENDER != null and SENDER != ''">
+                SENDER = #{SENDER},
+            </if>
+            <if test="MOBILE != null and MOBILE != ''">
+                MOBILE = #{MOBILE},
+            </if>
+            <if test="ACCEPTER != null and ACCEPTER != ''">
+                ACCEPTER = #{ACCEPTER},
+            </if>
+            <if test="PHONE != null and PHONE != ''">
+                PHONE = #{PHONE},
+            </if>
+            <if test="CONTENT != null and CONTENT != ''">
+                CONTENT = #{CONTENT},
+            </if>
+            <if test="TIME != null and TIME != ''">
+                TIME = #{TIME},
+            </if>
+            <if test="TYPEID != null and TYPEID != ''">
+                TYPEID = #{TYPEID},
+            </if>
+            <if test="FLAG != null and FLAG != ''">
+                FLAG = #{FLAG},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from "sms" where ID = #{ID}
+    </delete>
+</mapper>

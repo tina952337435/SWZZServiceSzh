@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.St_AstronomicalTide_BData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.St_AstronomicalTide_BPojo">
+        select a.* from "st_AstronomicalTide_B" a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZHANID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and ZHANNAMEA like concat('%',concat(#{key},'%'))
+                or ZHANNAMEB like concat('%',concat(#{key},'%'))
+                or ZHANNAMEC like concat('%',concat(#{key},'%'))
+            </if>
+
+<!--            <if test="stime != null and stime != ''">-->
+<!--                <![CDATA[ and STARTDATE >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>-->
+<!--            </if>-->
+<!--            <if test="etime != null and etime != ''">-->
+<!--                <![CDATA[ and STARTDATE <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>-->
+<!--            </if>-->
+<!--            <if test="type != null and type.size() > 0">-->
+<!--                and SEASONTYPE in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM "st_AstronomicalTide_B"
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZHANID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and ZHANNAMEA like concat('%',concat(#{key},'%'))
+                or ZHANNAMEB like concat('%',concat(#{key},'%'))
+                or ZHANNAMEC like concat('%',concat(#{key},'%'))
+            </if>
+            <!--            <if test="stime != null and stime != ''">-->
+            <!--                <![CDATA[ and STARTDATE >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>-->
+            <!--            </if>-->
+            <!--            <if test="etime != null and etime != ''">-->
+            <!--                <![CDATA[ and STARTDATE <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>-->
+            <!--            </if>-->
+            <!--            <if test="type != null and type.size() > 0">-->
+            <!--                and SEASONTYPE in-->
+            <!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+            <!--                    #{item}-->
+            <!--                </foreach>-->
+            <!--            </if>-->
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.St_AstronomicalTide_BPojo">
+        insert into "st_AstronomicalTide_B"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID,
+            </if>
+            <if test="ZHANIDA != null and ZHANIDA != ''">
+                ZHANIDA,
+            </if>
+            <if test="ZHANIDB != null and ZHANIDB != ''">
+                ZHANIDB,
+            </if>
+            <if test="ZHANIDC != null and ZHANIDC != ''">
+                ZHANIDC,
+            </if>
+            <if test="XSA != null">
+                XSA,
+            </if>
+            <if test="XSB != null">
+                XSB,
+            </if>
+            <if test="XSC != null">
+                XSC,
+            </if>
+            <if test="ZHANNAMEA != null and ZHANNAMEA != ''">
+                ZHANNAMEA,
+            </if>
+            <if test="ZHANNAMEB != null and ZHANNAMEB != ''">
+                ZHANNAMEB,
+            </if>
+            <if test="ZHANNAMEC != null and ZHANNAMEC != ''">
+                ZHANNAMEC,
+            </if>
+            <if test="ISIN != null and ISIN != ''">
+                ISIN,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZHANID != null and ZHANID != ''">
+                #{ZHANID},
+            </if>
+            <if test="ZHANIDA != null and ZHANIDA != ''">
+                #{ZHANIDA},
+            </if>
+            <if test="ZHANIDB != null and ZHANIDB != ''">
+                #{ZHANIDB},
+            </if>
+            <if test="ZHANIDC != null and ZHANIDC != ''">
+                #{ZHANIDC},
+            </if>
+            <if test="XSA != null">
+                #{XSA},
+            </if>
+            <if test="XSB != null">
+                #{XSB},
+            </if>
+            <if test="XSC != null">
+                #{XSC},
+            </if>
+            <if test="ZHANNAMEA != null and ZHANNAMEA != ''">
+                #{ZHANNAMEA},
+            </if>
+            <if test="ZHANNAMEB != null and ZHANNAMEB != ''">
+                #{ZHANNAMEB},
+            </if>
+            <if test="ZHANNAMEC != null and ZHANNAMEC != ''">
+                #{ZHANNAMEC},
+            </if>
+            <if test="ISIN != null and ISIN != ''">
+                #{ISIN},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.St_AstronomicalTide_BPojo">
+        update "st_AstronomicalTide_B"
+        <set>
+            <if test="ZHANIDA != null and ZHANIDA != ''">
+                ZHANIDA = #{ZHANIDA},
+            </if>
+            <if test="ZHANIDB != null and ZHANIDB != ''">
+                ZHANIDB = #{ZHANIDB},
+            </if>
+            <if test="ZHANIDC != null and ZHANIDC != ''">
+                ZHANIDC = #{ZHANIDC},
+            </if>
+            <if test="XSA != null">
+                XSA = #{XSA},
+            </if>
+            <if test="XSB != null">
+                XSB = #{XSB},
+            </if>
+            <if test="XSC != null">
+                XSC = #{XSC},
+            </if>
+            <if test="ZHANNAMEA != null and ZHANNAMEA != ''">
+                ZHANNAMEA = #{ZHANNAMEA},
+            </if>
+            <if test="ZHANNAMEB != null and ZHANNAMEB != ''">
+                ZHANNAMEB = #{ZHANNAMEB},
+            </if>
+            <if test="ZHANNAMEC != null and ZHANNAMEC != ''">
+                ZHANNAMEC = #{ZHANNAMEC},
+            </if>
+            <if test="ISIN != null and ISIN != ''">
+                ISIN = #{ISIN},
+            </if>
+        </set>
+        where ZHANID = #{ZHANID}
+    </update>
+    <delete id="deleteOne">
+        delete from "st_AstronomicalTide_B" where ZHANID = #{ID}
+    </delete>
+</mapper>

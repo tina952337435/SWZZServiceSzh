@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzdata.Qx_mainData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzdata.Qx_mainPojo">
+        select a.* from "qx_main" a
+        <where>
+            <if test="ID != null and ID != ''">
+                and QX_ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                    QX_NAME like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="QX_SYS != null and QX_SYS != ''">
+                and QX_SYS like concat('%',concat(#{QX_SYS},'%'))
+            </if>
+
+            <if test="type != null and type != ''">
+                and QX_MENU  like concat('%',concat(#{type},'%'))
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+        order by QX_ORDERID asc
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM "qx_main"
+        <where>
+            <if test="ID != null and ID != ''">
+                and QX_ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                     QX_NAME like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="QX_SYS != null and QX_SYS != ''">
+                and QX_MENU like concat('%',concat(#{QX_SYS},'%'))
+            </if>
+            <if test="type != null and type != ''">
+                and QX_MENU  like concat('%',concat(#{type},'%'))
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.Qx_mainPojo">
+        insert into "qx_main"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="QX_ID != null and QX_ID != ''">
+                QX_ID,
+            </if>
+            <if test="QX_PARENT != null and QX_PARENT != ''">
+                QX_PARENT,
+            </if>
+            <if test="QX_NAME != null and QX_NAME != ''">
+                QX_NAME,
+            </if>
+            <if test="QX_MENU != null and QX_MENU != ''">
+                QX_MENU,
+            </if>
+            <if test="QX_URL != null and QX_URL != ''">
+                QX_URL,
+            </if>
+            <if test="QX_ORDERID != null">
+                QX_ORDERID,
+            </if>
+            <if test="QX_SYS != null and QX_SYS != ''">
+                QX_SYS,
+            </if>
+            <if test="QX_ICON != null and QX_ICON != ''">
+                QX_ICON,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="QX_ID != null and QX_ID != ''">
+                #{QX_ID},
+            </if>
+            <if test="QX_PARENT != null and QX_PARENT != ''">
+                #{QX_PARENT},
+            </if>
+            <if test="QX_NAME != null and QX_NAME != ''">
+                #{QX_NAME},
+            </if>
+            <if test="QX_MENU != null and QX_MENU != ''">
+                #{QX_MENU},
+            </if>
+            <if test="QX_URL != null and QX_URL != ''">
+                #{QX_URL},
+            </if>
+            <if test="QX_ORDERID != null">
+                #{QX_ORDERID},
+            </if>
+            <if test="QX_SYS != null and QX_SYS != ''">
+                #{QX_SYS},
+            </if>
+            <if test="QX_ICON != null and QX_ICON != ''">
+                #{QX_ICON},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.Qx_mainPojo">
+        update "qx_main"
+        <set>
+            <if test="QX_PARENT != null and QX_PARENT != ''">
+                QX_PARENT = #{QX_PARENT},
+            </if>
+            <if test="QX_NAME != null and QX_NAME != ''">
+                QX_NAME = #{QX_NAME},
+            </if>
+            <if test="QX_MENU != null and QX_MENU != ''">
+                QX_MENU = #{QX_MENU},
+            </if>
+            <if test="QX_URL != null and QX_URL != ''">
+                QX_URL = #{QX_URL},
+            </if>
+            <if test="QX_ORDERID != null">
+                QX_ORDERID = #{QX_ORDERID},
+            </if>
+            <if test="QX_SYS != null and QX_SYS != ''">
+                QX_SYS = #{QX_SYS},
+            </if>
+            <if test="QX_ICON != null and QX_ICON != ''">
+                QX_ICON = #{QX_ICON},
+            </if>
+        </set>
+        where QX_ID = #{QX_ID}
+    </update>
+    <delete id="deleteOne">
+        delete from "qx_main" where QX_ID = #{ID}
+    </delete>
+</mapper>

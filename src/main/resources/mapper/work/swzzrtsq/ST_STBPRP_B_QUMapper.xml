@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.ST_STBPRP_B_QUData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_B_QUPojo">
+        select qu.* from ST_STBPRP_B_QU as qu left join ST_STBPRP_B as B on qu.STCD = B.STCD
+        <where>
+            <if test="STCD != null and STCD != ''">
+                and qu.STCD = #{STCD}
+            </if>
+            <if test="STNM != null and STNM != ''">
+                and qu.STNM like concat('%',concat(#{STNM},'%'))
+            </if>
+            <if test="STTPList != null and STTPList.size() > 0">
+                and qu.STTP in
+                <foreach collection="STTPList" open="(" close=")" item="STTP" separator=",">
+                    #{STTP}
+                </foreach>
+            </if>
+            <if test="PID != null and PID != ''">
+                and qu.PID = #{PID}
+            </if>
+            <if test="ADMAUTH != null and ADMAUTH != ''">
+                and ADMAUTH like concat('%',concat(#{ADMAUTH},'%'))
+            </if>
+        </where>
+        order by qu.ORDERBYID
+    </select>
+    <select id="queryList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_B_QUPojo">
+        select qu.* from ST_STBPRP_B_QU as qu
+        <where>
+            <if test="STCD != null and STCD != ''">
+                and qu.STCD = #{STCD}
+            </if>
+            <if test="STNM != null and STNM != ''">
+                and qu.STNM like concat('%',concat(#{STNM},'%'))
+            </if>
+            <if test="STTPList != null and STTPList.size() > 0">
+                and qu.STTP in
+                <foreach collection="STTPList" open="(" close=")" item="STTP" separator=",">
+                    #{STTP}
+                </foreach>
+            </if>
+            <if test="PIDList != null and PIDList.size() > 0">
+                and qu.PID in
+                <foreach collection="PIDList" open="(" close=")" item="PID" separator=",">
+                    #{PID}
+                </foreach>
+            </if>
+        </where>
+        order by qu.ORDERBYID
+    </select>
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_B_QUPojo">
+        insert into ST_STBPRP_B_QU
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="STNM != null and STNM != ''">
+                STNM,
+            </if>
+            <if test="STTP != null and STTP != ''">
+                STTP,
+            </if>
+            <if test="PID != null and PID != ''">
+                PID,
+            </if>
+            <if test="ORDERBYID != null">
+                ORDERBYID,
+            </if>
+            <if test="MAPSIZE != null">
+                MAPSIZE,
+            </if>
+            <if test="DIR != null">
+                DIR,
+            </if>
+            <if test="ROTATE != null">
+                ROTATE,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="STNM != null and STNM != ''">
+                #{STNM},
+            </if>
+            <if test="STTP != null and STTP != ''">
+                #{STTP},
+            </if>
+            <if test="PID != null and PID != ''">
+                #{PID},
+            </if>
+            <if test="ORDERBYID != null">
+                #{ORDERBYID},
+            </if>
+            <if test="MAPSIZE != null">
+                #{MAPSIZE},
+            </if>
+            <if test="DIR != null">
+                #{DIR},
+            </if>
+            <if test="ROTATE != null">
+                #{ROTATE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="list">
+        insert into ST_STBPRP_B_QU
+        (ID,STCD,STNM,STTP,PID,ORDERBYID,MAPSIZE,DIR,ROTATE) values
+        <foreach collection="quPojos" item="quPojo" separator=",">
+            (#{quPojo.ID},#{quPojo.STCD},#{quPojo.STNM},#{quPojo.STTP},#{quPojo.PID},#{quPojo.ORDERBYID},#{quPojo.MAPSIZE},#{quPojo.DIR},#{quPojo.ROTATE})
+        </foreach>
+    </insert>
+    <update id="upDateOne" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_B_QUPojo">
+        update ST_STBPRP_B_QU
+        <set>
+            <if test="ID != null and ID != ''">
+                ID = #{ID},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="STNM != null and STNM != ''">
+                STNM = #{STNM},
+            </if>
+            <if test="STTP != null and STTP != ''">
+                STTP = #{STTP},
+            </if>
+            <if test="PID != null and PID != ''">
+                PID = #{PID},
+            </if>
+            <if test="ORDERBYID != null">
+                ORDERBYID = #{ORDERBYID},
+            </if>
+            <if test="MAPSIZE != null">
+                MAPSIZE = #{MAPSIZE},
+            </if>
+            <if test="DIR != null">
+                DIR = #{DIR},
+            </if>
+            <if test="ROTATE != null">
+                ROTATE = #{ROTATE},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ST_STBPRP_B_QU where ID = #{ID}
+    </delete>
+    <select id="selectQUAndRPBList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_B_QUDto">
+        select A.*,B.LGTD,B.LTTD from ST_STBPRP_B_QU as A left join ST_STBPRP_B as B on A.STCD = B.STCD
+        <where>
+            <if test="PID != null and PID != ''">
+                and A.PID = #{PID}
+            </if>
+        </where>
+        order by A.ORDERBYID desc
+    </select>
+
+</mapper>

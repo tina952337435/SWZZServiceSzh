@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.ZhuantiData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.ZhuantiPojo">
+        select * from "zhuanti"
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0 ">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectZhuanTiList" resultType="swzzmodeserver.workserver.pojo.swzzflood.ZhuantiPojo">
+        select * from "zhuanti"
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0 ">
+                and ID in
+                <foreach collection="stcdList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="ddwj != null and ddwj != ''">
+                and DDWJ = #{ddwj}
+            </if>
+        </where>
+     order by STATUS desc
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ZhuantiPojo">
+        insert into "zhuanti"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                TITLE,
+            </if>
+            <if test="OWEN != null and OWEN != ''">
+                OWEN,
+            </if>
+            <if test="STATUS != null and STATUS != ''">
+                STATUS,
+            </if>
+            <if test="CREATE_TM != null and CREATE_TM != ''">
+                CREATE_TM,
+            </if>
+            <if test="FD_TM != null and FD_TM != ''">
+                FD_TM,
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE,
+            </if>
+            <if test="TITLE2 != null and TITLE2 != ''">
+                TITLE2,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="ADDRESS != null and ADDRESS != ''">
+                ADDRESS,
+            </if>
+            <if test="BUMEN != null and BUMEN != ''">
+                BUMEN,
+            </if>
+            <if test="SHIJIAN != null and SHIJIAN != ''">
+                SHIJIAN,
+            </if>
+            <if test="STM != null and STM != ''">
+                STM,
+            </if>
+            <if test="ETM != null and ETM != ''">
+                ETM,
+            </if>
+            <if test="SHENHE != null and SHENHE != ''">
+                SHENHE,
+            </if>
+            <if test="PIZHUN != null and PIZHUN != ''">
+                PIZHUN,
+            </if>
+            <if test="ZONGSHU != null and ZONGSHU != ''">
+                ZONGSHU,
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="GCDD != null and GCDD != ''">
+                GCDD,
+            </if>
+            <if test="FXKHJB != null and FXKHJB != ''">
+                FXKHJB,
+            </if>
+            <if test="NBCZDB != null and NBCZDB != ''">
+                NBCZDB,
+            </if>
+            <if test="DHTZD != null and DHTZD != ''">
+                DHTZD,
+            </if>
+            <if test="DDWJ != null and DDWJ != ''">
+                DDWJ,
+            </if>
+            <if test="FAYA != null and FAYA != ''">
+                FAYA,
+            </if>
+            <if test="MTLISTID != null and MTLISTID != ''">
+                MTLISTID,
+            </if>
+            <if test="TQ != null and TQ != ''">
+                TQ,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                #{TITLE},
+            </if>
+            <if test="OWEN != null and OWEN != ''">
+                #{OWEN},
+            </if>
+            <if test="STATUS != null and STATUS != ''">
+                #{STATUS},
+            </if>
+            <if test="CREATE_TM != null and CREATE_TM != ''">
+                #{CREATE_TM},
+            </if>
+            <if test="FD_TM != null and FD_TM != ''">
+                #{FD_TM},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                #{NOTE},
+            </if>
+            <if test="TITLE2 != null and TITLE2 != ''">
+                #{TITLE2},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="ADDRESS != null and ADDRESS != ''">
+                #{ADDRESS},
+            </if>
+            <if test="BUMEN != null and BUMEN != ''">
+                #{BUMEN},
+            </if>
+            <if test="SHIJIAN != null and SHIJIAN != ''">
+                #{SHIJIAN},
+            </if>
+            <if test="STM != null and STM != ''">
+                #{STM},
+            </if>
+            <if test="ETM != null and ETM != ''">
+                #{ETM},
+            </if>
+            <if test="SHENHE != null and SHENHE != ''">
+                #{SHENHE},
+            </if>
+            <if test="PIZHUN != null and PIZHUN != ''">
+                #{PIZHUN},
+            </if>
+            <if test="ZONGSHU != null and ZONGSHU != ''">
+                #{ZONGSHU},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="GCDD != null and GCDD != ''">
+                #{GCDD},
+            </if>
+            <if test="FXKHJB != null and FXKHJB != ''">
+                #{FXKHJB},
+            </if>
+            <if test="NBCZDB != null and NBCZDB != ''">
+                #{NBCZDB},
+            </if>
+            <if test="DHTZD != null and DHTZD != ''">
+                #{DHTZD},
+            </if>
+            <if test="DDWJ != null and DDWJ != ''">
+                #{DDWJ},
+            </if>
+            <if test="FAYA != null and FAYA != ''">
+                #{FAYA},
+            </if>
+            <if test="MTLISTID != null and MTLISTID != ''">
+                #{MTLISTID},
+            </if>
+            <if test="TQ != null and TQ != ''">
+                #{TQ},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="upDateOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ZhuantiPojo">
+        update "zhuanti"
+        <set>
+            <if test="TITLE != null and TITLE != ''">
+                TITLE = #{TITLE},
+            </if>
+            <if test="OWEN != null and OWEN != ''">
+                OWEN = #{OWEN},
+            </if>
+            <if test="STATUS != null and STATUS != ''">
+                STATUS = #{STATUS},
+            </if>
+            <if test="CREATE_TM != null and CREATE_TM != ''">
+                CREATE_TM = #{CREATE_TM},
+            </if>
+            <if test="FD_TM != null and FD_TM != ''">
+                FD_TM = #{FD_TM},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE = #{NOTE},
+            </if>
+            <if test="TITLE2 != null and TITLE2 != ''">
+                TITLE2 = #{TITLE2},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+            <if test="ADDRESS != null and ADDRESS != ''">
+                ADDRESS = #{ADDRESS},
+            </if>
+            <if test="BUMEN != null and BUMEN != ''">
+                BUMEN = #{BUMEN},
+            </if>
+            <if test="SHIJIAN != null and SHIJIAN != ''">
+                SHIJIAN = #{SHIJIAN},
+            </if>
+            <if test="STM != null and STM != ''">
+                STM = #{STM},
+            </if>
+            <if test="ETM != null and ETM != ''">
+                ETM = #{ETM},
+            </if>
+            <if test="SHENHE != null and SHENHE != ''">
+                SHENHE = #{SHENHE},
+            </if>
+            <if test="PIZHUN != null and PIZHUN != ''">
+                PIZHUN = #{PIZHUN},
+            </if>
+            <if test="ZONGSHU != null and ZONGSHU != ''">
+                ZONGSHU = #{ZONGSHU},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="GCDD != null and GCDD != ''">
+                GCDD = #{GCDD},
+            </if>
+            <if test="FXKHJB != null and FXKHJB != ''">
+                FXKHJB = #{FXKHJB},
+            </if>
+            <if test="NBCZDB != null and NBCZDB != ''">
+                NBCZDB = #{NBCZDB},
+            </if>
+            <if test="DHTZD != null and DHTZD != ''">
+                DHTZD = #{DHTZD},
+            </if>
+            <if test="DDWJ != null and DDWJ != ''">
+                DDWJ = #{DDWJ},
+            </if>
+            <if test="FAYA != null and FAYA != ''">
+                FAYA = #{FAYA},
+            </if>
+            <if test="MTLISTID != null and MTLISTID != ''">
+                MTLISTID = #{MTLISTID},
+            </if>
+            <if test="TQ != null and TQ != ''">
+                TQ = #{TQ},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+
+    <delete id="deleteOne" parameterType="string">
+        delete from "zhuanti" where ID = #{id}
+    </delete>
+
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ZhuantiPojo">
+        insert into "zhuanti"
+        (
+            ID,
+            TITLE,
+            OWEN,
+            STATUS,
+            CREATE_TM,
+            FD_TM,
+            NOTE,
+            TITLE2,
+            TYPE,
+            ADDRESS,
+            BUMEN,
+            SHIJIAN,
+            STM,
+            ETM,
+            SHENHE,
+            PIZHUN,
+            ZONGSHU,
+            STCD,
+            GCDD,
+            FXKHJB,
+            NBCZDB,
+            DHTZD,
+            DDWJ,
+            FAYA,
+            MTLISTID,
+            TQ
+        )
+        values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ID},
+            #{obj.TITLE},
+            #{obj.OWEN},
+            #{obj.STATUS},
+            #{obj.CREATE_TM},
+            #{obj.FD_TM},
+            #{obj.NOTE},
+            #{obj.TITLE2},
+            #{obj.TYPE},
+            #{obj.ADDRESS},
+            #{obj.BUMEN},
+            #{obj.SHIJIAN},
+            #{obj.STM},
+            #{obj.ETM},
+            #{obj.SHENHE},
+            #{obj.PIZHUN},
+            #{obj.ZONGSHU},
+            #{obj.STCD},
+            #{obj.GCDD},
+            #{obj.FXKHJB},
+            #{obj.NBCZDB},
+            #{obj.DHTZD},
+            #{obj.DDWJ},
+            #{obj.FAYA},
+            #{obj.MTLISTID},
+            #{obj.TQ}
+            )
+        </foreach>
+    </insert>
+
+    <update id="upDateAll" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ZhuantiPojo">
+        <foreach collection="objList" item="obj" separator=";">
+            update "zhuanti"
+            <set>
+                <if test="obj.TITLE != null and obj.TITLE != ''">
+                    TITLE = #{obj.TITLE},
+                </if>
+                <if test="obj.OWEN != null and obj.OWEN != ''">
+                    OWEN = #{obj.OWEN},
+                </if>
+                <if test="obj.STATUS != null and obj.STATUS != ''">
+                    STATUS = #{obj.STATUS},
+                </if>
+                <if test="obj.CREATE_TM != null and obj.CREATE_TM != ''">
+                    CREATE_TM = #{obj.CREATE_TM},
+                </if>
+                <if test="obj.FD_TM != null and obj.FD_TM != ''">
+                    FD_TM = #{obj.FD_TM},
+                </if>
+                <if test="obj.NOTE != null and obj.NOTE != ''">
+                    NOTE = #{obj.NOTE},
+                </if>
+                <if test="obj.TITLE2 != null and obj.TITLE2 != ''">
+                    TITLE2 = #{obj.TITLE2},
+                </if>
+                <if test="obj.TYPE != null and obj.TYPE != ''">
+                    TYPE = #{obj.TYPE},
+                </if>
+                <if test="obj.ADDRESS != null and obj.ADDRESS != ''">
+                    ADDRESS = #{obj.ADDRESS},
+                </if>
+                <if test="obj.BUMEN != null and obj.BUMEN != ''">
+                    BUMEN = #{obj.BUMEN},
+                </if>
+                <if test="obj.SHIJIAN != null and obj.SHIJIAN != ''">
+                    SHIJIAN = #{obj.SHIJIAN},
+                </if>
+                <if test="obj.STM != null and obj.STM != ''">
+                    STM = #{obj.STM},
+                </if>
+                <if test="obj.ETM != null and obj.ETM != ''">
+                    ETM = #{obj.ETM},
+                </if>
+                <if test="obj.SHENHE != null and obj.SHENHE != ''">
+                    SHENHE = #{obj.SHENHE},
+                </if>
+                <if test="obj.PIZHUN != null and obj.PIZHUN != ''">
+                    PIZHUN = #{obj.PIZHUN},
+                </if>
+                <if test="obj.ZONGSHU != null and obj.ZONGSHU != ''">
+                    ZONGSHU = #{obj.ZONGSHU},
+                </if>
+                <if test="obj.STCD != null and obj.STCD != ''">
+                    STCD = #{obj.STCD},
+                </if>
+                <if test="obj.GCDD != null and obj.GCDD != ''">
+                    GCDD = #{obj.GCDD},
+                </if>
+                <if test="obj.FXKHJB != null and obj.FXKHJB != ''">
+                    FXKHJB = #{obj.FXKHJB},
+                </if>
+                <if test="obj.NBCZDB != null and obj.NBCZDB != ''">
+                    NBCZDB = #{obj.NBCZDB},
+                </if>
+                <if test="obj.DHTZD != null and obj.DHTZD != ''">
+                    DHTZD = #{obj.DHTZD},
+                </if>
+                <if test="obj.DDWJ != null and obj.DDWJ != ''">
+                    DDWJ = #{obj.DDWJ},
+                </if>
+                <if test="obj.FAYA != null and obj.FAYA != ''">
+                    FAYA = #{obj.FAYA},
+                </if>
+                <if test="obj.MTLISTID != null and obj.MTLISTID != ''">
+                    MTLISTID = #{obj.MTLISTID},
+                </if>
+                <if test="obj.TQ != null and obj.TQ != ''">
+                    TQ = #{obj.TQ},
+                </if>
+            </set>
+            where ID = #{obj.ID}
+        </foreach>
+    </update>
+
+    <delete id="deleteAll" parameterType="list">
+        delete from "zhuanti" where ID in
+        <foreach collection="stcdList" open="(" close=")" item="id" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

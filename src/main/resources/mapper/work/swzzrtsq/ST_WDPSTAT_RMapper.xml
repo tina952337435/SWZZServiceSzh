@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.ST_WDPSTAT_RData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WDPSTAT_RPojo">
+        select * from ST_WDPSTAT_R
+        <where>
+            <if test="idList != null and idList.size() > 0">
+                and STCD in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and IDTM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and IDTM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+    </select>
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WDPSTAT_RPojo">
+        insert into ST_WDPSTAT_R
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="IDTM != null and IDTM != ''">
+                IDTM,
+            </if>
+            <if test="STTDRCD != null and STTDRCD != ''">
+                STTDRCD,
+            </if>
+            <if test="PPTMS != null">
+                PPTMS,
+            </if>
+            <if test="ACCPW != null">
+                ACCPW,
+            </if>
+            <if test="PPHRS != null">
+                PPHRS,
+            </if>
+            <if test="DRNTMS != null">
+                DRNTMS,
+            </if>
+            <if test="ACCDW != null">
+                ACCDW,
+            </if>
+            <if test="DRNHRS != null">
+                DRNHRS,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="IDTM != null and IDTM != ''">
+                #{IDTM},
+            </if>
+            <if test="STTDRCD != null and STTDRCD != ''">
+                #{STTDRCD},
+            </if>
+            <if test="PPTMS != null">
+                #{PPTMS},
+            </if>
+            <if test="ACCPW != null">
+                #{ACCPW},
+            </if>
+            <if test="PPHRS != null">
+                #{PPHRS},
+            </if>
+            <if test="DRNTMS != null">
+                #{DRNTMS},
+            </if>
+            <if test="ACCDW != null">
+                #{ACCDW},
+            </if>
+            <if test="DRNHRS != null">
+                #{DRNHRS},
+            </if>
+        </trim>
+    </insert>
+    <update id="upDateOne" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WDPSTAT_RPojo">
+        update ST_WDPSTAT_R
+        <set>
+<!--            <if test="STCD != null and STCD != ''">-->
+<!--                #{STCD},-->
+<!--            </if>-->
+            <if test="IDTM != null and IDTM != ''">
+                IDTM = #{IDTM},
+            </if>
+            <if test="STTDRCD != null and STTDRCD != ''">
+                STTDRCD = #{STTDRCD},
+            </if>
+            <if test="PPTMS != null">
+                PPTMS = #{PPTMS},
+            </if>
+            <if test="ACCPW != null">
+                ACCPW = #{ACCPW},
+            </if>
+            <if test="PPHRS != null">
+                PPHRS = #{PPHRS},
+            </if>
+            <if test="DRNTMS != null">
+                DRNTMS = #{DRNTMS},
+            </if>
+            <if test="ACCDW != null">
+                ACCDW = #{ACCDW},
+            </if>
+            <if test="DRNHRS != null">
+                DRNHRS = #{DRNHRS},
+            </if>
+        </set>
+        where STCD = #{STCD}
+    </update>
+    <delete id="deleteOne">
+        delete from ST_WDPSTAT_R where STCD = #{STCD}
+    </delete>
+    <select id="selectWdpstatRBXList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WDPSTAT_RPojo">
+        select stcd,to_char(idtm-1,'yyyy-MM-dd HH24:MI:SS') idtm,ACCPW,PPHRS,ACCDW,DRNHRS from ST_WDPSTAT_BX_RLIST
+        <where>
+            sttdrcd='1'
+            <if test="idList != null and idList.size() > 0">
+                and STCD in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and to_char(idtm-1,'YYYY-MM-DD HH24:MI:SS')>=#{stime}]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and to_char(idtm-1,'yyyy-MM-dd HH24:MI:SS')<=#{etime} ]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectWdpstatRList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WDPSTAT_RPojo">
+        /*
+        select stcd,to_char(idtm-1,'yyyy-MM-dd HH24:MI:SS') idtm,STTDRCD,PPTMS,ACCPW,PPHRS,DRNTMS,ACCDW,DRNHRS from ST_WDPSTAT_BX_RLIST
+        */
+        select stcd,to_char(idtm-1,'yyyy-MM-dd HH24:MI:SS') idtm,ACCPW,PPHRS,ACCDW,DRNHRS from ST_WDPSTAT_BX_RLIST
+        <where>
+            sttdrcd='1'
+            <if test="idList != null and idList.size() > 0">
+                and STCD in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and to_char(idtm-1,'YYYY-MM-DD HH24:MI:SS')>=#{stime}]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and to_char(idtm-1,'yyyy-MM-dd HH24:MI:SS')<=#{etime} ]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectGQDAYList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WDPSTAT_RPojo">
+        select stcd,count(*)*15*60*insflow/10000 ACCDW,to_char(TM,'YYYY-MM-DD') IDTM from "SZ_WATER"."ST_GATE_RLIST"
+        <where>
+            eqptp='泵站状态' and gtq=1
+            <if test="STIME!='' and STIME!=null">
+                and tm>=to_date(#{STIME},'YYYY-MM-DD HH24:MI:SS')
+            </if>
+            <if test="ETIME!='' and ETIME!=null">
+                <![CDATA[ and tm<=to_date(#{ETIME},'YYYY-MM-DD HH24:MI:SS')]]>
+            </if>
+            <if test="listSTCD != null and listSTCD.size() > 0 ">
+                and stcd in
+                <foreach collection="listSTCD" close=")" open="(" item="item" separator=",">
+                    '${item}'
+                </foreach>
+            </if>
+        </where>
+        group by stcd,to_char(TM,'YYYY-MM-DD')
+    </select>
+    <select id="selectGQHOURList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WDPSTAT_RPojo">
+        select stcd,count(*)*15*60*insflow/10000 ACCDW,to_char(TM,'YYYY-MM-DD HH')||':00:00' IDTM from "SZ_WATER"."ST_GATE_RLIST"
+        <where>
+            eqptp='泵站状态' and gtq=1
+            <if test="STIME!='' and STIME!=null">
+                and tm>=to_date(#{STIME},'YYYY-MM-DD HH24:MI:SS')
+            </if>
+            <if test="ETIME!='' and ETIME!=null">
+                <![CDATA[ and tm<=to_date(#{ETIME},'YYYY-MM-DD HH24:MI:SS')]]>
+            </if>
+            <if test="listSTCD != null and listSTCD.size() > 0 ">
+                and stcd in
+                <foreach collection="listSTCD" close=")" open="(" item="item" separator=",">
+                    '${item}'
+                </foreach>
+            </if>
+        </where>
+        group by stcd,to_char(TM,'YYYY-MM-DD HH')
+    </select>
+
+    <select id="INOUTWDPSTATDAYSel" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.INOUTWDPSTATPojo">
+        select * from INOUTWDPSTAT
+        <where>
+            <if test="STIME!='' and STIME!=null">
+                and tm>=to_date(#{STIME},'YYYY-MM-DD HH24:MI:SS')
+            </if>
+            <if test="ETIME!='' and ETIME!=null">
+                <![CDATA[ and tm<=to_date(#{ETIME},'YYYY-MM-DD HH24:MI:SS')]]>
+            </if>
+            <if test="listSTCD != null and listSTCD.size() > 0 ">
+                and stcd in
+                <foreach collection="listSTCD" close=")" open="(" item="item" separator=",">
+                    '${item}'
+                </foreach>
+            </if>
+            <if test="PATHNAME != null and PATHNAME !=''">
+                and PATHNAME  = #{PATHNAME}
+            </if>
+            <if test="RVNM != null and RVNM !=''">
+                and RVNM  = #{RVNM}
+            </if>
+        </where>
+        ORDER BY TM DESC
+    </select>
+
+
+</mapper>

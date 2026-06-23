@@ -1,0 +1,853 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.GetWaterViewNewData">
+    <select id="selectListByNew" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+       select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ from GetWaterViewNew as A inner join (
+       select STCD,MAX(TM) TM from GetWaterViewNew
+       <where>
+           <if test="stime != null and stime != ''">
+               <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+           </if>
+           <if test="etime != null and etime != ''">
+               <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+           </if>
+           <if test="stcdList != null and stcdList.size() > 0">
+               and STCD in
+               <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                   #{stcd}
+               </foreach>
+           </if>
+           <![CDATA[ and UPZ > 0 ]]>
+       </where>
+       group by STCD
+       ) as B on A.STCD = B.STCD and A.TM = B.TM
+       <where>
+           <if test="stcdList != null and stcdList.size() > 0">
+               and A.STCD in
+               <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                   #{stcd}
+               </foreach>
+           </if>
+           <if test="stime != null and stime != ''">
+               <![CDATA[ and A.TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+           </if>
+           <if test="etime != null and etime != ''">
+               <![CDATA[ and A.TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+           </if>
+       </where>
+    </select>
+
+    <select id="selectListByHisIsTime" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,LGTD,LTTD,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE,ADMAUTH,DTPR from GetWaterViewNew
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="dayhour!=null and dayhour!=''">
+                <if test="dayhour=='DAY'">
+                    AND to_CHAR(tm,'HH24:MI:SS')='08:00:00'
+                </if>
+                <if test="dayhour=='HOUR'">
+                    AND to_CHAR(tm,'MI:SS')='00:00'
+                </if>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM desc
+    </select>
+
+    <select id="selectListMinuteByRiver" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE,SLP from getWaterViewRiver
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+    <select id="selectListMinuteByWas" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE,SLP from getWaterViewWas
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+    <select id="selectListMinuteByTide" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE,SLP from getWaterViewTide
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+    <select id="selectListMinuteByPump" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE,SLP from getWaterViewPump
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+
+
+
+    <select id="selectListByHisIsHouse" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM from GetWaterViewNew
+        <where>
+            and RIGHT(TM,5) = '00:00'
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+    <select id="selectListHourByRiver" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE from getWaterViewRiver
+        <where>
+            and RIGHT(TM,5) = '00:00'
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+    <select id="selectListHourByWas" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE from getWaterViewWas
+        <where>
+            and RIGHT(TM,5) = '00:00'
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+    <select id="selectListHourByTide" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE from getWaterViewTide
+        <where>
+            and RIGHT(TM,5) = '00:00'
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+    <select id="selectListHourByPump" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE from getWaterViewPump
+        <where>
+            and RIGHT(TM,5) = '00:00'
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+
+
+    <select id="selectListByHisIsDay" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM from GetWaterViewNew
+        <where>
+            and RIGHT(TM,8) = '08:00:00'
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+    <select id="selectListDayByRiver" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE from getWaterViewRiver
+        <where>
+            and RIGHT(TM,8) = '08:00:00'
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+    <select id="selectListDayByWas" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE from getWaterViewWas
+        <where>
+            and RIGHT(TM,8) = '08:00:00'
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+    <select id="selectListDayByTide" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE from getWaterViewTide
+        <where>
+            and RIGHT(TM,8) = '08:00:00'
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+    <select id="selectListDayByPump" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select STCD,TM,UPZ,Q,DWZ,WRZ,GRZ,DKEL,CJ,IVHZ,IVHZTM,LAZ,STNM,RVNM,MTYPE from getWaterViewPump
+        <where>
+            and RIGHT(TM,8) = '08:00:00'
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+    </select>
+
+
+
+
+    <select id="selectListByRiver" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ from getWaterViewRiver as A inner join (
+        select STCD,MAX(TM) TM from getWaterViewRiver
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <![CDATA[ and UPZ > 0 ]]>
+        </where>
+        group by STCD
+        ) as B on A.STCD = B.STCD and A.TM = B.TM
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and A.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and A.TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and A.TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectListByWas" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ from getWaterViewWas as A inner join (
+        select STCD,MAX(TM) TM from getWaterViewWas
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <![CDATA[ and UPZ > 0 ]]>
+        </where>
+        group by STCD
+        ) as B on A.STCD = B.STCD and A.TM = B.TM
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and A.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and A.TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and A.TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectListByTide" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ from getWaterViewTide as A inner join (
+        select STCD,MAX(TM) TM from getWaterViewTide
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <![CDATA[ and UPZ > 0 ]]>
+        </where>
+        group by STCD
+        ) as B on A.STCD = B.STCD and A.TM = B.TM
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and A.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and A.TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and A.TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectListByPump" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ from getWaterViewPump as A inner join (
+        select STCD,MAX(TM) TM from getWaterViewPump
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <![CDATA[ and UPZ > 0 ]]>
+        </where>
+        group by STCD
+        ) as B on A.STCD = B.STCD and A.TM = B.TM
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and A.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and A.TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and A.TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectListByRiverAvgQ" resultType="java.util.Map">
+        SELECT stcd,MAX(Q) maxq,MIN(Q) minq,AVG(q) avgq FROM getWaterViewRiver
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        group by stcd
+    </select>
+
+
+    <select id="queryByRiver" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT from getWaterViewRiver as A
+        <where>
+            <if test="DAYHOUR!='' and DAYHOUR!=null">
+                <if test="DAYHOUR=='DAY'">
+                    and RIGHT(TM,8) = '08:00:00'
+                </if>
+                <if test="DAYHOUR=='HOUR'">
+                    and RIGHT(TM,5) = '00:00'
+                </if>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        order by tm desc
+    </select>
+    <select id="queryByWas" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT from getWaterViewWas as A
+        <where>
+            <if test="DAYHOUR!='' and DAYHOUR!=null">
+                <if test="DAYHOUR=='DAY'">
+                    and RIGHT(TM,8) = '08:00:00'
+                </if>
+                <if test="DAYHOUR=='HOUR'">
+                    and RIGHT(TM,5) = '00:00'
+                </if>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        order by tm desc
+    </select>
+    <select id="queryByTide" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT from getWaterViewTide as A
+        <where>
+            <if test="DAYHOUR!='' and DAYHOUR!=null">
+                <if test="DAYHOUR=='DAY'">
+                    and RIGHT(TM,8) = '08:00:00'
+                </if>
+                <if test="DAYHOUR=='HOUR'">
+                    and RIGHT(TM,5) = '00:00'
+                </if>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        order by tm desc
+    </select>
+    <select id="queryByPump" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT from getWaterViewPump as A
+        <where>
+            <if test="DAYHOUR!='' and DAYHOUR!=null">
+                <if test="DAYHOUR=='DAY'">
+                    and RIGHT(TM,8) = '08:00:00'
+                </if>
+                <if test="DAYHOUR=='HOUR'">
+                    and RIGHT(TM,5) = '00:00'
+                </if>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        order by tm desc
+    </select>
+    <select id="queryByFlow" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT from GETWATERVIEWFLOW as A
+        <where>
+            <if test="DAYHOUR!='' and DAYHOUR!=null">
+                <if test="DAYHOUR=='DAY'">
+                    and RIGHT(TM,8) = '08:00:00'
+                </if>
+                <if test="DAYHOUR=='HOUR'">
+                    and RIGHT(TM,5) = '00:00'
+                </if>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        order by tm desc
+    </select>
+
+<!--    <select id="querySingleStationWaterAnalysis" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.SingleStationWaterAnalysisPojo">-->
+<!--        select A.STCD,A.TM,STNM, CAST( CONVERT(varchar(100),DATEADD(HH,-8,TM), 23) as date) AS ymdhm,-->
+<!--        AVG(cast(UPZ as decimal(10,2))) Z,-->
+<!--        MAX(UPZ) MAX_Z,MIN(UPZ) MIN_Z,MAX(WRZ) WRZ,MAX(GRZ) GRZ from getWaterViewRiver as A-->
+<!--        <where>-->
+<!--            <if test="stime != null and stime != ''">-->
+<!--                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>-->
+<!--            </if>-->
+<!--            <if test="etime != null and etime != ''">-->
+<!--                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>-->
+<!--            </if>-->
+<!--            <if test="stcdList != null and stcdList.size() > 0">-->
+<!--                and STCD in-->
+<!--                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">-->
+<!--                    #{stcd}-->
+<!--                </foreach>-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        GROUP BY STCD, STNM, CONVERT(varchar(100), DATEADD(HH, -8, TM), 23)-->
+<!--        UNION ALL-->
+<!--        select A.STCD,A.TM,STNM, CAST( CONVERT(varchar(100),DATEADD(HH,-8,TM), 23) as date) AS ymdhm,-->
+<!--        AVG(cast(UPZ as decimal(10,2))) Z,-->
+<!--        MAX(UPZ) MAX_Z,MIN(UPZ) MIN_Z,MAX(WRZ) WRZ,MAX(GRZ) GRZ-->
+<!--        from getWaterViewWas as A-->
+<!--        <where>-->
+<!--            <if test="stime != null and stime != ''">-->
+<!--                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>-->
+<!--            </if>-->
+<!--            <if test="etime != null and etime != ''">-->
+<!--                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>-->
+<!--            </if>-->
+<!--            <if test="stcdList != null and stcdList.size() > 0">-->
+<!--                and STCD in-->
+<!--                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">-->
+<!--                    #{stcd}-->
+<!--                </foreach>-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        GROUP BY STCD, STNM, CONVERT(varchar(100), DATEADD(HH, -8, TM), 23)-->
+<!--        ORDER BY TM DESC-->
+<!--    </select>-->
+
+
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WAS_RPojo">
+        insert into ST_WAS_R(STCD,TM,UPZ,DWZ,TGTQ,SWCHRCD,SUPWPTN,SDWWPTN,MSQMT,INTM) values
+        <foreach collection="quPojo" item="pojo" separator=",">
+            (#{pojo.stcd},#{pojo.tm},#{pojo.upz},#{pojo.dwz},#{pojo.tgtq},#{pojo.swchrcd},#{pojo.supwptn},
+            #{pojo.sdwwptn},#{pojo.msqmt},#{pojo.intm})
+        </foreach>
+    </insert>
+
+    <update id="updatePLMAX" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_BPojo">
+        update ST_STBPRP_B b set intm=(select max(tm) from ST_WAS_R t where b.stcd=t.stcd)
+        where NT=#{NT}
+    </update>
+    <select id="querySUMPSL" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        SELECT STCD , to_date(to_char(TRUNC(TM - INTERVAL '8' HOUR - INTERVAL '1' MINUTE, 'DD'),'YYYY-MM-DD')||' 08:00:00','YYYY-MM-DD HH24:MI:SS') AS TM,
+        SUM(Q)*0.03 AS Q,MAX(STNM) STNM,MAX(LGTD) LGTD,MAX(LTTD) LTTD,MAX(MTYPE) MTYPE FROM GetWaterViewNew
+        <where>
+            Q is not null
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM > to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        GROUP BY
+        STCD,
+        TRUNC(TM - INTERVAL '8' HOUR - INTERVAL '1' MINUTE, 'DD')
+        ORDER BY
+        TM
+    </select>
+
+
+    <select id="selectListWaterAll" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
+        select * from WATER_ALL
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+        ORDER BY TM ASC
+
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+
+    <select id="selectListWaterAllCount" resultType="integer">
+        SELECT count(1) FROM WATER_ALL
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="mtype!=null and mtype!=''">
+                and mtype=#{mtype}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="selectHis" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_WAS_RPojo">
+        select STCD,UPZ,DWZ,TM from WATER_ALL
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        order by TM asc
+    </select>
+
+
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.ST_AREACWSTATION_BData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_AREACWSTATION_BPojo">
+        select * from ST_AREACWSTATION_B
+        <where>
+            <if test="CWID != null and CWID != ''">
+                and CWID = #{CWID}
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="PAID != null and PAID != ''">
+                and PAID = #{PAID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ST_AREACWSTATION_BPojo">
+        insert into ST_AREACWSTATION_B
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="CWID != null and CWID != ''">
+                CWID,
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="PAID != null and PAID != ''">
+                PAID,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="CWID != null and CWID != ''">
+                #{CWID},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="PAID != null and PAID != ''">
+                #{PAID},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ST_AREACWSTATION_BPojo">
+        update ST_AREACWSTATION_B
+        <set>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="PAID != null and PAID != ''">
+                PAID = #{PAID},
+            </if>
+        </set>
+        where CWID = #{CWID}
+    </update>
+
+    <delete id="deleteOne">
+        delete from ST_AREACWSTATION_B where CWID = #{CWID}
+    </delete>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(1) from ST_AREACWSTATION_B
+        <where>
+            <if test="CWID != null and CWID != ''">
+                and CWID = #{CWID}
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="PAID != null and PAID != ''">
+                and PAID = #{PAID}
+            </if>
+        </where>
+    </select>
+</mapper>

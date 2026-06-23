@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.PRO_WarningInfoData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.PRO_WarningInfoPojo">
+        select a.* from "PRO_WarningInfo" a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and CITYNAME like concat('%',concat(#{key},'%'))
+                or SEASONLEVEL like concat('%',concat(#{key},'%'))
+                or SEASONTYPE like concat('%',concat(#{key},'%'))
+                or OWEN like concat('%',concat(#{key},'%'))
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and STARTDATE >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and STARTDATE <= #{etime} ]]>
+            </if>
+            <if test="type != null and type.size() > 0">
+                and SEASONTYPE in
+                <foreach collection="type" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM "PRO_WarningInfo"
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and CITYNAME like concat('%',concat(#{key},'%'))
+                or SEASONLEVEL like concat('%',concat(#{key},'%'))
+                or SEASONTYPE like concat('%',concat(#{key},'%'))
+                or OWEN like concat('%',concat(#{key},'%'))
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and STARTDATE >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and STARTDATE <= #{etime} ]]>
+            </if>
+            <if test="type != null and type.size() > 0">
+                and SEASONTYPE in
+                <foreach collection="type" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.PRO_WarningInfoPojo">
+        insert into "PRO_WarningInfo"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="CITYID != null and CITYID != ''">
+                CITYID,
+            </if>
+            <if test="CITYNAME != null and CITYNAME != ''">
+                CITYNAME,
+            </if>
+            <if test="SEASONLEVEL != null and SEASONLEVEL != ''">
+                SEASONLEVEL,
+            </if>
+            <if test="STARTDATE != null and STARTDATE != ''">
+                STARTDATE,
+            </if>
+            <if test="ENDDATE != null and ENDDATE != ''">
+                ENDDATE,
+            </if>
+            <if test="STATE != null and STATE != ''">
+                STATE,
+            </if>
+            <if test="CREATETIME != null and CREATETIME != ''">
+                CREATETIME,
+            </if>
+            <if test="CREATEUSERID != null and CREATEUSERID != ''">
+                CREATEUSERID,
+            </if>
+            <if test="SEASONTYPE != null and SEASONTYPE != ''">
+                SEASONTYPE,
+            </if>
+            <if test="OWEN != null and OWEN != ''">
+                OWEN,
+            </if>
+            <if test="UNIT != null and UNIT != ''">
+                UNIT,
+            </if>
+            <if test="REMARK != null and REMARK != ''">
+                REMARK,
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="CITYID != null and CITYID != ''">
+                #{CITYID},
+            </if>
+            <if test="CITYNAME != null and CITYNAME != ''">
+                #{CITYNAME},
+            </if>
+            <if test="SEASONLEVEL != null and SEASONLEVEL != ''">
+                #{SEASONLEVEL},
+            </if>
+            <if test="STARTDATE != null and STARTDATE != ''">
+                #{STARTDATE},
+            </if>
+            <if test="ENDDATE != null and ENDDATE != ''">
+                #{ENDDATE},
+            </if>
+            <if test="STATE != null and STATE != ''">
+                #{STATE},
+            </if>
+            <if test="CREATETIME != null and CREATETIME != ''">
+                #{CREATETIME},
+            </if>
+            <if test="CREATEUSERID != null and CREATEUSERID != ''">
+                #{CREATEUSERID},
+            </if>
+            <if test="SEASONTYPE != null and SEASONTYPE != ''">
+                #{SEASONTYPE},
+            </if>
+            <if test="OWEN != null and OWEN != ''">
+                #{OWEN},
+            </if>
+            <if test="UNIT != null and UNIT != ''">
+                #{UNIT},
+            </if>
+            <if test="REMARK != null and REMARK != ''">
+                #{REMARK},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                #{NOTE},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.PRO_WarningInfoPojo">
+        update "PRO_WarningInfo"
+        <set>
+            <if test="CITYID != null and CITYID != ''">
+                CITYID = #{CITYID},
+            </if>
+            <if test="CITYNAME != null and CITYNAME != ''">
+                CITYNAME = #{CITYNAME},
+            </if>
+            <if test="SEASONLEVEL != null and SEASONLEVEL != ''">
+                SEASONLEVEL = #{SEASONLEVEL},
+            </if>
+            <if test="STARTDATE != null and STARTDATE != ''">
+                STARTDATE = #{STARTDATE},
+            </if>
+            <if test="ENDDATE != null and ENDDATE != ''">
+                ENDDATE = #{ENDDATE},
+            </if>
+            <if test="STATE != null and STATE != ''">
+                STATE = #{STATE},
+            </if>
+            <if test="CREATETIME != null and CREATETIME != ''">
+                CREATETIME = #{CREATETIME},
+            </if>
+            <if test="CREATEUSERID != null and CREATEUSERID != ''">
+                CREATEUSERID = #{CREATEUSERID},
+            </if>
+            <if test="SEASONTYPE != null and SEASONTYPE != ''">
+                SEASONTYPE = #{SEASONTYPE},
+            </if>
+            <if test="OWEN != null and OWEN != ''">
+                OWEN = #{OWEN},
+            </if>
+            <if test="UNIT != null and UNIT != ''">
+                UNIT = #{UNIT},
+            </if>
+            <if test="REMARK != null and REMARK != ''">
+                REMARK = #{REMARK},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE = #{NOTE},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from "PRO_WarningInfo" where ID = #{ID}
+    </delete>
+</mapper>

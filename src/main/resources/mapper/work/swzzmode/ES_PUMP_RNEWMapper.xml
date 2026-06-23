@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_PUMP_RNEWData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RNEWPojo">
+        select * from ES_PUMP_RNEW
+        <where>
+            <if test="id != null and id != ''">
+                and "ID" = #{id}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and "CALC_TIME" >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and "CALC_TIME" <= #{etime} ]]>
+            </if>
+        </where>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_PUMP_RNEW
+        <where>
+            <if test="id != null">
+                and ID = #{id}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RNEWPojo">
+        insert into ES_PUMP_RNEW
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="CALC_TIME != null and CALC_TIME != ''">
+                CALC_TIME,
+            </if>
+            <if test="DATA_TIME != null and DATA_TIME != ''">
+                DATA_TIME,
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="CALC_TIME != null and CALC_TIME != ''">
+                #{CALC_TIME},
+            </if>
+            <if test="DATA_TIME != null and DATA_TIME != ''">
+                #{DATA_TIME},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                #{NOTE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RNEWPojo">
+        insert into ES_PUMP_RNEW(ID,CALC_TIME,DATA_TIME,NOTE) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.ID},#{obj.CALC_TIME},#{obj.DATA_TIME},#{obj.NOTE})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RNEWPojo">
+        update ES_PUMP_RNEW
+        <set>
+            <if test="CALC_TIME != null and CALC_TIME != ''">
+                CALC_TIME = #{CALC_TIME},
+            </if>
+            <if test="DATA_TIME != null and DATA_TIME != ''">
+                DATA_TIME = #{DATA_TIME},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE = #{NOTE},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_PUMP_RNEW where ID = #{id}
+    </delete>
+</mapper>

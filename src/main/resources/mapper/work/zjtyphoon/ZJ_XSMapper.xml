@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.zjtyphoon.ZJ_XSData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_XSPojo">
+        select A.* from ZJ_XS A
+        <where>
+            <if test="ID != null and ID != ''">
+                and PTFBH = #{ID}
+            </if>
+<!--            <if test="key != null and key != ''">-->
+<!--                and (-->
+<!--                info like concat('%',concat(#{key},'%'))-->
+<!--                or landaddress like concat('%',concat(#{key},'%'))-->
+<!--                or strong like concat('%',concat(#{key},'%'))-->
+<!--                )-->
+<!--            </if>-->
+<!--            <if test="stime != null and stime != ''">-->
+<!--                <![CDATA[ and landtime >= #{stime} ]]>-->
+<!--            </if>-->
+<!--            <if test="etime != null and etime != ''">-->
+<!--                <![CDATA[ and landtime <= #{etime} ]]>-->
+<!--            </if>-->
+            <if test="type != null and type.size() > 0">
+                and TYPE in
+                <foreach collection="type" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM ZJ_XS
+        <where>
+            <if test="ID != null and ID != ''">
+                and PTFBH = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_XSPojo">
+        insert into ZJ_XS
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="PTFBH != null">
+                PTFBH,
+            </if>
+            <if test="TFBH != null">
+                TFBH,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="TFSTIME != null and TFSTIME != ''">
+                TFSTIME,
+            </if>
+            <if test="TFETIME != null and TFETIME !=''">
+                TFETIME,
+            </if>
+            <if test="TFNOTE != null and TFNOTE != ''">
+                TFNOTE,
+            </if>
+            <if test="TFXIANGSIDU != null">
+                TFXIANGSIDU,
+            </if>
+            <if test="ISDEL != null and ISDEL != ''">
+                ISDEL,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="PTFBH != null">
+                #{PTFBH},
+            </if>
+            <if test="TFBH != null">
+                #{TFBH},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="TFSTIME != null and TFSTIME != ''">
+                #{TFSTIME},
+            </if>
+            <if test="TFETIME != null and TFETIME !=''">
+                #{TFETIME},
+            </if>
+            <if test="TFNOTE != null and TFNOTE != ''">
+                #{TFNOTE},
+            </if>
+            <if test="TFXIANGSIDU != null">
+                #{TFXIANGSIDU},
+            </if>
+            <if test="ISDEL != null and ISDEL != ''">
+                #{ISDEL},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_XSPojo">
+        update ZJ_XS
+        <set>
+            <if test="TFSTIME != null and TFSTIME != ''">
+                TFSTIME = #{TFSTIME},
+            </if>
+            <if test="TFETIME != null and TFETIME !=''">
+                TFETIME = #{TFETIME},
+            </if>
+            <if test="TFNOTE != null and TFNOTE != ''">
+                TFNOTE = #{TFNOTE},
+            </if>
+            <if test="TFXIANGSIDU != null">
+                TFXIANGSIDU = #{TFXIANGSIDU},
+            </if>
+            <if test="ISDEL != null and ISDEL != ''">
+                ISDEL = #{ISDEL},
+            </if>
+        </set>
+        where PTFBH = #{PTFBH} and TFBH = #{TFBH} and TYPE = #{TYPE}
+    </update>
+    <delete id="deleteOne">
+        delete from ZJ_XS where PTFBH = #{ID1} and TFBH = #{ID2} and TYPE = #{ID3}
+    </delete>
+
+    <insert id="insertALL" parameterType="list">
+        insert into ZJ_XS
+        (
+        PTFBH,
+        TFBH,
+        TYPE,
+        TFSTIME,
+        TFETIME,
+        TFNOTE,
+        TFXIANGSIDU,
+        ISDEL
+        )
+        values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.PTFBH},
+            #{obj.TFBH},
+            #{obj.TYPE},
+            #{obj.TFSTIME},
+            #{obj.TFETIME},
+            #{obj.TFNOTE},
+            #{obj.TFXIANGSIDU},
+            #{obj.ISDEL}
+            )
+        </foreach>
+    </insert>
+
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" item="obj" separator=";">
+            update ZJ_XS
+            <set>
+                <if test="obj.TFSTIME != null and obj.TFSTIME != ''">
+                    TFSTIME = #{obj.TFSTIME},
+                </if>
+                <if test="obj.TFETIME != null and obj.TFETIME !=''">
+                    TFETIME = #{obj.TFETIME},
+                </if>
+                <if test="obj.TFNOTE != null and obj.TFNOTE != ''">
+                    TFNOTE = #{obj.TFNOTE},
+                </if>
+                <if test="obj.TFXIANGSIDU != null">
+                    TFXIANGSIDU = #{obj.TFXIANGSIDU},
+                </if>
+                <if test="obj.ISDEL != null and obj.ISDEL != ''">
+                    ISDEL = #{obj.ISDEL},
+                </if>
+            </set>
+            where PTFBH = #{obj.PTFBH} and TFBH = #{obj.TFBH} and TYPE = #{obj.TYPE}
+        </foreach>
+    </update>
+
+    <delete id="deleteALL">
+        delete from ZJ_XS where
+        <foreach collection="objList" item="obj" separator="or">
+            ( PTFBH = #{obj.PTFBH} and TFBH = #{obj.TFBH} and TYPE = #{obj.TYPE} )
+        </foreach>
+    </delete>
+</mapper>

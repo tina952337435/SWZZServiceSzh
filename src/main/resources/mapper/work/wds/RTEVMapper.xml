@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.wds.RTEVData">
+    <select id="ga" resultType="swzzmodeserver.workserver.pojo.wds.RTEVPojo">
+        select "SENID" as senid, "TIME" as time, "IFCH" as ifch, "FACTV" as factv, "CYCLE" as cycle, "STATE" as state, "TS" as ts from  wds.rtev
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and "TIME" >=to_date('${stime}','YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and "TIME" <=to_date('${etime}','YYYY-MM-DD HH24:MI:SS')]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and  "SENID"  in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        order by "TIME" asc
+    </select>
+
+
+    <select id="selectHis" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_WAS_RPojo">
+        select "TIME" as TM,             
+        case when "SENID"=12190083 then "FACTV"-0.26                 
+        when "SENID"=12200083 then "FACTV"-0.26                 
+        when "SENID"=11150083 then "FACTV"-0.26       
+        when "SENID"=63301183 then "FACTV"-0.26                 
+        else "FACTV" end as UPZ,       
+        "SENID" as STCD, "STATE" as STATE         
+        from wds.rtev 
+        <where>
+            <if test="idList != null and idList.size() > 0">
+                and "SENID" in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and "TIME" >= to_date('${stime}','YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and "TIME" <= to_date('${etime}','YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        order by "TIME" asc
+    </select>
+
+    <select id="GetWaterData" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_WAS_RPojo">
+        select "TIME" as TM,             
+        case when "SENID"=12190083 then "FACTV"-0.26                 
+        when "SENID"=12200083 then "FACTV"-0.26                 
+        when "SENID"=11150083 then "FACTV"-0.26       
+        when "SENID"=63301183 then "FACTV"-0.26                 
+        else "FACTV" end as UPZ,       
+        "SENID" as STCD, "STATE" as STATE         
+        from wds.rtev 
+        <where>
+            <if test="idList != null and idList.size() > 0">
+                and "SENID" in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and "TIME" > to_date('${stime}','YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <![CDATA[ and "FACTV" < 10 ]]>
+        </where>
+        and ROWNUM &lt;= 2000
+        order by "TIME" asc
+    </select>
+
+
+    <select id="GetWaterDataLL" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_WAS_RPojo">
+        select "TIME" as TM,             
+        "FACTV" as UPZ,       
+        "SENID" as STCD, 
+        "STATE" as STATE         
+        from wds.rtev 
+        <where>
+            <if test="idList != null and idList.size() > 0">
+                and "SENID" in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and "TIME" > to_date('${stime}','YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        and ROWNUM &lt;= 2000
+        order by "TIME" asc
+    </select>
+    <select id="GetWaterDataFX" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_WAS_RPojo">
+        select "TIME" as TM,             
+        "FACTV" as UPZ,       
+        "SENID" as STCD, 
+        "STATE" as STATE         
+        from wds.rtev 
+        <where>
+            <if test="idList != null and idList.size() > 0">
+                and "SENID" in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and "TIME" > to_date('${stime}','YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and "TIME" <= to_date('${etime}','YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        <!-- order by "TIME" asc -->
+    </select>
+</mapper>

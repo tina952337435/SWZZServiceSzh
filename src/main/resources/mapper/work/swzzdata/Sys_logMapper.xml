@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzdata.Sys_logData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzdata.Sys_logPojo">
+        select a.* from "sys_log" a
+        <where>
+
+            <if test="ID != null and ID != ''">
+                and EMP_ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and EMP_NAME like concat('%',concat(#{key},'%'))
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and LOGO_DATE >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and LOGO_DATE <= #{etime} ]]>
+            </if>
+<!--            <if test="type != null">-->
+<!--                and TYPE in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM "sys_log"
+        <where>
+            <if test="ID != null and ID != ''">
+                and EMP_ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and EMP_NAME like concat('%',concat(#{key},'%'))
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and LOGO_DATE >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and LOGO_DATE <= #{etime} ]]>
+            </if>
+            <!--            <if test="type != null">-->
+            <!--                and TYPE in-->
+            <!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+            <!--                    #{item}-->
+            <!--                </foreach>-->
+            <!--            </if>-->
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.Sys_logPojo">
+        insert into "sys_log"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="EMP_ID != null and EMP_ID != ''">
+                EMP_ID,
+            </if>
+            <if test="LOGO_DATE != null and LOGO_DATE != ''">
+                LOGO_DATE,
+            </if>
+            <if test="IP != null and IP != ''">
+                IP,
+            </if>
+            <if test="MAC != null and MAC != ''">
+                MAC,
+            </if>
+            <if test="EMP_NAME != null and EMP_NAME != ''">
+                EMP_NAME,
+            </if>
+            <if test="STATUS != null and STATUS != ''">
+                STATUS,
+            </if>
+            <if test="NAME != null and NAME != ''">
+                NAME,
+            </if>
+            <if test="PWD != null and PWD != ''">
+                PWD,
+            </if>
+            <if test="FLAG != null and FLAG != ''">
+                FLAG,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="EMP_ID != null and EMP_ID != ''">
+                #{EMP_ID},
+            </if>
+            <if test="LOGO_DATE != null and LOGO_DATE != ''">
+                #{LOGO_DATE},
+            </if>
+            <if test="IP != null and IP != ''">
+                #{IP},
+            </if>
+            <if test="MAC != null and MAC != ''">
+                #{MAC},
+            </if>
+            <if test="EMP_NAME != null and EMP_NAME != ''">
+                #{EMP_NAME},
+            </if>
+            <if test="STATUS != null and STATUS != ''">
+                #{STATUS},
+            </if>
+            <if test="NAME != null and NAME != ''">
+                #{NAME},
+            </if>
+            <if test="PWD != null and PWD != ''">
+                #{PWD},
+            </if>
+            <if test="FLAG != null and FLAG != ''">
+                #{FLAG},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.Sys_logPojo">
+        update "sys_log"
+        <set>
+            <if test="LOGO_DATE != null and LOGO_DATE != ''">
+                LOGO_DATE = #{LOGO_DATE},
+            </if>
+            <if test="IP != null and IP != ''">
+                IP = #{IP},
+            </if>
+            <if test="MAC != null and MAC != ''">
+                MAC = #{MAC},
+            </if>
+            <if test="EMP_NAME != null and EMP_NAME != ''">
+                EMP_NAME = #{EMP_NAME},
+            </if>
+            <if test="STATUS != null and STATUS != ''">
+                STATUS = #{STATUS},
+            </if>
+            <if test="NAME != null and NAME != ''">
+                NAME = #{NAME},
+            </if>
+            <if test="PWD != null and PWD != ''">
+                PWD = #{PWD},
+            </if>
+            <if test="FLAG != null and FLAG != ''">
+                FLAG = #{FLAG},
+            </if>
+        </set>
+        where EMP_ID = #{EMP_ID}
+    </update>
+    <delete id="deleteOne">
+        delete from "sys_log" where EMP_ID = #{ID}
+    </delete>
+</mapper>

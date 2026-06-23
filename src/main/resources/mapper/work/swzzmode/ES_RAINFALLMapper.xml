@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_RAINFALLData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_RAINFALLPojo">
+        select a.* from ES_RAINFALL a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZHANID = #{ID}
+            </if>
+            <if test="type != null and type.size() > 0 != ''">
+                and TYPE in
+                <foreach collection="type" open="(" close=")" item="t" separator=",">
+                    #{t}
+                </foreach>
+            </if>
+            <if test="key != null and key != ''">
+                and HOUR = #{key}
+            </if>
+            <if test="zhanidList != null and zhanidList.size() > 0 != ''">
+                and ZHANID in
+                <foreach collection="zhanidList" open="(" close=")" item="zhanid" separator=",">
+                    #{zhanid}
+                </foreach>
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_RAINFALL
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZHANID = #{ID}
+            </if>
+            <if test="type != null and type.size() > 0 != ''">
+                and TYPE in
+                <foreach collection="type" open="(" close=")" item="t" separator=",">
+                    #{t}
+                </foreach>
+            </if>
+            <if test="key != null and key != ''">
+                and HOUR = #{key}
+            </if>
+            <if test="zhanidList != null and zhanidList.size() > 0 != ''">
+                and ZHANID in
+                <foreach collection="zhanidList" open="(" close=")" item="zhanid" separator=",">
+                    #{zhanid}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_RAINFALLPojo">
+        insert into ES_RAINFALL
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="HOUR != null">
+                HOUR,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="DRP != null and DRP != ''">
+                DRP,
+            </if>
+            <if test="TM != null and TM != ''">
+                TM,
+            </if>
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="HOUR != null">
+                #{HOUR},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="DRP != null and DRP != ''">
+                #{DRP},
+            </if>
+            <if test="TM != null and TM != ''">
+                #{TM},
+            </if>
+            <if test="ZHANID != null and ZHANID != ''">
+                #{ZHANID},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_RAINFALLPojo">
+        insert into ES_RAINFALL(ID,HOUR,TYPE,DRP,TM,ZHANID) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ID,jdbcType=VARCHAR},
+            #{obj.HOUR,jdbcType=FLOAT},
+            #{obj.TYPE,jdbcType=VARCHAR},
+            #{obj.DRP,jdbcType=VARCHAR},
+            #{obj.TM,jdbcType=VARCHAR},
+            #{obj.ZHANID,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_RAINFALLPojo">
+        update ES_RAINFALL
+        <set>
+            <if test="HOUR != null">
+                HOUR = #{HOUR},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+            <if test="DRP != null and DRP != ''">
+                DRP = #{DRP},
+            </if>
+            <if test="TM != null and TM != ''">
+                TM = #{TM},
+            </if>
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID = #{ZHANID},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_RAINFALL where ID = #{ID}
+    </delete>
+
+    <delete id="deleteALL" parameterType="list">
+        delete from ES_RAINFALL where
+        ID in
+        <foreach collection="bpPojo" open="(" close=")" item="item" separator=",">
+            #{item.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" open="begin" close=";end;" item="obj" separator=";">
+            update ES_RAINFALL
+            <set>
+                <if test="obj.HOUR != null">
+                    HOUR = #{obj.HOUR,jdbcType=FLOAT},
+                </if>
+                <if test="obj.TYPE != null and obj.TYPE != ''">
+                    TYPE = #{obj.TYPE,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.DRP != null and obj.DRP != ''">
+                    DRP = #{obj.DRP,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.TM != null and obj.TM != ''">
+                    TM = #{obj.TM,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.ZHANID != null and obj.ZHANID != ''">
+                    ZHANID = #{obj.ZHANID,jdbcType=VARCHAR},
+                </if>
+            </set>
+            where ID = #{obj.ID,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+</mapper>

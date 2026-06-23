@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzdata.EmployeeData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzdata.EmployeePojo">
+        select
+        ID,NAME,SEX,BIRTHDAY,ORGID,WORKYEAR,JOBTITLE,TECHTITLE,TEL,HOMETEL,MOBILE,GOODNESS,MEMO,QX_LOGIN,PHOTOPATH,
+        EMPTYPE,GROUPID,GROUPNAME,MOBILE2,MOBILE3,TEL2,SORT
+        from "employee"
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="QX_LOGIN != null and QX_LOGIN != ''">
+                and QX_LOGIN = #{QX_LOGIN}
+            </if>
+            <if test="PWD != null and PWD != ''">
+                and QX_YPASSWORD = #{PWD}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                NAME like concat('%',concat(#{key},'%'))
+                or sex like concat('%',concat(#{key},'%'))
+                or JOBTITLE like concat('%',concat(#{key},'%'))
+                or TECHTITLE like concat('%',concat(#{key},'%'))
+                or MEMO like concat('%',concat(#{key},'%'))
+                or GROUPNAME like concat('%',concat(#{key},'%'))
+                or MOBILE like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and BIRTHDAY >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and BIRTHDAY <= #{etime} ]]>
+            </if>
+            <if test="type != null and type.size() > 0">
+                and GROUPID in
+                <foreach collection="type" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectListPWD" resultType="swzzmodeserver.workserver.pojo.swzzdata.EmployeePojo">
+        select
+        ID,NAME,SEX,BIRTHDAY,ORGID,WORKYEAR,JOBTITLE,TECHTITLE,TEL,HOMETEL,MOBILE,GOODNESS,MEMO,QX_LOGIN,PHOTOPATH,
+        EMPTYPE,GROUPID,GROUPNAME,MOBILE2,MOBILE3,TEL2,SORT,QX_PASSWORD,QX_YPASSWORD
+        from "employee"
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="QX_LOGIN != null and QX_LOGIN != ''">
+                and QX_LOGIN = #{QX_LOGIN}
+            </if>
+            <if test="PWD != null and PWD != ''">
+                and QX_PASSWORD = #{PWD}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                NAME like concat('%',concat(#{key},'%'))
+                or sex like concat('%',concat(#{key},'%'))
+                or JOBTITLE like concat('%',concat(#{key},'%'))
+                or TECHTITLE like concat('%',concat(#{key},'%'))
+                or MEMO like concat('%',concat(#{key},'%'))
+                or GROUPNAME like concat('%',concat(#{key},'%'))
+                or MOBILE like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and BIRTHDAY >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and BIRTHDAY <= #{etime} ]]>
+            </if>
+            <if test="type != null and type.size() > 0">
+                and GROUPID in
+                <foreach collection="type" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM "employee"
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="QX_LOGIN != null and QX_LOGIN != ''">
+                and QX_LOGIN = #{QX_LOGIN}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                NAME like concat('%',concat(#{key},'%'))
+                or sex like concat('%',concat(#{key},'%'))
+                or JOBTITLE like concat('%',concat(#{key},'%'))
+                or TECHTITLE like concat('%',concat(#{key},'%'))
+                or MEMO like concat('%',concat(#{key},'%'))
+                or GROUPNAME like concat('%',concat(#{key},'%'))
+                or MOBILE like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and BIRTHDAY >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and BIRTHDAY <= #{etime} ]]>
+            </if>
+            <if test="type != null and type.size() > 0">
+                and GROUPID in
+                <foreach collection="type" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.EmployeePojo">
+        insert into "employee"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="NAME != null and NAME != ''">
+                NAME,
+            </if>
+            <if test="SEX != null and SEX != ''">
+                SEX,
+            </if>
+            <if test="BIRTHDAY != null and BIRTHDAY != ''">
+                BIRTHDAY,
+            </if>
+            <if test="ORGID != null and ORGID != ''">
+                ORGID,
+            </if>
+            <if test="WORKYEAR != null and WORKYEAR != ''">
+                WORKYEAR,
+            </if>
+            <if test="JOBTITLE != null and JOBTITLE != ''">
+                JOBTITLE,
+            </if>
+            <if test="TECHTITLE != null and TECHTITLE != ''">
+                TECHTITLE,
+            </if>
+            <if test="TEL != null and TEL != ''">
+                TEL,
+            </if>
+            <if test="HOMETEL != null and HOMETEL != ''">
+                HOMETEL,
+            </if>
+            <if test="MOBILE != null and MOBILE != ''">
+                MOBILE,
+            </if>
+            <if test="GOODNESS != null and GOODNESS != ''">
+                GOODNESS,
+            </if>
+            <if test="MEMO != null and MEMO != ''">
+                MEMO,
+            </if>
+            <if test="QX_LOGIN != null and QX_LOGIN != ''">
+                QX_LOGIN,
+            </if>
+            <if test="QX_PASSWORD != null and QX_PASSWORD != ''">
+                QX_PASSWORD,
+            </if>
+            <if test="PHOTOPATH != null and PHOTOPATH != ''">
+                PHOTOPATH,
+            </if>
+            <if test="EMPTYPE != null and EMPTYPE != ''">
+                EMPTYPE,
+            </if>
+            <if test="GROUPID != null and GROUPID != ''">
+                GROUPID,
+            </if>
+            <if test="GROUPNAME != null and GROUPNAME != ''">
+                GROUPNAME,
+            </if>
+            <if test="QX_YPASSWORD != null and QX_YPASSWORD != ''">
+                QX_YPASSWORD,
+            </if>
+            <if test="MOBILE2 != null and MOBILE2 != ''">
+                MOBILE2,
+            </if>
+            <if test="MOBILE3 != null and MOBILE3 != ''">
+                MOBILE3,
+            </if>
+            <if test="TEL2 != null and TEL2 != ''">
+                TEL2,
+            </if>
+            <if test="SORT != null">
+                SORT,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="NAME != null and NAME != ''">
+                #{NAME},
+            </if>
+            <if test="SEX != null and SEX != ''">
+                #{SEX},
+            </if>
+            <if test="BIRTHDAY != null and BIRTHDAY != ''">
+                #{BIRTHDAY},
+            </if>
+            <if test="ORGID != null and ORGID != ''">
+                #{ORGID},
+            </if>
+            <if test="WORKYEAR != null and WORKYEAR != ''">
+                #{WORKYEAR},
+            </if>
+            <if test="JOBTITLE != null and JOBTITLE != ''">
+                #{JOBTITLE},
+            </if>
+            <if test="TECHTITLE != null and TECHTITLE != ''">
+                #{TECHTITLE},
+            </if>
+            <if test="TEL != null and TEL != ''">
+                #{TEL},
+            </if>
+            <if test="HOMETEL != null and HOMETEL != ''">
+                #{HOMETEL},
+            </if>
+            <if test="MOBILE != null and MOBILE != ''">
+                #{MOBILE},
+            </if>
+            <if test="GOODNESS != null and GOODNESS != ''">
+                #{GOODNESS},
+            </if>
+            <if test="MEMO != null and MEMO != ''">
+                #{MEMO},
+            </if>
+            <if test="QX_LOGIN != null and QX_LOGIN != ''">
+                #{QX_LOGIN},
+            </if>
+            <if test="QX_PASSWORD != null and QX_PASSWORD != ''">
+                #{QX_PASSWORD},
+            </if>
+            <if test="PHOTOPATH != null and PHOTOPATH != ''">
+                #{PHOTOPATH},
+            </if>
+            <if test="EMPTYPE != null and EMPTYPE != ''">
+                #{EMPTYPE},
+            </if>
+            <if test="GROUPID != null and GROUPID != ''">
+                #{GROUPID},
+            </if>
+            <if test="GROUPNAME != null and GROUPNAME != ''">
+                #{GROUPNAME},
+            </if>
+            <if test="QX_YPASSWORD != null and QX_YPASSWORD != ''">
+                #{QX_YPASSWORD},
+            </if>
+            <if test="MOBILE2 != null and MOBILE2 != ''">
+                #{MOBILE2},
+            </if>
+            <if test="MOBILE3 != null and MOBILE3 != ''">
+                #{MOBILE3},
+            </if>
+            <if test="TEL2 != null and TEL2 != ''">
+                #{TEL2},
+            </if>
+            <if test="SORT != null">
+                #{SORT},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.EmployeePojo">
+        update "employee"
+        <set>
+            <if test="NAME != null and NAME != ''">
+                NAME = #{NAME},
+            </if>
+            <if test="SEX != null and SEX != ''">
+                SEX = #{SEX},
+            </if>
+            <if test="BIRTHDAY != null and BIRTHDAY != ''">
+                BIRTHDAY = #{BIRTHDAY},
+            </if>
+            <if test="ORGID != null and ORGID != ''">
+                ORGID = #{ORGID},
+            </if>
+            <if test="WORKYEAR != null and WORKYEAR != ''">
+                WORKYEAR = #{WORKYEAR},
+            </if>
+            <if test="JOBTITLE != null and JOBTITLE != ''">
+                JOBTITLE = #{JOBTITLE},
+            </if>
+            <if test="TECHTITLE != null and TECHTITLE != ''">
+                TECHTITLE = #{TECHTITLE},
+            </if>
+            <if test="TEL != null and TEL != ''">
+                TEL = #{TEL},
+            </if>
+            <if test="HOMETEL != null and HOMETEL != ''">
+                HOMETEL = #{HOMETEL},
+            </if>
+            <if test="MOBILE != null and MOBILE != ''">
+                MOBILE = #{MOBILE},
+            </if>
+            <if test="GOODNESS != null and GOODNESS != ''">
+                GOODNESS = #{GOODNESS},
+            </if>
+            <if test="MEMO != null and MEMO != ''">
+                MEMO = #{MEMO},
+            </if>
+            <if test="QX_LOGIN != null and QX_LOGIN != ''">
+                QX_LOGIN = #{QX_LOGIN},
+            </if>
+            <if test="QX_PASSWORD != null and QX_PASSWORD != ''">
+                QX_PASSWORD = #{QX_PASSWORD},
+            </if>
+            <if test="PHOTOPATH != null and PHOTOPATH != ''">
+                PHOTOPATH = #{PHOTOPATH},
+            </if>
+            <if test="EMPTYPE != null and EMPTYPE != ''">
+                EMPTYPE = #{EMPTYPE},
+            </if>
+            <if test="GROUPID != null and GROUPID != ''">
+                GROUPID = #{GROUPID},
+            </if>
+            <if test="GROUPNAME != null and GROUPNAME != ''">
+                GROUPNAME = #{GROUPNAME},
+            </if>
+            <if test="QX_YPASSWORD != null and QX_YPASSWORD != ''">
+                QX_YPASSWORD = #{QX_YPASSWORD},
+            </if>
+            <if test="MOBILE2 != null and MOBILE2 != ''">
+                MOBILE2 = #{MOBILE2},
+            </if>
+            <if test="MOBILE3 != null and MOBILE3 != ''">
+                MOBILE3 = #{MOBILE3},
+            </if>
+            <if test="TEL2 != null and TEL2 != ''">
+                TEL2 = #{TEL2},
+            </if>
+            <if test="SORT != null">
+                SORT = #{SORT},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from "employee" where ID = #{ID}
+    </delete>
+</mapper>

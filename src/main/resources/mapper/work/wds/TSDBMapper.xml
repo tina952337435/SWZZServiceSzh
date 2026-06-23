@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.wds.TSDBData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.TSDBPojo">
+        select * from wds.TSDB
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and "TIME" >=to_date('${stime}','YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and "TIME" <=to_date('${etime}','YYYY-MM-DD HH24:MI:SS')]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and "SENID" in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        order by "TIME" asc
+    </select>
+
+    <select id="selectTSDBListtTop" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.TSDBPojo">
+        select * from wds.TSDB
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and "TIME" >=to_date('${stime}','YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and "TIME" <=to_date('${etime}','YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and "SENID" in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        and ROWNUM &lt;= 150
+        order by "TIME" asc
+    </select>
+</mapper>

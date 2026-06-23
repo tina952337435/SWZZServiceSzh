@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.GL_STCDData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.GL_STCDPojo">
+        select a.* from GL_STCD a
+        <where>
+            <if test="IDList != null and IDList.size() > 0">
+                and ID in
+                <foreach collection="IDList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="STCDList != null and STCDList.size() > 0">
+                and STCD in
+                <foreach collection="STCDList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="NAME != null and NAME != ''">
+                and NAME like concat('%',concat(#{NAME},'%'))
+            </if>
+            <if test="TYPE != null and TYPE.size() > 0">
+                and TYPE in
+                <foreach collection="TYPE" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="STTP != null and STTP != ''">
+                and STTP like concat('%',concat(#{STTP},'%'))
+            </if>
+        </where>
+        order by orderby asc
+    </select>
+
+
+    <select id="selectListNew" resultType="swzzmodeserver.workserver.pojo.swzzmode.GL_STCDStnmPojo">
+        select a.*,b.stnm from GL_STCD a left join st_stbprp_b b on a.stcd=b.stcd
+        <where>
+            <if test="IDList != null and IDList.size() > 0">
+                and ID in
+                <foreach collection="IDList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="STCDList != null and STCDList.size() > 0">
+                and a.STCD in
+                <foreach collection="STCDList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="NAME != null and NAME != ''">
+                and NAME like concat('%',concat(#{NAME},'%'))
+            </if>
+            <if test="TYPE != null and TYPE.size() > 0">
+                and TYPE in
+                <foreach collection="TYPE" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="STTP != null and STTP != ''">
+                and a.STTP like concat('%',concat(#{STTP},'%'))
+            </if>
+        </where>
+        order by a.orderby asc
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.GL_STCDPojo">
+        insert into GL_STCD
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="NAME != null and NAME != ''">
+                NAME,
+            </if>
+            <if test="URL != null and URL != ''">
+                URL,
+            </if>
+            <if test="ORDERBY != null and ORDERBY != ''">
+                ORDERBY,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="STTP != null and STTP != ''">
+                STTP,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="NAME != null and NAME != ''">
+                #{NAME},
+            </if>
+            <if test="URL != null and URL != ''">
+                #{URL},
+            </if>
+            <if test="ORDERBY != null and ORDERBY != ''">
+                #{ORDERBY},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="STTP != null and STTP != ''">
+                #{STTP},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.GL_STCDPojo">
+        insert into GL_STCD(ID,STCD,NAME,URL,ORDERBY,TYPE,STTP) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.ID,jdbcType=VARCHAR},
+            #{obj.STCD,jdbcType=VARCHAR},
+            #{obj.NAME,jdbcType=VARCHAR},
+            #{obj.URL,jdbcType=VARCHAR},
+            #{obj.ORDERBY,jdbcType=FLOAT},
+            #{obj.TYPE,jdbcType=VARCHAR},
+            #{obj.STTP,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.GL_STCDPojo">
+        update GL_STCD
+        <set>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="NAME != null and NAME != ''">
+                NAME = #{NAME},
+            </if>
+            <if test="URL != null and URL != ''">
+                URL = #{URL},
+            </if>
+            <if test="ORDERBY != null and ORDERBY != ''">
+                ORDERBY = #{ORDERBY},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+            <if test="STTP != null and STTP != ''">
+                STTP = #{STTP},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" item="obj" separator=";">
+            update GL_STCD
+            <set>
+                <if test="obj.ID != null and obj.ID != ''">
+                    ID = #{obj.ID,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.STCD != null and obj.STCD != ''">
+                    STCD = #{obj.STCD,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.NAME != null and obj.NAME != ''">
+                    NAME = #{obj.NAME,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.URL != null and obj.URL != ''">
+                    URL = #{obj.URL,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.ORDERBY != null">
+                    ORDERBY = #{obj.ORDERBY,jdbcType=FLOAT},
+                </if>
+                <if test="obj.TYPE != null and obj.TYPE != ''">
+                    TYPE = #{obj.TYPE,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.STTP != null and obj.STTP != ''">
+                    STTP = #{obj.STTP,jdbcType=VARCHAR},
+                </if>
+            </set>
+            where ID = #{obj.ID,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+
+    <delete id="deleteOne">
+        delete from GL_STCD where ID = #{ID}
+    </delete>
+
+    <delete id="deleteMore">
+        delete from GL_STCD
+        <where>
+            <if test="IDList != null and IDList.size() > 0">
+                and STCD in
+                <foreach collection="IDList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+</mapper>

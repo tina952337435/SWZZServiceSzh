@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.ST_AREA_BData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_AREA_BPojo">
+        select * from ST_AREA_B
+        <where>
+            <if test="AID != null and AID != ''">
+                and AID = #{AID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                AREANAME like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="pathname != null and pathname != ''">
+                and ATYPE=#{pathname}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ST_AREA_BPojo">
+        insert into ST_AREA_B
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="AID != null and AID != ''">
+                AID,
+            </if>
+            <if test="AREANAME != null and AREANAME != ''">
+                AREANAME,
+            </if>
+            <if test="ATYPE != null and ATYPE != ''">
+                ATYPE,
+            </if>
+            <if test="AREA != null and AREA != ''">
+                AREA,
+            </if>
+            <if test="LGTD != null and LGTD != ''">
+                LGTD,
+            </if>
+            <if test="LTTD != null and LTTD != ''">
+                LTTD,
+            </if>
+            <if test="ORDERNUM != null and ORDERNUM != ''">
+                ORDERNUM,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="AID != null and AID != ''">
+                #{AID},
+            </if>
+            <if test="AREANAME != null and AREANAME != ''">
+                #{AREANAME},
+            </if>
+            <if test="ATYPE != null and ATYPE != ''">
+                #{ATYPE},
+            </if>
+            <if test="AREA != null and AREA != ''">
+                #{AREA},
+            </if>
+            <if test="LGTD != null and LGTD != ''">
+                #{LGTD},
+            </if>
+            <if test="LTTD != null and LTTD != ''">
+                #{LTTD},
+            </if>
+            <if test="ORDERNUM != null and ORDERNUM != ''">
+                #{ORDERNUM},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ST_AREA_BPojo">
+        update ST_AREA_B
+        <set>
+            <if test="AREANAME != null and AREANAME != ''">
+                AREANAME = #{AREANAME},
+            </if>
+            <if test="ATYPE != null and ATYPE != ''">
+                ATYPE = #{ATYPE},
+            </if>
+            <if test="AREA != null and AREA != ''">
+                AREA = #{AREA},
+            </if>
+            <if test="LGTD != null and LGTD != ''">
+                LGTD = #{LGTD},
+            </if>
+            <if test="LTTD != null and LTTD != ''">
+                LTTD = #{LTTD},
+            </if>
+            <if test="ORDERNUM != null and ORDERNUM != ''">
+                ORDERNUM = #{ORDERNUM},
+            </if>
+        </set>
+        where AID = #{AID}
+    </update>
+
+    <delete id="deleteOne">
+        delete from ST_AREA_B where AID = #{AID}
+    </delete>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(1) from ST_AREA_B
+        <where>
+            <if test="AID != null and AID != ''">
+                and AID = #{AID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                AREANAME like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="pathname != null and pathname != ''">
+                and ATYPE=#{pathname}
+            </if>
+        </where>
+    </select>
+</mapper>

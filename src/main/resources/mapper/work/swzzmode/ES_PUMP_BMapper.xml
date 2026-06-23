@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_PUMP_BData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_BPojo">
+        select a.* from ES_PUMP_B a
+        <where>
+            <if test="ID != null">
+                and STCD = #{ID}
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_PUMP_B
+        <where>
+            <if test="ID != null">
+                and STCD = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_BPojo">
+        insert into ES_PUMP_B
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="STNM != null and STNM != ''">
+                STNM,
+            </if>
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="LGTD != null">
+                LGTD,
+            </if>
+            <if test="LTTD != null">
+                LTTD,
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE,
+            </if>
+            <if test="CONTENT != null and CONTENT != ''">
+                CONTENT,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="STNM != null and STNM != ''">
+                #{STNM},
+            </if>
+            <if test="ZHANID != null and ZHANID != ''">
+                #{ZHANID},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="LGTD != null">
+                #{LGTD},
+            </if>
+            <if test="LTTD != null">
+                #{LTTD},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                #{NOTE},
+            </if>
+            <if test="CONTENT != null and CONTENT != ''">
+                #{CONTENT},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_BPojo">
+        insert into ES_PUMP_B(STCD,STNM,ZHANID,TYPE,LGTD,LTTD,NOTE,CONTENT) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.STCD},#{obj.STNM},#{obj.ZHANID},#{obj.TYPE},#{obj.LGTD},#{obj.LTTD},#{obj.NOTE},#{obj.CONTENT})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_BPojo">
+        update ES_PUMP_B
+        <set>
+            <if test="STNM != null and STNM != ''">
+                STNM = #{STNM},
+            </if>
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID = #{ZHANID},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+            <if test="LGTD != null">
+                LGTD = #{LGTD},
+            </if>
+            <if test="LTTD != null">
+                LTTD = #{LTTD},
+            </if>
+            <if test="NOTE != null and NOTE != ''">
+                NOTE = #{NOTE},
+            </if>
+            <if test="CONTENT != null and CONTENT != ''">
+                CONTENT = #{CONTENT},
+            </if>
+        </set>
+        where STCD = #{STCD}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_PUMP_B where STCD = #{ID}
+    </delete>
+</mapper>

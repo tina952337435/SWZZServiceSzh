@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzdata.Qx_enableData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzdata.Qx_enablePojo">
+        select a.* from "qx_enable" a
+        <where>
+            <if test="ID != null and ID != ''">
+                and QX_ID = #{ID}
+            </if>
+            <if test="type != null and type.size() > 0">
+                and QX_ID in
+                <foreach collection="type" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM "qx_enable"
+        <where>
+            <if test="ID != null and ID != ''">
+                and QX_ID = #{ID}
+            </if>
+            <!--            <if test="key != null and key != ''">-->
+            <!--                and MENU_NAME like concat('%',concat(#{key},'%'))-->
+            <!--                or QX_LOGIN like concat('%',concat(#{key},'%'))-->
+            <!--            </if>-->
+            <!--            <if test="stime != null and stime != ''">-->
+            <!--                <![CDATA[ and TM >= #{stime} ]]>-->
+            <!--            </if>-->
+            <!--            <if test="etime != null and etime != ''">-->
+            <!--                <![CDATA[ and TM <= #{etime} ]]>-->
+            <!--            </if>-->
+            <!--            <if test="type != null">-->
+            <!--                and GROUPID in-->
+            <!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+            <!--                    #{item}-->
+            <!--                </foreach>-->
+            <!--            </if>-->
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.Qx_enablePojo">
+        insert into "qx_enable"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="QX_ID != null and QX_ID != ''">
+                QX_ID,
+            </if>
+            <if test="QX_MOKUAI != null and QX_MOKUAI != ''">
+                QX_MOKUAI,
+            </if>
+            <if test="MANAGEMENT != null and MANAGEMENT != ''">
+                MANAGEMENT,
+            </if>
+            <if test="ISCHAXUN != null and ISCHAXUN != ''">
+                ISCHAXUN,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="QX_ID != null and QX_ID != ''">
+                #{QX_ID},
+            </if>
+            <if test="QX_MOKUAI != null and QX_MOKUAI != ''">
+                #{QX_MOKUAI},
+            </if>
+            <if test="MANAGEMENT != null and MANAGEMENT != ''">
+                #{MANAGEMENT},
+            </if>
+            <if test="ISCHAXUN != null and ISCHAXUN != ''">
+                #{ISCHAXUN},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.Qx_enablePojo">
+        update "qx_enable"
+        <set>
+            <if test="QX_ID != null and QX_ID != ''">
+                QX_ID = #{QX_ID},
+            </if>
+            <if test="QX_MOKUAI != null and QX_MOKUAI != ''">
+                QX_MOKUAI = #{QX_MOKUAI},
+            </if>
+            <if test="MANAGEMENT != null and MANAGEMENT != ''">
+                MANAGEMENT = #{MANAGEMENT},
+            </if>
+            <if test="ISCHAXUN != null and ISCHAXUN != ''">
+                ISCHAXUN = #{ISCHAXUN},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from "qx_enable" where QX_ID = #{ID}
+    </delete>
+
+    <insert id="instertAll" parameterType="list">
+        insert into "qx_enable"(
+            ID,
+            QX_ID,
+            QX_MOKUAI,
+            MANAGEMENT,
+            ISCHAXUN
+            ) values
+        <foreach collection="QxobjList" item="obj" separator=",">
+            (
+            #{obj.ID,jdbcType=VARCHAR},
+            #{obj.QX_ID,jdbcType=VARCHAR},
+            #{obj.QX_MOKUAI,jdbcType=VARCHAR},
+            #{obj.MANAGEMENT,jdbcType=VARCHAR},
+            #{obj.ISCHAXUN,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateAll" parameterType="list">
+        <foreach collection="QxobjList" item="obj" separator=";">
+            update "qx_enable"
+            <set>
+                <if test="obj.QX_ID != null and obj.QX_ID != ''">
+                    QX_ID = #{obj.QX_ID,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.QX_MOKUAI != null and obj.QX_MOKUAI != ''">
+                    QX_MOKUAI = #{obj.QX_MOKUAI,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.MANAGEMENT != null and obj.MANAGEMENT != ''">
+                    MANAGEMENT = #{obj.MANAGEMENT,jdbcType=VARCHAR},
+                </if>
+                <if test="obj.ISCHAXUN != null and obj.ISCHAXUN != ''">
+                    ISCHAXUN = #{obj.ISCHAXUN,jdbcType=VARCHAR},
+                </if>
+            </set>
+            where ID = #{obj.ID,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+</mapper>

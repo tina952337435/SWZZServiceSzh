@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_MODELUSERData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELUSERPojo">
+        select a.* from ES_MODELUSER a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_MODELUSER
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELUSERPojo">
+        insert into ES_MODELUSER
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="LOGINNAME != null and LOGINNAME != ''">
+                LOGINNAME,
+            </if>
+            <if test="USERNAME != null and USERNAME != ''">
+                USERNAME,
+            </if>
+            <if test="TM != null and TM != ''">
+                TM,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="LOGINNAME != null and LOGINNAME != ''">
+                #{LOGINNAME},
+            </if>
+            <if test="USERNAME != null and USERNAME != ''">
+                #{USERNAME},
+            </if>
+            <if test="TM != null and TM != ''">
+                #{TM},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELUSERPojo">
+        insert into ES_MODELUSER(ID,LOGINNAME,USERNAME,TM) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ID},
+            #{obj.LOGINNAME},
+            #{obj.USERNAME},
+            #{obj.TM}
+            )
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_MODELUSERPojo">
+        update ES_MODELUSER
+        <set>
+            <if test="LOGINNAME != null and LOGINNAME != ''">
+                LOGINNAME = #{LOGINNAME},
+            </if>
+            <if test="USERNAME != null and USERNAME != ''">
+                USERNAME = #{USERNAME},
+            </if>
+            <if test="TM != null and TM != ''">
+                TM = #{TM},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_MODELUSER where ID = #{ID}
+    </delete>
+</mapper>

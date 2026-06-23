@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.St_stbprp_b_quData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.St_stbprp_b_quPojo">
+        select A.* from "st_stbprp_b_qu" A
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                STNM like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+<!--            <if test="type != null">-->
+<!--                and GROUPID in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM "st_stbprp_b_qu"
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                STNM like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertList" parameterType="swzzmodeserver.workserver.pojo.swzzflood.St_stbprp_b_quPojo">
+        insert into "st_stbprp_b_qu"
+        (
+        ID,
+        STCD,
+        STNM,
+        STTP,
+        PID,
+        ORDERBYID
+        )
+        values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ID},
+            #{obj.STCD},
+            #{obj.STNM},
+            #{obj.STTP},
+            #{obj.PID},
+            #{obj.ORDERBYID}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.St_stbprp_b_qu_treePojo">
+        update "st_stbprp_b_qu"
+        <set>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="STNM != null and STNM != ''">
+                STNM = #{STNM},
+            </if>
+            <if test="STTP != null and STTP != ''">
+                STTP = #{STTP},
+            </if>
+            <if test="ORDERBYID != null">
+                ORDERBYID = #{ORDERBYID},
+            </if>
+            <if test="PID != null and PID != ''">
+                PID = #{PID},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from "st_stbprp_b_qu" where ID = #{ID}
+    </delete>
+</mapper>

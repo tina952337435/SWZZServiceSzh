@@ -1,0 +1,27 @@
+package swzzmodeserver.workserver.data.swzzdata;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import swzzmodeserver.workserver.pojo.swzzdata.Sys_logPojo;
+import swzzmodeserver.workserver.pojo.swzzdata.Sys_reportlogPojo;
+
+import java.util.List;
+
+@Mapper
+public interface Sys_reportlogData {
+
+    List<Sys_reportlogPojo> selectList(@Param(value = "ID") String ID, @Param(value = "key") String key,
+                                       @Param(value = "stime") String stime, @Param(value = "etime") String etime,
+                                       @Param(value = "type")List<String> type,
+                                       @Param(value = "startindex") Integer startindex,@Param(value = "pagesize") Integer pagesize);
+
+    Integer updateOne(Sys_reportlogPojo bdmsPredictPojo);
+
+    Integer insertOne(Sys_reportlogPojo bdmsPredictPojo);
+
+    Integer deleteOne(@Param(value = "ID") String ID);
+
+    Integer selectCount(@Param(value = "ID") String ID, @Param(value = "key") String key,
+                        @Param(value = "stime") String stime, @Param(value = "etime") String etime,
+                        @Param(value = "type")List<String> type);
+}

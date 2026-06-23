@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_MBMANAGEData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_MBMANAGEPojo">
+        select a.* from ES_MBMANAGE a
+        <where>
+            <if test="ID != null and ID != ''">
+                and MB_ID = #{ID}
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM ES_MBMANAGE
+        <where>
+            <if test="ID != null and ID != ''">
+                and MB_ID = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_MBMANAGEPojo">
+        insert into ES_MBMANAGE
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="MB_ID != null and MB_ID != ''">
+                MB_ID,
+            </if>
+            <if test="MB_NAME != null and MB_NAME != ''">
+                MB_NAME,
+            </if>
+            <if test="MB_METHODNAME != null and MB_METHODNAME != ''">
+                MB_METHODNAME,
+            </if>
+            <if test="MB_FUNCTION != null and MB_FUNCTION != ''">
+                MB_FUNCTION,
+            </if>
+            <if test="MB_PATH != null and MB_PATH != ''">
+                MB_PATH,
+            </if>
+            <if test="MB_MANAGER != null and MB_MANAGER != ''">
+                MB_MANAGER,
+            </if>
+            <if test="MB_PARA != null and MB_PARA != ''">
+                MB_PARA,
+            </if>
+            <if test="MB_PARANOTE != null and MB_PARANOTE != ''">
+                MB_PARANOTE,
+            </if>
+            <if test="MB_NOTE != null and MB_NOTE != ''">
+                MB_NOTE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="MB_ID != null and MB_ID != ''">
+                #{MB_ID},
+            </if>
+            <if test="MB_NAME != null and MB_NAME != ''">
+                #{MB_NAME},
+            </if>
+            <if test="MB_METHODNAME != null and MB_METHODNAME != ''">
+                #{MB_METHODNAME},
+            </if>
+            <if test="MB_FUNCTION != null and MB_FUNCTION != ''">
+                #{MB_FUNCTION},
+            </if>
+            <if test="MB_PATH != null and MB_PATH != ''">
+                #{MB_PATH},
+            </if>
+            <if test="MB_MANAGER != null and MB_MANAGER != ''">
+                #{MB_MANAGER},
+            </if>
+            <if test="MB_PARA != null and MB_PARA != ''">
+                #{MB_PARA},
+            </if>
+            <if test="MB_PARANOTE != null and MB_PARANOTE != ''">
+                #{MB_PARANOTE},
+            </if>
+            <if test="MB_NOTE != null and MB_NOTE != ''">
+                #{MB_NOTE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_MBMANAGEPojo">
+        insert into ES_MBMANAGE(MB_ID,MB_NAME,MB_METHODNAME,MB_FUNCTION,MB_PATH,MB_MANAGER,MB_PARA,MB_PARANOTE,MB_NOTE) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.MB_ID},#{obj.MB_NAME},#{obj.MB_METHODNAME},#{obj.MB_FUNCTION},#{obj.MB_PATH},#{obj.MB_MANAGER},#{obj.MB_PARA},#{obj.MB_PARANOTE},#{obj.MB_NOTE})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_MBMANAGEPojo">
+        update ES_MBMANAGE
+        <set>
+            <if test="MB_NAME != null and MB_NAME != ''">
+                MB_NAME = #{MB_NAME},
+            </if>
+            <if test="MB_METHODNAME != null and MB_METHODNAME != ''">
+                MB_METHODNAME = #{MB_METHODNAME},
+            </if>
+            <if test="MB_FUNCTION != null and MB_FUNCTION != ''">
+                MB_FUNCTION = #{MB_FUNCTION},
+            </if>
+            <if test="MB_PATH != null and MB_PATH != ''">
+                MB_PATH = #{MB_PATH},
+            </if>
+            <if test="MB_MANAGER != null and MB_MANAGER != ''">
+                MB_MANAGER = #{MB_MANAGER},
+            </if>
+            <if test="MB_PARA != null and MB_PARA != ''">
+                MB_PARA = #{MB_PARA},
+            </if>
+            <if test="MB_PARANOTE != null and MB_PARANOTE != ''">
+                MB_PARANOTE = #{MB_PARANOTE},
+            </if>
+            <if test="MB_NOTE != null and MB_NOTE != ''">
+                MB_NOTE = #{MB_NOTE},
+            </if>
+        </set>
+        where MB_ID = #{MB_ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_MBMANAGE where MB_ID = #{ID}
+    </delete>
+</mapper>

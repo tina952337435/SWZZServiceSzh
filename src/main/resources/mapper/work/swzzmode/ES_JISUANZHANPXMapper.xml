@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_JISUANZHANPXData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_JISUANZHANPXPojo">
+        select a.*,rownum rnum from ES_JISUANZHANPX a
+        <where>
+            <if test="ID != null and ID != ''">
+                and STCD = #{ID}
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM ES_JISUANZHANPX
+        <where>
+            <if test="ID != null and ID != ''">
+                and STCD = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_JISUANZHANPXPojo">
+        insert into ES_JISUANZHANPX
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="STNM != null and STNM != ''">
+                STNM,
+            </if>
+            <if test="PX != null">
+                PX,
+            </if>
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="STNM != null and STNM != ''">
+                #{STNM},
+            </if>
+            <if test="PX != null">
+                #{PX},
+            </if>
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_JISUANZHANPXPojo">
+        insert into ES_JISUANZHANPX(STCD,STNM,PX,ID) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.STCD},#{obj.STNM},#{obj.PX},#{obj.ID})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_JISUANZHANPXPojo">
+        update ES_JISUANZHANPX
+        <set>
+            <if test="STNM != null and STNM != ''">
+                STNM = #{STNM},
+            </if>
+            <if test="PX != null">
+                PX = #{PX},
+            </if>
+            <if test="ID != null and ID != ''">
+                ID = #{ID},
+            </if>
+        </set>
+        where STCD = #{STCD}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_JISUANZHANPX where STCD = #{ID}
+    </delete>
+</mapper>

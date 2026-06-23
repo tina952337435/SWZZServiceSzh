@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.RTSQGL_STCDData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GL_STCDPojo">
+        select * from GL_STCD
+        <where>
+            <if test="STCDList != null and STCDList.size() > 0">
+                and STCD in
+                <foreach collection="STCDList" open="(" close=")" item="STCD" separator=",">
+                    #{STCD}
+                </foreach>
+            </if>
+        </where>
+        order by orderby asc
+    </select>
+    <insert id="insertOne">
+        insert into GL_STCD
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="NAME != null and NAME != ''">
+                NAME,
+            </if>
+            <if test="URL != null and URL != ''">
+                URL,
+            </if>
+            <if test="ORDERBY != null">
+                ORDERBY,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="STTP != null and STTP != ''">
+                STTP,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="NAME != null and NAME != ''">
+                #{NAME},
+            </if>
+            <if test="URL != null and URL != ''">
+                #{URL},
+            </if>
+            <if test="ORDERBY != null">
+                #{ORDERBY},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="STTP != null and STTP != ''">
+                #{STTP},
+            </if>
+        </trim>
+    </insert>
+    <update id="upDateOne">
+        update GL_STCD
+        <set>
+            <if test="ID != null and ID != ''">
+                ID = #{ID},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="NAME != null and NAME != ''">
+                NAME = #{NAME},
+            </if>
+            <if test="URL != null and URL != ''">
+                URL = #{URL},
+            </if>
+            <if test="ORDERBY != null">
+                ORDERBY = #{ORDERBY},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+            <if test="STTP != null and STTP != ''">
+                STTP = #{STTP},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from GL_STCD where ID = #{ID}
+    </delete>
+</mapper>

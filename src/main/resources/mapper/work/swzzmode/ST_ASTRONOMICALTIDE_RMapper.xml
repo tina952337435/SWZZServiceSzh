@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ST_ASTRONOMICALTIDE_RData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_ASTRONOMICALTIDE_RPojo">
+        select a.ZHANID,a.Z,a.ISIN,DATE_FORMAT(a.tm, '%Y-%m-%d %H:%i:%s') as TM from "st_AstronomicalTide_r" a
+        <where>
+            <if test="IDList != null and IDList.size() > 0">
+                and ZHANID in
+                <foreach collection="IDList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+<!--            <if test="key != null and key != ''">-->
+<!--                and ZHANNAMEA like concat('%',concat(#{key},'%'))-->
+<!--                or ZHANNAMEB like concat('%',concat(#{key},'%'))-->
+<!--                or ZHANNAMEC like concat('%',concat(#{key},'%'))-->
+<!--            </if>-->
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+
+<!--            <if test="type != null and type.size() > 0">-->
+<!--                and SEASONTYPE in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+
+
+    <select id="selectListNew" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_ASTRONOMICALTIDE_RPojo">
+        select * from "st_AstronomicalTide_r" a
+        <where>
+            <if test="IDList != null and IDList.size() > 0">
+                and ZHANID in
+                <foreach collection="IDList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+        </where>
+        order by tm asc
+    </select>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM "st_AstronomicalTide_r"
+        <where>
+            <if test="IDList != null and IDList.size() > 0">
+                and ZHANID in
+                <foreach collection="IDList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <!--            <if test="key != null and key != ''">-->
+            <!--                and ZHANNAMEA like concat('%',concat(#{key},'%'))-->
+            <!--                or ZHANNAMEB like concat('%',concat(#{key},'%'))-->
+            <!--                or ZHANNAMEC like concat('%',concat(#{key},'%'))-->
+            <!--            </if>-->
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+            <!--            <if test="type != null and type.size() > 0">-->
+            <!--                and SEASONTYPE in-->
+            <!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+            <!--                    #{item}-->
+            <!--                </foreach>-->
+            <!--            </if>-->
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_ASTRONOMICALTIDE_RPojo">
+        insert into "st_AstronomicalTide_r"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID,
+            </if>
+            <if test="TM != null and TM != ''">
+                TM,
+            </if>
+            <if test="Z != null">
+                Z,
+            </if>
+            <if test="ISIN != null and ISIN != ''">
+                ISIN,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZHANID != null and ZHANID != ''">
+                #{ZHANID},
+            </if>
+            <if test="TM != null and TM != ''">
+                #{TM},
+            </if>
+            <if test="Z != null">
+                #{Z},
+            </if>
+            <if test="ISIN != null and ISIN != ''">
+                #{ISIN},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_ASTRONOMICALTIDE_RPojo">
+        update "st_AstronomicalTide_r"
+        <set>
+            <if test="Z != null">
+                Z = #{Z},
+            </if>
+            <if test="ISIN != null and ISIN != ''">
+                ISIN = #{ISIN},
+            </if>
+        </set>
+        where ZHANID = #{ZHANID} and TM = #{TM}
+    </update>
+    <delete id="deleteOne">
+        delete from "st_AstronomicalTide_r" where ZHANID = #{ID} and TM = #{TM}
+    </delete>
+
+    <delete id="deleteALL" parameterType="list">
+        delete from "st_AstronomicalTide_r" where
+        <foreach collection="bpPojo" item="item" separator="or">
+            (
+            ZHANID = #{item.stcd,jdbcType=VARCHAR}
+            and
+            TM = #{item.startdate,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </delete>
+
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_ASTRONOMICALTIDE_RPojo">
+        insert into ES_RAINFALL(
+            ZHANID,
+            TM,
+            Z,
+            ISIN
+            ) values
+        <foreach collection="bpPojo" item="obj" separator=",">
+            (
+            #{obj.ZHANID,jdbcType=VARCHAR},
+            #{obj.TM,jdbcType=VARCHAR},
+            #{obj.Z,jdbcType=DOUBLE},
+            #{obj.ISIN,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="bpPojo" open="begin" close=";end;" item="obj" separator=";">
+            update "st_AstronomicalTide_r"
+            <set>
+                <if test="obj.Z != null">
+                    Z = #{obj.Z,jdbcType=DOUBLE},
+                </if>
+                <if test="obj.ISIN != null and obj.ISIN != ''">
+                    ISIN = #{obj.ISIN,jdbcType=VARCHAR},
+                </if>
+            </set>
+            where ZHANID = #{obj.ZHANID,jdbcType=VARCHAR} and TM = #{obj.TM,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.HY_DP_CData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.HY_DP_CPojo">
+        select * from HY_DP_C
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and DT >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DT <= #{etime} ]]>
+            </if>
+            <if test="idList != null and idList.size() > 0 ">
+                and STCD in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectListByPage" resultType="swzzmodeserver.workserver.pojo.swzzflood.HY_DP_CPojo">
+        select * from HY_DP_C
+        <where>
+            <if test="key != null and key != ''">
+                and PRCD like concat(concat('%',#{key}),'%')
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and DT >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DT <= #{etime} ]]>
+            </if>
+            <if test="idList != null and idList.size() > 0 ">
+                and STCD in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="prcdList != null and prcdList.size() > 0 ">
+                and PRCD in
+                <foreach collection="prcdList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+</mapper>

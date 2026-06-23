@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.ST_PSTAT_RData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PSTAT_RPojo">
+        select   STCD,
+        CONVERT(varchar(19), IDTM,120) as IDTM,
+        STTDRCD,
+        ACCP,
+        WTH
+        from ST_PSTAT_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and  IDTM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and IDTM <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and ST_PSTAT_R.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="pathname != null and pathname.size() > 0">
+                and ST_PSTAT_R.STTDRCD in
+                <foreach collection="pathname" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+        </where>
+        order by  IDTM asc
+    </select>
+
+    <select id="selectListIsDay" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+        select STCD,SUM(DRP) DRP,CONVERT(varchar(19), Max(TM),120) as TM from ST_PPTN_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+        group by STCD order by DRP desc
+    </select>
+    <!-- 小时数据-->
+    <select id="selectListHour" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PSTAT_RPojo">
+        select   STCD,
+        CONVERT(varchar(19), DATEADD(HOUR, -1, IDTM),120) as IDTM,
+        STTDRCD,
+        ACCP
+        from ST_PSTAT_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and  DATEADD(HOUR, -1, IDTM) >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DATEADD(HOUR, -1, IDTM) <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and ST_PSTAT_R.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="pathname != null and pathname.size() > 0">
+                and ST_PSTAT_R.STTDRCD in
+                <foreach collection="pathname" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+        </where>
+        order by  DATEADD(HOUR, -1, IDTM) asc
+    </select>
+
+    <!--    日数据-->
+    <select id="selectListDay" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PSTAT_RPojo">
+        select   STCD,
+        CONVERT(varchar(19), DATEADD(HOUR, -24, IDTM),120) as IDTM,
+        STTDRCD,
+        ACCP
+        from ST_PSTAT_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and  DATEADD(HOUR, -24, IDTM) >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DATEADD(HOUR, -24, IDTM) <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and ST_PSTAT_R.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="pathname != null and pathname.size() > 0">
+                and ST_PSTAT_R.STTDRCD in
+                <foreach collection="pathname" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+        </where>
+        order by  DATEADD(HOUR, -24, IDTM) asc
+    </select>
+
+    <!--    月数据-->
+    <select id="selectListMonth" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PSTAT_RPojo">
+        select   STCD,
+        CONVERT(varchar(19), DATEADD(MONTH, -1, IDTM),120) as IDTM,
+        STTDRCD,
+        ACCP
+        from ST_PSTAT_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and  DATEADD(MONTH, -1, IDTM) >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DATEADD(MONTH, -1, IDTM) <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and ST_PSTAT_R.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="pathname != null and pathname.size() > 0">
+                and ST_PSTAT_R.STTDRCD in
+                <foreach collection="pathname" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+        </where>
+        order by  DATEADD(MONTH, -1, IDTM) asc
+    </select>
+
+    <select id="selectListYear" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PSTAT_RPojo">
+        select   STCD,
+        CONVERT(varchar(19), DATEADD(YEAR, -1, IDTM),120) as IDTM,
+        STTDRCD,
+        ACCP
+        from ST_PSTAT_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and  DATEADD(YEAR, -1, IDTM) >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DATEADD(YEAR, -1, IDTM) <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and ST_PSTAT_R.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="pathname != null and pathname.size() > 0">
+                and ST_PSTAT_R.STTDRCD in
+                <foreach collection="pathname" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+        </where>
+        order by  DATEADD(YEAR, -1, IDTM) asc
+    </select>
+
+
+    <select id="selectListIsLast" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PSTAT_RPojo">
+        select STCD,CONVERT(varchar(19), Max(IDTM),120) as IDTM from ST_PSTAT_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and IDTM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and IDTM <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="pathname != null and pathname.size() > 0">
+                and STTDRCD in
+                <foreach collection="pathname" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+        </where>
+        group by STCD
+    </select>
+
+
+    <select id="selectListTotal" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PSTAT_RPojo">
+        select STCD,SUM(ACCP) ACCP,CONVERT(varchar(19), Max(IDTM) ,120) as IDTM from ST_PSTAT_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and IDTM > #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and IDTM <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="pathname != null and pathname.size() > 0">
+                and ST_PSTAT_R.STTDRCD in
+                <foreach collection="pathname" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+        </where>
+        group by STCD
+        order by ACCP asc
+    </select>
+
+
+    <select id="selectListTotalDay" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PSTAT_RPojo">
+        select STCD,SUM(ACCP) ACCP from ST_PSTAT_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and DATEADD(HOUR, -24, IDTM) > #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DATEADD(HOUR, -24, IDTM) <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="pathname != null and pathname.size() > 0">
+                and ST_PSTAT_R.STTDRCD in
+                <foreach collection="pathname" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+        </where>
+        group by STCD
+        order by ACCP asc
+    </select>
+
+    <!--   修正版：STAT_DATE表示统计周期结束时间（次日8点）-->
+    <select id="selectListDayly" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PSTAT_RPojo">
+        SELECT
+        STCD,
+        CASE
+        WHEN DATEPART(HOUR, IDTM) >8 THEN CONVERT(VARCHAR(10), DATEADD(DAY, 1, IDTM), 120)
+        ELSE CONVERT(VARCHAR(10), IDTM, 120)
+        END + ' 08:00:00' AS IDTM,
+        SUM(ACCP) AS ACCP,
+        '1' as STTDRCD
+        FROM
+        ST_PSTAT_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and IDTM > #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and IDTM <= #{etime} ]]>
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="pathname != null and pathname.size() > 0">
+                and STTDRCD in
+                <foreach collection="pathname" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+        </where>
+        GROUP BY
+        STCD,
+        CASE
+        WHEN DATEPART(HOUR, IDTM) >8 THEN CONVERT(VARCHAR(10), DATEADD(DAY, 1, IDTM), 120)
+        ELSE CONVERT(VARCHAR(10), IDTM, 120)
+        END
+        ORDER BY
+        IDTM, STCD;
+    </select>
+
+    <update id="upDateOne" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PSTAT_RPojo">
+        update ST_PSTAT_R
+        <set>
+            <if test="ACCP != null">
+                ACCP= #{ACCP},
+            </if>
+            <if test="WTH != null and WTH != ''">
+                WTH= #{WTH}
+            </if>
+        </set>
+        where STCD = #{STCD} and IDTM= #{IDTM} and STTDRCD=#{STTDRCD}
+    </update>
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" item="obj" separator=";">
+            update ST_PSTAT_R
+            <set>
+                <if test="obj.ACCP!=null">
+                    ACCP=#{obj.ACCP},
+                </if>
+                <if test="obj.WTH != null and obj.WTH != ''">
+                    WTH= #{obj.WTH}
+                </if>
+            </set>
+            where STCD = #{obj.STCD} and IDTM= #{obj.IDTM} and STTDRCD=#{obj.STTDRCD}
+        </foreach>
+    </update>
+    
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PSTAT_RPojo">
+        insert into ST_PSTAT_R(STCD,IDTM,STTDRCD,ACCP) values
+        <foreach collection="quPojo" item="pojo" separator=",">
+            (#{pojo.STCD},#{pojo.IDTM},#{pojo.STTDRCD},#{pojo.ACCP})
+        </foreach>
+    </insert>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PSTAT_RPojo">
+        insert into ST_PSTAT_R
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="IDTM != null and IDTM != ''">
+                IDTM,
+            </if>
+            <if test="STTDRCD != null and STTDRCD != ''">
+                STTDRCD,
+            </if>
+            <if test="ACCP != null">
+                ACCP,
+            </if>
+            <if test="WTH != null and WTH != ''">
+                WTH,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="IDTM != null and IDTM != ''">
+                #{IDTM},
+            </if>
+            <if test="STTDRCD != null and STTDRCD != ''">
+                #{STTDRCD},
+            </if>
+            <if test="ACCP != null">
+                #{ACCP},
+            </if>
+            <if test="WTH != null and WTH != ''">
+                #{WTH},
+            </if>
+        </trim>
+    </insert>
+</mapper>

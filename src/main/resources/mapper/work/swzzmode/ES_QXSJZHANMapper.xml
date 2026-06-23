@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_QXSJZHANData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_QXSJZHANPojo">
+        select a.* from ES_QXSJZHAN a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZHANID = #{ID}
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_QXSJZHAN
+        <where>
+            <if test="ID != null and ID != ''">
+                and ZHANID = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_QXSJZHANPojo">
+        insert into ES_QXSJZHAN
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID,
+            </if>
+            <if test="GRIDCODE != null and GRIDCODE != ''">
+                GRIDCODE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZHANID != null and ZHANID != ''">
+                #{ZHANID},
+            </if>
+            <if test="GRIDCODE != null and GRIDCODE != ''">
+                #{GRIDCODE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_QXSJZHANPojo">
+        insert into ES_QXSJZHAN(ZHANID,GRIDCODE) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.ZHANID},#{obj.GRIDCODE})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_QXSJZHANPojo">
+        update ES_QXSJZHAN
+        <set>
+            <if test="GRIDCODE != null and GRIDCODE != ''">
+                GRIDCODE = #{GRIDCODE},
+            </if>
+        </set>
+        where ZHANID = #{ZHANID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_QXSJZHAN where ZHANID = #{ID}
+    </delete>
+</mapper>

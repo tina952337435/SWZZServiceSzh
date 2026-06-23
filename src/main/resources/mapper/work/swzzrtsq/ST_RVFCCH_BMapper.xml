@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.RTSQST_RVFCCH_BData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RVFCCH_BPojo">
+        select * from ST_RVFCCH_B
+        <where>
+            <if test="STCD != null and STCD !=''">
+                and STCD = #{STCD}
+            </if>
+        </where>
+    </select>
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RVFCCH_BPojo">
+        insert into ST_RVFCCH_B
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="LDKEL != null">
+                LDKEL,
+            </if>
+            <if test="RDKEL != null">
+                RDKEL,
+            </if>
+            <if test="WRZ != null">
+                WRZ,
+            </if>
+            <if test="WRQ != null">
+                WRQ,
+            </if>
+            <if test="GRZ != null">
+                GRZ,
+            </if>
+            <if test="GRQ != null">
+                GRQ,
+            </if>
+            <if test="FLPQ != null">
+                FLPQ,
+            </if>
+            <if test="OBHTZ != null">
+                OBHTZ,
+            </if>
+            <if test="OBHTZTM != null and OBHTZTM != ''">
+                OBHTZTM,
+            </if>
+            <if test="IVHZ != null">
+                IVHZ,
+            </if>
+            <if test="IVHZTM != null and IVHZTM != ''">
+                IVHZTM,
+            </if>
+            <if test="OBMXQ != null">
+                OBMXQ,
+            </if>
+            <if test="OBMXQTM != null and OBMXQTM != ''">
+                OBMXQTM,
+            </if>
+            <if test="IVMXQ != null">
+                IVMXQ,
+            </if>
+            <if test="IVMXQTM != null and IVMXQTM != ''">
+                IVMXQTM,
+            </if>
+            <if test="HMXS != null">
+                HMXS,
+            </if>
+            <if test="HMXSTM != null and HMXSTM != ''">
+                HMXSTM,
+            </if>
+            <if test="HMXAVV != null">
+                HMXAVV,
+            </if>
+            <if test="HMXAVVTM != null and HMXAVVTM != ''">
+                HMXAVVTM,
+            </if>
+            <if test="HLZ != null">
+                HLZ,
+            </if>
+            <if test="HLZTM != null and HLZTM != ''">
+                HLZTM,
+            </if>
+            <if test="HMNQ != null">
+                HMNQ,
+            </if>
+            <if test="HMNQTM != null and HMNQTM != ''">
+                HMNQTM,
+            </if>
+            <if test="TAZ != null">
+                TAZ,
+            </if>
+            <if test="TAQ != null">
+                TAQ,
+            </if>
+            <if test="LAZ != null">
+                LAZ,
+            </if>
+            <if test="LAQ != null">
+                LAQ,
+            </if>
+            <if test="SFZ != null">
+                SFZ,
+            </if>
+            <if test="SFQ != null">
+                SFQ,
+            </if>
+            <if test="MODITIME != null and MODITIME != ''">
+                MODITIME,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="LDKEL != null">
+                #{LDKEL},
+            </if>
+            <if test="RDKEL != null">
+                #{RDKEL},
+            </if>
+            <if test="WRZ != null">
+                #{WRZ},
+            </if>
+            <if test="WRQ != null">
+                #{WRQ},
+            </if>
+            <if test="GRZ != null">
+                #{GRZ},
+            </if>
+            <if test="GRQ != null">
+                #{GRQ},
+            </if>
+            <if test="FLPQ != null">
+                #{FLPQ},
+            </if>
+            <if test="OBHTZ != null">
+                #{OBHTZ},
+            </if>
+            <if test="OBHTZTM != null and OBHTZTM != ''">
+                #{OBHTZTM},
+            </if>
+            <if test="IVHZ != null">
+                #{IVHZ},
+            </if>
+            <if test="IVHZTM != null and IVHZTM != ''">
+                #{IVHZTM},
+            </if>
+            <if test="OBMXQ != null">
+                #{OBMXQ},
+            </if>
+            <if test="OBMXQTM != null and OBMXQTM != ''">
+                #{OBMXQTM},
+            </if>
+            <if test="IVMXQ != null">
+                #{IVMXQ},
+            </if>
+            <if test="IVMXQTM != null and IVMXQTM != ''">
+                #{IVMXQTM},
+            </if>
+            <if test="HMXS != null">
+                #{HMXS},
+            </if>
+            <if test="HMXSTM != null and HMXSTM != ''">
+                #{HMXSTM},
+            </if>
+            <if test="HMXAVV != null">
+                #{HMXAVV},
+            </if>
+            <if test="HMXAVVTM != null and HMXAVVTM != ''">
+                #{HMXAVVTM},
+            </if>
+            <if test="HLZ != null">
+                #{HLZ},
+            </if>
+            <if test="HLZTM != null and HLZTM != ''">
+                #{HLZTM},
+            </if>
+            <if test="HMNQ != null">
+                #{HMNQ},
+            </if>
+            <if test="HMNQTM != null and HMNQTM != ''">
+                #{HMNQTM},
+            </if>
+            <if test="TAZ != null">
+                #{TAZ},
+            </if>
+            <if test="TAQ != null">
+                #{TAQ},
+            </if>
+            <if test="LAZ != null">
+                #{LAZ},
+            </if>
+            <if test="LAQ != null">
+                #{LAQ},
+            </if>
+            <if test="SFZ != null">
+                #{SFZ},
+            </if>
+            <if test="SFQ != null">
+                #{SFQ},
+            </if>
+            <if test="MODITIME != null and MODITIME != ''">
+                #{MODITIME},
+            </if>
+        </trim>
+    </insert>
+    <update id="upDateOne" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RVFCCH_BPojo">
+        update ST_RVFCCH_B
+        <set>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="LDKEL != null">
+                LDKEL = #{LDKEL},
+            </if>
+            <if test="RDKEL != null">
+                RDKEL = #{RDKEL},
+            </if>
+            <if test="WRZ != null">
+                WRZ = #{WRZ},
+            </if>
+            <if test="WRQ != null">
+                WRQ = #{WRQ},
+            </if>
+            <if test="GRZ != null">
+                GRZ = #{GRZ},
+            </if>
+            <if test="GRQ != null">
+                GRQ = #{GRQ},
+            </if>
+            <if test="FLPQ != null">
+                FLPQ = #{FLPQ},
+            </if>
+            <if test="OBHTZ != null">
+                OBHTZ = #{OBHTZ},
+            </if>
+            <if test="OBHTZTM != null and OBHTZTM != ''">
+                OBHTZTM = #{OBHTZTM},
+            </if>
+            <if test="IVHZ != null">
+                IVHZ = #{IVHZ},
+            </if>
+            <if test="IVHZTM != null and IVHZTM != ''">
+                IVHZTM = #{IVHZTM},
+            </if>
+            <if test="OBMXQ != null">
+                OBMXQ = #{OBMXQ},
+            </if>
+            <if test="OBMXQTM != null and OBMXQTM != ''">
+                OBMXQTM = #{OBMXQTM},
+            </if>
+            <if test="IVMXQ != null">
+                IVMXQ = #{IVMXQ},
+            </if>
+            <if test="IVMXQTM != null and IVMXQTM != ''">
+                IVMXQTM = #{IVMXQTM},
+            </if>
+            <if test="HMXS != null">
+                HMXS = #{HMXS},
+            </if>
+            <if test="HMXSTM != null and HMXSTM != ''">
+                HMXSTM = #{HMXSTM},
+            </if>
+            <if test="HMXAVV != null">
+                HMXAVV = #{HMXAVV},
+            </if>
+            <if test="HMXAVVTM != null and HMXAVVTM != ''">
+                HMXAVVTM = #{HMXAVVTM},
+            </if>
+            <if test="HLZ != null">
+                HLZ = #{HLZ},
+            </if>
+            <if test="HLZTM != null and HLZTM != ''">
+                HLZTM = #{HLZTM},
+            </if>
+            <if test="HMNQ != null">
+                HMNQ = #{HMNQ},
+            </if>
+            <if test="HMNQTM != null and HMNQTM != ''">
+                HMNQTM = #{HMNQTM},
+            </if>
+            <if test="TAZ != null">
+                TAZ = #{TAZ},
+            </if>
+            <if test="TAQ != null">
+                TAQ = #{TAQ},
+            </if>
+            <if test="LAZ != null">
+                LAZ = #{LAZ},
+            </if>
+            <if test="LAQ != null">
+                LAQ = #{LAQ},
+            </if>
+            <if test="SFZ != null">
+                SFZ = #{SFZ},
+            </if>
+            <if test="SFQ != null">
+                SFQ = #{SFQ},
+            </if>
+            <if test="MODITIME != null and MODITIME != ''">
+                MODITIME = #{MODITIME},
+            </if>
+        </set>
+        where STCD = #{STCD}
+    </update>
+    <delete id="deleteOne">
+        delete from ST_RVFCCH_B where STCD = #{STCD}
+    </delete>
+</mapper>

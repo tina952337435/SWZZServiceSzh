@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.XQKB_LISTData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.XQKB_LISTPojo">
+        select * from XQKB_LIST
+        <where>
+            <if test="pathnameList != null and pathnameList.size() > 0 ">
+                and XQKB_TYPE in
+                <foreach collection="pathnameList" open="(" close=")" item="type" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and XQKB_TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and XQKB_TM <= #{etime} ]]>
+            </if>
+        </where>
+        order by XQKB_TM desc
+    </select>
+    <select id="selectOne" resultType="swzzmodeserver.workserver.pojo.swzzflood.XQKB_LISTPojo">
+        select * from XQKB_LIST where XQKB_ID = #{XQKB_ID}
+    </select>
+    <insert id="insertOne">
+        insert into XQKB_LIST
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="XQKB_ID != null and XQKB_ID != ''">
+                XQKB_ID,
+            </if>
+            <if test="XQKB_TITLE != null and XQKB_TITLE != ''">
+                XQKB_TITLE,
+            </if>
+            <if test="XQKB_TM != null and XQKB_TM != ''">
+                XQKB_TM,
+            </if>
+            <if test="XQKB_STM != null and XQKB_STM != ''">
+                XQKB_STM,
+            </if>
+            <if test="XQKB_ETM != null and XQKB_ETM != ''">
+                XQKB_ETM,
+            </if>
+            <if test="XQKB_QIHAO != null">
+                XQKB_QIHAO,
+            </if>
+            <if test="XQKB_FILE != null and XQKB_FILE != ''">
+                XQKB_FILE,
+            </if>
+            <if test="XQKB_OWEN != null and XQKB_OWEN != ''">
+                XQKB_OWEN,
+            </if>
+            <if test="XQKB_TYPE != null and XQKB_TYPE != ''">
+                XQKB_TYPE,
+            </if>
+            <if test="XQKB_NOTE != null and XQKB_NOTE != ''">
+                XQKB_NOTE,
+            </if>
+            <if test="XQKB_YLNOTE != null and XQKB_YLNOTE != ''">
+                XQKB_YLNOTE,
+            </if>
+            <if test="XQKB_SWNOTE != null and XQKB_SWNOTE != ''">
+                XQKB_SWNOTE,
+            </if>
+            <if test="XQKB_LLNOTE != null and XQKB_LLNOTE != ''">
+                XQKB_LLNOTE,
+            </if>
+            <if test="XQKB_DZMTITLE != null and XQKB_DZMTITLE != ''">
+                XQKB_DZMTITLE,
+            </if>
+            <if test="XQKB_TOPTITLE != null and XQKB_TOPTITLE != ''">
+                XQKB_TOPTITLE,
+            </if>
+            <if test="XQKB_DZMPIC != null and XQKB_DZMPIC != ''">
+                XQKB_DZMPIC,
+            </if>
+            <if test="XQKB_YAOSU != null and XQKB_YAOSU != ''">
+                XQKB_YAOSU,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="XQKB_ID != null and XQKB_ID != ''">
+                #{XQKB_ID},
+            </if>
+            <if test="XQKB_TITLE != null and XQKB_TITLE != ''">
+                #{XQKB_TITLE},
+            </if>
+            <if test="XQKB_TM != null and XQKB_TM != ''">
+                #{XQKB_TM},
+            </if>
+            <if test="XQKB_STM != null and XQKB_STM != ''">
+                #{XQKB_STM},
+            </if>
+            <if test="XQKB_ETM != null and XQKB_ETM != ''">
+                #{XQKB_ETM},
+            </if>
+            <if test="XQKB_QIHAO != null">
+                #{XQKB_QIHAO},
+            </if>
+            <if test="XQKB_FILE != null and XQKB_FILE != ''">
+                #{XQKB_FILE},
+            </if>
+            <if test="XQKB_OWEN != null and XQKB_OWEN != ''">
+                #{XQKB_OWEN},
+            </if>
+            <if test="XQKB_TYPE != null and XQKB_TYPE != ''">
+                #{XQKB_TYPE},
+            </if>
+            <if test="XQKB_NOTE != null and XQKB_NOTE != ''">
+                #{XQKB_NOTE},
+            </if>
+            <if test="XQKB_YLNOTE != null and XQKB_YLNOTE != ''">
+                #{XQKB_YLNOTE},
+            </if>
+            <if test="XQKB_SWNOTE != null and XQKB_SWNOTE != ''">
+                #{XQKB_SWNOTE},
+            </if>
+            <if test="XQKB_LLNOTE != null and XQKB_LLNOTE != ''">
+                #{XQKB_LLNOTE},
+            </if>
+            <if test="XQKB_DZMTITLE != null and XQKB_DZMTITLE != ''">
+                #{XQKB_DZMTITLE},
+            </if>
+            <if test="XQKB_TOPTITLE != null and XQKB_TOPTITLE != ''">
+                #{XQKB_TOPTITLE},
+            </if>
+            <if test="XQKB_DZMPIC != null and XQKB_DZMPIC != ''">
+                #{XQKB_DZMPIC},
+            </if>
+            <if test="XQKB_YAOSU != null and XQKB_YAOSU != ''">
+                #{XQKB_YAOSU},
+            </if>
+        </trim>
+    </insert>
+    <update id="upDateOne">
+        update XQKB_LIST
+        <set>
+            <if test="XQKB_TITLE != null and XQKB_TITLE != ''">
+                XQKB_TITLE = #{XQKB_TITLE},
+            </if>
+            <if test="XQKB_TM != null and XQKB_TM != ''">
+                XQKB_TM = #{XQKB_TM},
+            </if>
+            <if test="XQKB_STM != null and XQKB_STM != ''">
+                XQKB_STM = #{XQKB_STM},
+            </if>
+            <if test="XQKB_ETM != null and XQKB_ETM != ''">
+                XQKB_ETM = #{XQKB_ETM},
+            </if>
+            <if test="XQKB_QIHAO != null">
+                XQKB_QIHAO = #{XQKB_QIHAO},
+            </if>
+            <if test="XQKB_FILE != null and XQKB_FILE != ''">
+                XQKB_FILE = #{XQKB_FILE},
+            </if>
+            <if test="XQKB_OWEN != null and XQKB_OWEN != ''">
+                XQKB_OWEN = #{XQKB_OWEN},
+            </if>
+            <if test="XQKB_TYPE != null and XQKB_TYPE != ''">
+                XQKB_TYPE = #{XQKB_TYPE},
+            </if>
+            <if test="XQKB_NOTE != null and XQKB_NOTE != ''">
+                XQKB_NOTE = #{XQKB_NOTE},
+            </if>
+            <if test="XQKB_YLNOTE != null and XQKB_YLNOTE != ''">
+                XQKB_YLNOTE = #{XQKB_YLNOTE},
+            </if>
+            <if test="XQKB_SWNOTE != null and XQKB_SWNOTE != ''">
+                XQKB_SWNOTE = #{XQKB_SWNOTE},
+            </if>
+            <if test="XQKB_LLNOTE != null and XQKB_LLNOTE != ''">
+                XQKB_LLNOTE = #{XQKB_LLNOTE},
+            </if>
+            <if test="XQKB_DZMTITLE != null and XQKB_DZMTITLE != ''">
+                XQKB_DZMTITLE = #{XQKB_DZMTITLE},
+            </if>
+            <if test="XQKB_TOPTITLE != null and XQKB_TOPTITLE != ''">
+                XQKB_TOPTITLE = #{XQKB_TOPTITLE},
+            </if>
+            <if test="XQKB_DZMPIC != null and XQKB_DZMPIC != ''">
+                XQKB_DZMPIC = #{XQKB_DZMPIC},
+            </if>
+            <if test="XQKB_YAOSU != null and XQKB_YAOSU != ''">
+                XQKB_YAOSU = #{XQKB_YAOSU},
+            </if>
+        </set>
+        where XQKB_ID = #{XQKB_ID}
+    </update>
+    <delete id="deleteOne">
+        delete from XQKB_LIST where XQKB_ID = #{XQKB_ID}
+    </delete>
+</mapper>

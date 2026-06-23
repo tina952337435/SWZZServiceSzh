@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_ZHANDIANXSData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANXSPojo">
+        select a.* from ES_ZHANDIANXS a
+        <where>
+            <if test="ID != null and ID != ''">
+                and MKEYID = #{ID}
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_ZHANDIANXS
+        <where>
+            <if test="ID != null and ID != ''">
+                and MKEYID = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANXSPojo">
+        insert into ES_ZHANDIANXS
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="MKEYID != null and MKEYID != ''">
+                MKEYID,
+            </if>
+            <if test="XS != null">
+                XS,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="MKEYID != null and MKEYID != ''">
+                #{MKEYID},
+            </if>
+            <if test="XS != null">
+                #{XS},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANXSPojo">
+        insert into ES_ZHANDIANXS(MKEYID,XS) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.MKEYID},#{obj.XS})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANXSPojo">
+        update ES_ZHANDIANXS
+        <set>
+            <if test="XS != null">
+                XS = #{XS},
+            </if>
+        </set>
+        where MKEYID = #{MKEYID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_ZHANDIANXS where MKEYID = #{ID}
+    </delete>
+
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="list" item="obj" separator=";">
+            update ES_ZHANDIANXS
+            <set>
+                <if test="obj.XS != null and obj.XS != ''">
+                    XS = #{obj.XS,jdbcType=VARCHAR},
+                </if>
+            </set>
+            where
+            MKEYID = #{obj.MKEYID,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+</mapper>

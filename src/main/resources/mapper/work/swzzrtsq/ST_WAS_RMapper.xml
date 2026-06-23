@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.RTSQST_WAS_RData">
+    <select id="selectNew" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WAS_RPojo">
+        select A.STCD,A.TM,UPZ,DWZ,TGTQ,SWCHRCD,SUPWPTN,SDWWPTN,MSQMT,INTM from ST_WAS_R as A inner join (
+        select STCD,MAX(TM) TM from ST_WAS_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        group by STCD
+        ) as B on A.STCD = B.STCD and A.TM = B.TM
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and A.STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectHis" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WAS_RPojo">
+        select * from ST_WAS_R
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WAS_RPojo">
+        insert into ST_WAS_R(STCD, TM, UPZ, DWZ, TGTQ, SWCHRCD, SUPWPTN, SDWWPTN, MSQMT, INTM) values
+        <foreach collection="quPojo" item="pojo" separator=",">
+            (
+                #{pojo.stcd}, #{pojo.tm}, #{pojo.upz}, #{pojo.dwz}, #{pojo.tgtq}, 
+                #{pojo.swchrcd}, #{pojo.supwptn}, #{pojo.sdwwptn}, #{pojo.msqmt}, #{pojo.intm}
+            )
+        </foreach>
+    </insert>   
+</mapper>

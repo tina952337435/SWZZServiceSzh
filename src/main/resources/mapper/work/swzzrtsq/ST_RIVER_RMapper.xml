@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.ST_RIVER_RData">
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RIVER_RPojo">
+        insert into ST_RIVER_R(STCD,TM,Z,Q,XSA,XSAVV,XSMXV,FLWCHRCD,WPTN,MSQMT,MSAMT,MSVMT) values
+        <foreach collection="quPojo" item="pojo" separator=",">
+            (#{pojo.STCD},#{pojo.TM},#{pojo.Z},#{pojo.Q},#{pojo.XSA},#{pojo.XSAVV},#{pojo.XSMXV},
+            #{pojo.FLWCHRCD},#{pojo.WPTN},#{pojo.MSQMT},#{pojo.MSAMT},#{pojo.MSVMT})
+        </foreach>
+    </insert>
+
+    <update id="upDateMaxRiver" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RIVER_RPojo">
+        UPDATE st_stbprp_b_stcd a ,
+            (
+            select v.STCD, v.TM,v.Z UPZ from st_river_r v
+            inner join (select STCD, max(TM) TM from st_river_r
+            group by STCD) c on v.STCD = c.STCD and v.TM = c.TM
+        ) b
+        SET a.ZTM = b.TM,a.UPZ=b.UPZ,DWZ=NULL where a.STCD = b.STCD and TYPE = '1'
+        <if test="STCD != null and STCD != ''">
+            and a.STCD = #{STCD}
+        </if>
+    </update>
+</mapper>

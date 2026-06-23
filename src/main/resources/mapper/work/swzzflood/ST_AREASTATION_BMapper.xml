@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.ST_AREASTATION_BData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_AREASTATION_BPojo">
+        select * from ST_AREASTATION_B
+        <where>
+            <if test="BID != null and BID != ''">
+                and BID = #{BID}
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="PAID != null and PAID != ''">
+                and PAID = #{PAID}
+            </if>
+            <if test="BTYPE != null and BTYPE != ''">
+                and BTYPE = #{BTYPE}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ST_AREASTATION_BPojo">
+        insert into ST_AREASTATION_B
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="BID != null and BID != ''">
+                BID,
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="BTYPE != null and BTYPE != ''">
+                BTYPE,
+            </if>
+            <if test="PAID != null and PAID != ''">
+                PAID,
+            </if>
+            <if test="AREA != null">
+                AREA,
+            </if>
+            <if test="AREARATIO != null">
+                AREARATIO,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="BID != null and BID != ''">
+                #{BID},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="BTYPE != null and BTYPE != ''">
+                #{BTYPE},
+            </if>
+            <if test="PAID != null and PAID != ''">
+                #{PAID},
+            </if>
+            <if test="AREA != null">
+                #{AREA},
+            </if>
+            <if test="AREARATIO != null">
+                #{AREARATIO},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.ST_AREASTATION_BPojo">
+        update ST_AREASTATION_B
+        <set>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="BTYPE != null and BTYPE != ''">
+                BTYPE = #{BTYPE},
+            </if>
+            <if test="PAID != null and PAID != ''">
+                PAID = #{PAID},
+            </if>
+            <if test="AREA != null">
+                AREA = #{AREA},
+            </if>
+            <if test="AREARATIO != null">
+                AREARATIO = #{AREARATIO},
+            </if>
+        </set>
+        where BID = #{BID}
+    </update>
+
+    <delete id="deleteOne">
+        delete from ST_AREASTATION_B where BID = #{BID}
+    </delete>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(1) from ST_AREASTATION_B
+        <where>
+            <if test="BID != null and BID != ''">
+                and BID = #{BID}
+            </if>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="PAID != null and PAID != ''">
+                and PAID = #{PAID}
+            </if>
+            <if test="BTYPE != null and BTYPE != ''">
+                and BTYPE = #{BTYPE}
+            </if>
+        </where>
+    </select>
+</mapper>

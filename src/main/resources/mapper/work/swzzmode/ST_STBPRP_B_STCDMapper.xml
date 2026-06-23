@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ST_STBPRP_B_STCDData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_STBPRP_B_STCDPojo">
+        select a.* from "st_stbprp_b_stcd" a
+        <where>
+            <if test="ID != null and ID != ''">
+                and STCD = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and STNM like concat('%',concat(#{key},'%'))
+            </if>
+            <if test="TYPE != null and TYPE.size() > 0">
+                and TYPE in
+                <foreach collection="TYPE" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="SOURCE != null and SOURCE != ''">
+                and SOURCE = #{SOURCE}
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM "st_stbprp_b_stcd"
+        <where>
+            <if test="ID != null and ID != ''">
+                and STCD = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and STNM like concat('%',concat(#{key},'%'))
+            </if>
+            <if test="TYPE != null and TYPE.size() > 0">
+                and TYPE in
+                <foreach collection="TYPE" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="SOURCE != null and SOURCE != ''">
+                and SOURCE = #{SOURCE}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_STBPRP_B_STCDPojo">
+        insert into "st_stbprp_b_stcd"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="SOURCE != null and SOURCE != ''">
+                SOURCE,
+            </if>
+            <if test="STNM != null and STNM != ''">
+                STNM,
+            </if>
+            <if test="ZSTCD != null and ZSTCD != ''">
+                ZSTCD,
+            </if>
+            <if test="UPZ != null and UPZ != ''">
+                UPZ,
+            </if>
+            <if test="DWZ != null and DWZ != ''">
+                DWZ,
+            </if>
+            <if test="ZTM != null and ZTM != ''">
+                ZTM,
+            </if>
+            <if test="ZD != null and ZD != ''">
+                ZD,
+            </if>
+            <if test="TIMEINTERVAL != null">
+                TIMEINTERVAL,
+            </if>
+            <if test="ISSTATUS != null and ISSTATUS != ''">
+                ISSTATUS,
+            </if>
+            <if test="LASTTM != null and LASTTM != ''">
+                LASTTM,
+            </if>
+            <if test="REMARK != null and REMARK != ''">
+                REMARK,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="SOURCE != null and SOURCE != ''">
+                #{SOURCE},
+            </if>
+            <if test="STNM != null and STNM != ''">
+                #{STNM},
+            </if>
+            <if test="ZSTCD != null and ZSTCD != ''">
+                #{ZSTCD},
+            </if>
+            <if test="UPZ != null and UPZ != ''">
+                #{UPZ},
+            </if>
+            <if test="DWZ != null and DWZ != ''">
+                #{DWZ},
+            </if>
+            <if test="ZTM != null and ZTM != ''">
+               #{ZTM},
+            </if>
+            <if test="ZD != null and ZD != ''">
+                #{ZD},
+            </if>
+            <if test="TIMEINTERVAL != null">
+                #{TIMEINTERVAL},
+            </if>
+            <if test="ISSTATUS != null and ISSTATUS != ''">
+                #{ISSTATUS},
+            </if>
+            <if test="LASTTM != null and LASTTM != ''">
+                #{LASTTM},
+            </if>
+            <if test="REMARK != null and REMARK != ''">
+                #{REMARK},
+            </if>
+        </trim>
+    </insert>
+<!--    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_STBPRP_B_STCDPojo">-->
+<!--        insert into "st_stbprp_b_stcd"(STCD,TYPE,SOURCE,STNM,ZSTCD,UPZ,DWZ,ZTM,ZD,TIMEINTERVAL,ISSTATUS,LASTTM,REMARK) values-->
+<!--        <foreach collection="objList" item="obj" separator=",">-->
+<!--            (#{obj.STCD},#{obj.TYPE},#{obj.SOURCE},#{obj.STNM},#{obj.ZSTCD},#{obj.UPZ},#{obj.DWZ},#{obj.ZTM},#{obj.ZD},#{obj.TIMEINTERVAL},#{obj.ISSTATUS},#{obj.LASTTM},#{obj.REMARK})-->
+<!--        </foreach>-->
+<!--    </insert>-->
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_STBPRP_B_STCDPojo">
+        update "st_stbprp_b_stcd"
+        <set>
+            <if test="STNM != null and STNM != ''">
+                STNM = #{STNM},
+            </if>
+            <if test="ZSTCD != null and ZSTCD != ''">
+                ZSTCD = #{ZSTCD},
+            </if>
+            <if test="UPZ != null and UPZ != ''">
+                UPZ = #{UPZ},
+            </if>
+            <if test="DWZ != null and DWZ != ''">
+                DWZ = #{DWZ},
+            </if>
+            <if test="ZTM != null and ZTM != ''">
+                ZTM = #{ZTM},
+            </if>
+            <if test="ZD != null and ZD != ''">
+                ZD = #{ZD},
+            </if>
+            <if test="TIMEINTERVAL != null">
+                TIMEINTERVAL = #{TIMEINTERVAL},
+            </if>
+            <if test="ISSTATUS != null and ISSTATUS != ''">
+                ISSTATUS = #{ISSTATUS},
+            </if>
+            <if test="LASTTM != null and LASTTM != ''">
+                LASTTM = #{LASTTM},
+            </if>
+            <if test="REMARK != null and REMARK != ''">
+                REMARK = #{REMARK},
+            </if>
+            <if test="SOURCE != null and SOURCE != ''">
+                SOURCE = #{SOURCE},
+            </if>
+        </set>
+        where STCD = #{STCD} and TYPE = #{TYPE}
+    </update>
+    <delete id="deleteOne">
+        delete from "st_stbprp_b_stcd" where STCD = #{ID} and TYPE = #{TYPE}
+    </delete>
+</mapper>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.AREARAIN_HData">
+
+    <!-- 1. 基础查询：获取列表 (支持多站点筛选) -->
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.AREARAIN_HPojo">
+        SELECT "STCD", "TM", "DRP", "Q_FLAG"
+        FROM "AREARAIN_H"
+        <where>
+            <if test="STCDList != null and STCDList.size() > 0">
+                AND "STCD" IN
+                <foreach collection="STCDList" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="stime != null  and stime != ''">
+                AND "TM" &gt;= #{stime}
+            </if>
+            <if test="etime != null  and etime != ''">
+                AND "TM" &lt;= #{etime}
+            </if>
+        </where>
+        ORDER BY "TM" DESC
+    </select>
+
+    <!-- 2. 核心统计：计算过去 N 小时的累积雨量 (达梦语法: SYSDATE - N/24) -->
+    <!-- 用于实现截图中的 1h, 3h, 6h, 12h, 24h -->
+    <select id="sumRainByHours" resultType="java.math.BigDecimal">
+        SELECT NVL(SUM("DRP"), 0)
+        FROM "AREARAIN_H"
+        WHERE "STCD" = #{stcd}
+        <choose>
+            <when test="etime != null and etime!=''">
+                AND "TM" &gt;= (TO_TIMESTAMP(#{etime} , 'YYYY-MM-DD HH24:MI:SS')- INTERVAL '${hours}' HOUR)
+                AND "TM" &lt;= #{etime}
+            </when>
+            <otherwise>
+                <!-- 没传时间则用系统时间 -->
+                AND "TM" &gt;= (SYSDATE - INTERVAL #{hours}  HOUR)
+                AND "TM" &lt;= SYSDATE
+            </otherwise>
+        </choose>
+        --AND ("Q_FLAG" IS NULL OR "Q_FLAG" = '0')
+    </select>
+
+    <!-- 3. 核心统计：获取最近 N 小时的明细 (倒序) -->
+    <!-- 用于 Java 代码逻辑计算“场次雨量” (判断雨停间隔) -->
+    <select id="selectRecentDetails" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.AREARAIN_HPojo">
+        SELECT "STCD", "TM", "DRP", "Q_FLAG"
+        FROM "AREARAIN_H"
+        WHERE "STCD" = #{stcd}
+        <choose>
+            <when test="etime != null and etime!=''">
+                <!-- 情况 A: 传入了具体时间 -->
+                AND "TM" &gt;= (TO_TIMESTAMP(#{etime} , 'YYYY-MM-DD HH24:MI:SS') - INTERVAL '${limitHours}'  HOUR )
+                AND "TM" &lt;= #{etime}
+            </when>
+            <otherwise>
+                <!-- 情况 B: 未传入时间，使用数据库当前时间 -->
+                AND "TM" &gt;= (SYSDATE - INTERVAL #{limitHours}  HOUR)
+                AND "TM" &lt;= SYSDATE
+            </otherwise>
+        </choose>
+        AND ("Q_FLAG" IS NULL OR "Q_FLAG" = '0')
+        ORDER BY "TM" DESC
+    </select>
+
+    <!-- 4. 单条插入 (适配你的字段风格，但去掉了不存在的 ID/NAME 等字段) -->
+    <insert id="insertOne">
+        INSERT INTO "AREARAIN_H"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                "STCD",
+            </if>
+            <if test="TM != null">
+                "TM",
+            </if>
+            <if test="DRP != null">
+                "DRP",
+            </if>
+            <if test="Q_FLAG != null and Q_FLAG != ''">
+                "Q_FLAG",
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="TM != null">
+                #{TM},
+            </if>
+            <if test="DRP != null">
+                #{DRP},
+            </if>
+            <if test="Q_FLAG != null and Q_FLAG != ''">
+                #{Q_FLAG},
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 5. 批量插入 (提高入库性能，推荐用于小时数据高频写入) -->
+    <insert id="insertBatch">
+        INSERT INTO "AREARAIN_H" ("STCD", "TM", "DRP", "Q_FLAG")
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.STCD},
+            #{item.TM},
+            #{item.DRP},
+            #{item.Q_FLAG}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 6. 更新 (通常小时雨量不需要更新，除非修正数据，以 STCD+TM 为条件) -->
+    <update id="updateOne">
+        UPDATE "AREARAIN_H"
+        <set>
+            <if test="DRP != null">
+                "DRP" = #{DRP},
+            </if>
+            <if test="Q_FLAG != null and Q_FLAG != ''">
+                "Q_FLAG" = #{Q_FLAG},
+            </if>
+        </set>
+        WHERE "STCD" = #{STCD} AND "TM" = #{TM}
+    </update>
+
+    <!-- 7. 删除 (以 STCD+TM 为条件) -->
+    <delete id="deleteOne">
+        DELETE FROM "AREARAIN_H"
+        WHERE "STCD" = #{STCD} AND "TM" = #{TM}
+    </delete>
+</mapper>

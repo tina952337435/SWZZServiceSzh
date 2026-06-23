@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.HD_FLOWLINEData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.HD_FLOWLINEPojo">
+        select a.* from HD_FLOWLINE a
+        <where>
+            <if test="ID != null and ID != ''">
+                and HD_ID = #{ID}
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM HD_FLOWLINE
+        <where>
+            <if test="ID != null and ID != ''">
+                and HD_ID = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.HD_FLOWLINEPojo">
+        insert into HD_FLOWLINE
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="HD_ID != null and HD_ID != ''">
+                HD_ID,
+            </if>
+            <if test="HD_NAME != null and HD_NAME != ''">
+                HD_NAME,
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="FX != null and FX != ''">
+                FX,
+            </if>
+            <if test="HD_DM_MX != null and HD_DM_MX != ''">
+                HD_DM_MX,
+            </if>
+            <if test="HD_DM_FX != null and HD_DM_FX != ''">
+                HD_DM_FX,
+            </if>
+            <if test="LS != null and LS != ''">
+                LS,
+            </if>
+            <if test="MAP_LINE != null and MAP_LINE != ''">
+                MAP_LINE,
+            </if>
+            <if test="HD_ID_MX != null and HD_ID_MX != ''">
+                HD_ID_MX,
+            </if>
+            <if test="HD_ORDER != null">
+                HD_ORDER,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="HD_ID != null and HD_ID != ''">
+                #{HD_ID},
+            </if>
+            <if test="HD_NAME != null and HD_NAME != ''">
+                #{HD_NAME},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="FX != null and FX != ''">
+                #{FX},
+            </if>
+            <if test="HD_DM_MX != null and HD_DM_MX != ''">
+                #{HD_DM_MX},
+            </if>
+            <if test="HD_DM_FX != null and HD_DM_FX != ''">
+                #{HD_DM_FX},
+            </if>
+            <if test="LS != null and LS != ''">
+                #{LS},
+            </if>
+            <if test="MAP_LINE != null and MAP_LINE != ''">
+                #{MAP_LINE},
+            </if>
+            <if test="HD_ID_MX != null and HD_ID_MX != ''">
+                #{HD_ID_MX},
+            </if>
+            <if test="HD_ORDER != null">
+                #{HD_ORDER},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.HD_FLOWLINEPojo">
+        insert into HD_FLOWLINE(HD_ID,HD_NAME,STCD,FX,HD_DM_MX,HD_DM_FX,LS,MAP_LINE,HD_ID_MX,HD_ORDER) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.HD_ID},#{obj.HD_NAME},#{obj.STCD},#{obj.FX},#{obj.HD_DM_MX},#{obj.HD_DM_FX},#{obj.LS},#{obj.MAP_LINE},#{obj.HD_ID_MX},#{obj.HD_ORDER})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.HD_FLOWLINEPojo">
+        update HD_FLOWLINE
+        <set>
+            <if test="HD_NAME != null and HD_NAME != ''">
+                HD_NAME = #{HD_NAME},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD = #{STCD},
+            </if>
+            <if test="FX != null and FX != ''">
+                FX = #{FX},
+            </if>
+            <if test="HD_DM_MX != null and HD_DM_MX != ''">
+                HD_DM_MX = #{HD_DM_MX},
+            </if>
+            <if test="HD_DM_FX != null and HD_DM_FX != ''">
+                HD_DM_FX = #{HD_DM_FX},
+            </if>
+            <if test="LS != null and LS != ''">
+                LS = #{LS},
+            </if>
+            <if test="MAP_LINE != null and MAP_LINE != ''">
+                MAP_LINE = #{MAP_LINE},
+            </if>
+            <if test="HD_ID_MX != null and HD_ID_MX != ''">
+                HD_ID_MX = #{HD_ID_MX},
+            </if>
+            <if test="HD_ORDER != null">
+                HD_ORDER = #{HD_ORDER},
+            </if>
+        </set>
+        where HD_ID = #{HD_ID}
+    </update>
+    <delete id="deleteOne">
+        delete from HD_FLOWLINE where HD_ID = #{ID}
+    </delete>
+</mapper>

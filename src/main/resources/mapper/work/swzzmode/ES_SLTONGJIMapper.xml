@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_SLTONGJIData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_SLTONGJIPojo">
+        select a.* from ES_SLTONGJI a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="type != null and type != ''">
+                and TYPE = #{type}
+            </if>
+            <if test="PID != null and PID != ''">
+                and PID = #{PID}
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+         order by angle
+    </select>
+
+    <select id="selectListByID" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_SLTONGJIPojo">
+        select a.* from ES_SLTONGJI a
+        <where>            
+            <if test="IDList != null and IDList.size() > 0">
+                and ID in
+                <foreach collection="IDList" open="(" close=")" item="id" separator=",">
+                    #{id,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="type != null and type != ''">
+                and TYPE = #{type}
+            </if>
+            <if test="PID != null and PID != ''">
+                and PID = #{PID}
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+         order by angle
+    </select>
+
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_SLTONGJI
+        <where>
+        <if test="ID != null and ID != ''">
+            and ID = #{ID}
+        </if>
+        <if test="type != null and type != ''">
+            and TYPE = #{type}
+        </if>
+        <if test="PID != null and PID != ''">
+            and PID = #{PID}
+        </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_SLTONGJIPojo">
+        insert into ES_SLTONGJI
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                TITLE,
+            </if>
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+            <if test="PID != null and PID != ''">
+                PID,
+            </if>
+            <if test="LGTD != null">
+                LGTD,
+            </if>
+            <if test="LTTD != null">
+                LTTD,
+            </if>
+            <if test="FX != null and FX != ''">
+                FX,
+            </if>
+            <if test="ANGLE != null">
+                ANGLE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                #{TITLE},
+            </if>
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+            <if test="PID != null and PID != ''">
+                #{PID},
+            </if>
+            <if test="LGTD != null">
+                #{LGTD},
+            </if>
+            <if test="LTTD != null">
+                #{LTTD},
+            </if>
+            <if test="FX != null and FX != ''">
+                #{FX},
+            </if>
+            <if test="ANGLE != null">
+                #{ANGLE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_SLTONGJIPojo">
+        insert into ES_SLTONGJI(ID,TITLE,STCD,TYPE,PID,LGTD,LTTD,FX,ANGLE) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.ID},#{obj.TITLE},#{obj.STCD},#{obj.TYPE},#{obj.PID},#{obj.LGTD},#{obj.LTTD},#{obj.FX},#{obj.ANGLE})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_SLTONGJIPojo">
+        update ES_SLTONGJI
+        <set>
+            <if test="TITLE != null and TITLE != ''">
+                TITLE = #{TITLE},
+            </if>
+            <if test="STCD != null">
+                STCD = #{STCD},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+            <if test="PID != null and PID != ''">
+                PID = #{PID},
+            </if>
+            <if test="LGTD != null">
+                LGTD = #{LGTD},
+            </if>
+            <if test="LTTD != null">
+                LTTD = #{LTTD},
+            </if>
+            <if test="FX != null and FX != ''">
+                FX = #{FX},
+            </if>
+            <if test="ANGLE != null">
+                ANGLE = #{ANGLE},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_SLTONGJI where ID = #{ID}
+    </delete>
+</mapper>

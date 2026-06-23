@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_PUMP_RData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RPojo">
+        select * from ES_PUMP_R 
+        <where>
+            <if test="id != null  and id != ''">
+                and stcd = #{id}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and tm >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and tm <= #{etime} ]]>
+            </if>
+        </where>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM ES_PUMP_R
+        <where>
+            <if test="id != null">
+                and stcd = #{id}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RPojo">
+        insert into ES_PUMP_R
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="TM != null and TM != ''">
+                TM,
+            </if>
+            <if test="OMCN != null">
+                OMCN,
+            </if>
+            <if test="PMPQ != null">
+                PMPQ,
+            </if>
+            <if test="RLSTM != null and RLSTM != ''">
+                RLSTM,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="TM != null and TM != ''">
+                #{TM},
+            </if>
+            <if test="omcn != null">
+                #{OMCN},
+            </if>
+            <if test="PMPQ != null">
+                #{PMPQ},
+            </if>
+            <if test="RLSTM != null and RLSTM != ''">
+                #{RLSTM},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RPojo">
+        insert into ES_PUMP_R(STCD,TM,OMCN,PMPQ,RLSTM) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.STCD},#{obj.TM},#{obj.OMCN},#{obj.PMPQ},#{obj.RLSTM})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RPojo">
+        update ES_PUMP_R
+        <set>
+            <if test="TM != null and TM != ''">
+                tm = #{TM},
+            </if>
+            <if test="OMCN != null">
+                omcn = #{OMCN},
+            </if>
+            <if test="PMPQ != null">
+                pmpq = #{PMPQ},
+            </if>
+            <if test="RLSTM != null and RLSTM != ''">
+                rlstm = #{RLSTM},
+            </if>
+        </set>
+        where stcd = #{STCD}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_PUMP_R where stcd = #{id}
+    </delete>
+
+    <!-- 先找出每一个具体预报时间（TM）对应的最新起报时间（RLSTM），然后再把这些数据捞出来 -->
+    <select id="selectListNew" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RPojo">
+       SELECT t1.STCD, t1.TM, t1.OMCN, t1.PMPQ, t1.RLSTM 
+        FROM ES_PUMP_R t1
+        INNER JOIN (
+            -- 子查询：按站点(STCD)和预报时间(TM)分组，找出每个时刻最新的起报时间(RLSTM)
+            SELECT STCD, TM, MAX(RLSTM) as LATEST_RLSTM
+            FROM ES_PUMP_R
+            <where>
+                <if test="stcd != null and stcd != ''">
+                    and STCD = #{stcd}
+                </if>
+                <if test="stime != null and stime != ''">
+                    <![CDATA[ and TM >= #{stime} ]]>
+                </if>
+                <if test="etime != null and etime != ''">
+                    <![CDATA[ and TM <= #{etime} ]]>
+                </if>
+            </where>
+            GROUP BY STCD, TM
+        ) t2 
+        ON t1.STCD = t2.STCD AND t1.TM = t2.TM AND t1.RLSTM = t2.LATEST_RLSTM
+        ORDER BY t1.STCD, t1.TM ASC;
+    </select>
+</mapper>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.St_stbprp_b_sttpData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.St_stbprp_b_sttpPojo">
+        select A.* from "st_stbprp_b_sttp" A
+        <where>
+            <if test="ID != null and ID != ''">
+                and STCD = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                STNM like concat('%',concat(#{key},'%'))
+                )
+            </if>
+<!--            <if test="type != null">-->
+<!--                and GROUPID in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM "st_stbprp_b_sttp"
+        <where>
+            <if test="ID != null and ID != ''">
+                and STCD = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                STNM like concat('%',concat(#{key},'%'))
+                )
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.St_stbprp_b_sttpPojo">
+        insert into "st_stbprp_b_sttp"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                STCD,
+            </if>
+            <if test="STNM != null and STNM != ''">
+                STNM,
+            </if>
+            <if test="STZZ != null and STZZ != ''">
+                STZZ,
+            </if>
+            <if test="STPP != null and STPP != ''">
+                STPP,
+            </if>
+            <if test="STDP != null and STDP != ''">
+                STDP,
+            </if>
+            <if test="STDD != null and STDD != ''">
+                STDD,
+            </if>
+            <if test="STMM != null and STMM != ''">
+                STMM,
+            </if>
+            <if test="ISSTATUS != null and ISSTATUS != ''">
+                ISSTATUS,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="STCD != null and STCD != ''">
+                #{STCD},
+            </if>
+            <if test="STNM != null and STNM != ''">
+                #{STNM},
+            </if>
+            <if test="STZZ != null and STZZ != ''">
+                #{STZZ},
+            </if>
+            <if test="STPP != null and STPP != ''">
+                #{STPP},
+            </if>
+            <if test="STDP != null and STDP != ''">
+                #{STDP},
+            </if>
+            <if test="STDD != null and STDD != ''">
+                #{STDD},
+            </if>
+            <if test="STMM != null and STMM != ''">
+                #{STMM},
+            </if>
+            <if test="ISSTATUS != null and ISSTATUS != ''">
+                #{ISSTATUS},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzflood.St_stbprp_b_sttpPojo">
+        update "st_stbprp_b_sttp"
+        <set>
+            <if test="STNM != null and STNM != ''">
+                STNM = #{STNM},
+            </if>
+            <if test="STZZ != null and STZZ != ''">
+                STZZ = #{STZZ},
+            </if>
+            <if test="STPP != null and STPP != ''">
+                STPP = #{STPP},
+            </if>
+            <if test="STDP != null and STDP != ''">
+                STDP = #{STDP},
+            </if>
+            <if test="STDD != null and STDD != ''">
+                STDD = #{STDD},
+            </if>
+            <if test="STMM != null and STMM != ''">
+                STMM = #{STMM},
+            </if>
+            <if test="ISSTATUS != null and ISSTATUS != ''">
+                ISSTATUS = #{ISSTATUS},
+            </if>
+        </set>
+        where STCD = #{STCD}
+    </update>
+    <delete id="deleteOne">
+        delete from "st_stbprp_b_sttp" where STCD = #{ID}
+    </delete>
+</mapper>

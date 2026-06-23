@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzdata.Sys_reportlogData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzdata.Sys_reportlogPojo">
+        select a.* from "sys_reportlog" a
+        <where>
+
+            <if test="ID != null and ID != ''">
+                and REPORTID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                SYSUSERNAME like concat('%',concat(#{key},'%'))
+                or PLATFORMNAME like concat('%',concat(#{key},'%'))
+                or INTERFACENAME like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and CREATETIME >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and CREATETIME <= #{etime} ]]>
+            </if>
+<!--            <if test="type != null">-->
+<!--                and TYPE in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM "sys_reportlog"
+        <where>
+            <if test="ID != null and ID != ''">
+                and REPORTID = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                SYSUSERNAME like concat('%',concat(#{key},'%'))
+                or PLATFORMNAME like concat('%',concat(#{key},'%'))
+                or INTERFACENAME like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and CREATETIME >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and CREATETIME <= #{etime} ]]>
+            </if>
+            <!--            <if test="type != null">-->
+            <!--                and TYPE in-->
+            <!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+            <!--                    #{item}-->
+            <!--                </foreach>-->
+            <!--            </if>-->
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.Sys_reportlogPojo">
+        insert into "sys_reportlog"
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="REPORTID != null and REPORTID != ''">
+                REPORTID,
+            </if>
+            <if test="CREATETIME != null and CREATETIME != ''">
+                CREATETIME,
+            </if>
+            <if test="SYSUSERID != null and SYSUSERID != ''">
+                SYSUSERID,
+            </if>
+            <if test="SYSUSERNAME != null and SYSUSERNAME != ''">
+                SYSUSERNAME,
+            </if>
+            <if test="PLATFORM != null and PLATFORM != ''">
+                PLATFORM,
+            </if>
+            <if test="PLATFORMNAME != null and PLATFORMNAME != ''">
+                PLATFORMNAME,
+            </if>
+            <if test="INTERFACENAME != null and INTERFACENAME != ''">
+                INTERFACENAME,
+            </if>
+            <if test="REQUESTLOGMESSAGE != null and REQUESTLOGMESSAGE != ''">
+                REQUESTLOGMESSAGE,
+            </if>
+            <if test="REPORTMESSAGE != null and REPORTMESSAGE != ''">
+                REPORTMESSAGE,
+            </if>
+            <if test="REPORTERROR != null and REPORTERROR != ''">
+                REPORTERROR,
+            </if>
+            <if test="RESPONSETIME != null and RESPONSETIME != ''">
+                RESPONSETIME,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="REPORTID != null and REPORTID != ''">
+                #{REPORTID},
+            </if>
+            <if test="CREATETIME != null and CREATETIME != ''">
+                #{CREATETIME},
+            </if>
+            <if test="SYSUSERID != null and SYSUSERID != ''">
+                #{SYSUSERID},
+            </if>
+            <if test="SYSUSERNAME != null and SYSUSERNAME != ''">
+                #{SYSUSERNAME},
+            </if>
+            <if test="PLATFORM != null and PLATFORM != ''">
+                #{PLATFORM},
+            </if>
+            <if test="PLATFORMNAME != null and PLATFORMNAME != ''">
+                #{PLATFORMNAME},
+            </if>
+            <if test="INTERFACENAME != null and INTERFACENAME != ''">
+                #{INTERFACENAME},
+            </if>
+            <if test="REQUESTLOGMESSAGE != null and REQUESTLOGMESSAGE != ''">
+                #{REQUESTLOGMESSAGE},
+            </if>
+            <if test="REPORTMESSAGE != null and REPORTMESSAGE != ''">
+                #{REPORTMESSAGE},
+            </if>
+            <if test="REPORTERROR != null and REPORTERROR != ''">
+                #{REPORTERROR},
+            </if>
+            <if test="RESPONSETIME != null and RESPONSETIME != ''">
+                #{RESPONSETIME},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzdata.Sys_reportlogPojo">
+        update "sys_reportlog"
+        <set>
+            <if test="CREATETIME != null and CREATETIME != ''">
+                CREATETIME = #{CREATETIME},
+            </if>
+            <if test="SYSUSERID != null and SYSUSERID != ''">
+                SYSUSERID = #{SYSUSERID},
+            </if>
+            <if test="SYSUSERNAME != null and SYSUSERNAME != ''">
+                SYSUSERNAME = #{SYSUSERNAME},
+            </if>
+            <if test="PLATFORM != null and PLATFORM != ''">
+                PLATFORM = #{PLATFORM},
+            </if>
+            <if test="PLATFORMNAME != null and PLATFORMNAME != ''">
+                PLATFORMNAME = #{PLATFORMNAME},
+            </if>
+            <if test="INTERFACENAME != null and INTERFACENAME != ''">
+                INTERFACENAME = #{INTERFACENAME},
+            </if>
+            <if test="REQUESTLOGMESSAGE != null and REQUESTLOGMESSAGE != ''">
+                REQUESTLOGMESSAGE = #{REQUESTLOGMESSAGE},
+            </if>
+            <if test="REPORTMESSAGE != null and REPORTMESSAGE != ''">
+                REPORTMESSAGE = #{REPORTMESSAGE},
+            </if>
+            <if test="REPORTERROR != null and REPORTERROR != ''">
+                REPORTERROR = #{REPORTERROR},
+            </if>
+            <if test="RESPONSETIME != null and RESPONSETIME != ''">
+                RESPONSETIME = #{RESPONSETIME},
+            </if>
+        </set>
+        where REPORTID = #{REPORTID}
+    </update>
+    <delete id="deleteOne">
+        delete from "sys_reportlog" where REPORTID = #{ID}
+    </delete>
+</mapper>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.SDE_HDDMData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.SDE_HDDMPojo">
+        select a.* from SDE_HDDM a
+        <where>
+            <if test="OBJECTID != null">
+                and OBJECTID = #{ID}
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM SDE_HDDM
+        <where>
+            <if test="OBJECTID != null">
+                and OBJECTID = #{ID}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.SDE_HDDMPojo">
+        --SET IDENTITY_INSERT SDE_HDDM ON
+        insert into SDE_HDDM
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="OBJECTID != null">
+                OBJECTID,
+            </if>
+            <if test="ID != null">
+                ID,
+            </if>
+            <if test="HDNAME != null and HDNAME != ''">
+                HDNAME,
+            </if>
+            <if test="DMNUM != null">
+                DMNUM,
+            </if>
+            <if test="DMNAME != null and DMNAME != ''">
+                DMNAME,
+            </if>
+            <if test="JIBIE != null and JIBIE != ''">
+                JIBIE,
+            </if>
+            <if test="COLOR != null">
+                COLOR,
+            </if>
+            <if test="ZVALUE != null">
+                ZVALUE,
+            </if>
+            <if test="WRZ != null">
+                WRZ,
+            </if>
+            <if test="GRZ != null">
+                GRZ,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="OBJECTID != null">
+                #{OBJECTID},
+            </if>
+            <if test="ID != null">
+                #{ID},
+            </if>
+            <if test="HDNAME != null and HDNAME != ''">
+                #{HDNAME},
+            </if>
+            <if test="DMNUM != null">
+                #{DMNUM},
+            </if>
+            <if test="DMNAME != null and DMNAME != ''">
+                #{DMNAME},
+            </if>
+            <if test="JIBIE != null and JIBIE != ''">
+                #{JIBIE},
+            </if>
+            <if test="COLOR != null">
+                #{COLOR},
+            </if>
+            <if test="ZVALUE != null">
+                #{ZVALUE},
+            </if>
+            <if test="WRZ != null">
+                #{WRZ},
+            </if>
+            <if test="GRZ != null">
+                #{GRZ},
+            </if>
+        </trim>
+        --SET IDENTITY_INSERT SDE_HDDM OFF
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.SDE_HDDMPojo">
+        insert into SDE_HDDM(OBJECTID,ID,HDNAME,DMNUM,DMNAME,JIBIE,COLOR,ZVALUE,WRZ,GRZ) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.OBJECTID},#{obj.ID},#{obj.HDNAME},#{obj.DMNUM},#{obj.DMNAME},#{obj.JIBIE},#{obj.COLOR},#{obj.ZVALUE},#{obj.WRZ},#{obj.GRZ})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.SDE_HDDMPojo">
+        update SDE_HDDM
+        <set>
+            <if test="ID != null">
+                ID = #{ID},
+            </if>
+            <if test="HDNAME != null and HDNAME != ''">
+                HDNAME = #{HDNAME},
+            </if>
+            <if test="DMNUM != null">
+                DMNUM = #{DMNUM},
+            </if>
+            <if test="DMNAME != null and DMNAME != ''">
+                DMNAME = #{DMNAME},
+            </if>
+            <if test="JIBIE != null and JIBIE != ''">
+                JIBIE = #{JIBIE},
+            </if>
+            <if test="COLOR != null">
+                COLOR = #{COLOR},
+            </if>
+            <if test="ZVALUE != null">
+                ZVALUE = #{ZVALUE},
+            </if>
+            <if test="WRZ != null">
+                WRZ = #{WRZ},
+            </if>
+            <if test="GRZ != null">
+                GRZ = #{GRZ},
+            </if>
+        </set>
+        where OBJECTID = #{OBJECTID}
+    </update>
+    <delete id="deleteOne">
+        delete from SDE_HDDM where OBJECTID = #{ID}
+    </delete>
+</mapper>

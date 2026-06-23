@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.TB_TIDE_HIGHLOWData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzflood.TB_TIDE_HIGHLOWPojo">
+        select *  from HPJSQ.TB_TIDE_HIGHLOW
+        <where>
+            <if test="idList != null and idList.size() > 0 ">
+                and st_stationid in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and dt_timeforecast >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and dt_timeforecast <= #{etime} ]]>
+            </if>
+        </where>
+        order by dt_timeforecast asc
+    </select>
+</mapper>

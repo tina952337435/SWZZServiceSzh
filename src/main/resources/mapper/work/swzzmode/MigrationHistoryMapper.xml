@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.MigrationHistoryData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.MigrationHistoryPojo">
+        select a.* from __MigrationHistory a
+        <where>
+            <if test="ID != null and ID != ''">
+                and MigrationId = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and ContextKey = #{key}
+            </if>
+
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM __MigrationHistory
+        <where>
+            <if test="ID != null and ID != ''">
+                and MigrationId = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and ContextKey = #{key}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.MigrationHistoryPojo">
+        insert into __MigrationHistory
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="MigrationId != null and MigrationId != ''">
+                MigrationId,
+            </if>
+            <if test="ContextKey != null and ContextKey != ''">
+                ContextKey,
+            </if>
+            <if test="Model != null">
+                Model,
+            </if>
+            <if test="ProductVersion != null and ProductVersion != ''">
+                ProductVersion,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="MigrationId != null and MigrationId != ''">
+                #{MigrationId},
+            </if>
+            <if test="ContextKey != null and ContextKey != ''">
+                #{ContextKey},
+            </if>
+            <if test="Model != null">
+                #{Model},
+            </if>
+            <if test="ProductVersion != null and ProductVersion != ''">
+                #{ProductVersion},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.MigrationHistoryPojo">
+        insert into __MigrationHistory(MigrationId,ContextKey,Model,ProductVersion) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.MigrationId},#{obj.ContextKey},#{obj.Model},#{obj.ProductVersion})
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.MigrationHistoryPojo">
+        update __MigrationHistory
+        <set>
+            <if test="Model != null">
+                Model = #{Model},
+            </if>
+            <if test="ProductVersion != null and ProductVersion != ''">
+                ProductVersion = #{ProductVersion},
+            </if>
+        </set>
+        where MigrationId = #{MigrationId} and ContextKey = #{ContextKey}
+    </update>
+    <delete id="deleteOne">
+        delete from __MigrationHistory where MigrationId = #{ID} and ContextKey = #{key}
+    </delete>
+</mapper>

@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.RTSQST_GATE_RNEWData">
+    <select id="selectByNew" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_GATE_RNEWPojo">
+         select * from ST_GATE_RNEW
+         <where>
+             <if test="STCD != null and STCD != ''">
+                 and STCD = #{STCD}
+             </if>
+         </where>
+    </select>
+    <select id="selectGateListNew" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_GATE_RNEWPojo">
+        select * from ST_GATE_RNEW
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                and STCD in
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <select id="selectByHis" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_GATE_RNEWPojo">
+        select * from ST_GATE_RNEW
+        <where>
+            <if test="STCD != null and STCD != ''">
+                and STCD = #{STCD}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+    </select>
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_GATE_RNEWPojo">
+        insert into ST_GATE_RNEW(STCD,TM,EXKEY,EQPTP,EQPNO,GTQ,GTOPNUM,GTOPHGT,MSQMT,TYPE) values
+        <foreach collection="quPojo" item="pojo" separator=",">
+            (#{pojo.STCD},#{pojo.TM},#{pojo.EXKEY},#{pojo.EQPTP},#{pojo.EQPNO},#{pojo.GTQ},
+            #{pojo.GTOPNUM},#{pojo.GTOPHGT},#{pojo.MSQMT},#{pojo.TYPE})
+        </foreach>
+    </insert>
+
+    <select id="queryList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_GATE_RNEWPojo">
+        select * from ST_GATE_R
+        <where>
+            <if test="listSTCD != null and listSTCD.size() > 0">
+                and STCD in
+                <foreach collection="listSTCD" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="exkey != null and exkey != ''">
+                and exkey = #{exkey}
+            </if>
+            <if test="eqptp != null and eqptp != ''">
+                and eqptp = #{eqptp}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            order by tm asc
+        </where>
+    </select>
+
+    <select id="queryListQ" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_GATE_RNEWPojo">
+        select * from ST_GATE_RLISTQ
+        <where>
+            <if test="listSTCD != null and listSTCD.size() > 0">
+                and STCD in
+                <foreach collection="listSTCD" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="exkey != null and exkey != ''">
+                and exkey = #{exkey}
+            </if>
+            <if test="eqptp != null and eqptp != ''">
+                and eqptp = #{eqptp}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            order by tm asc
+        </where>
+    </select>
+
+
+    <select id="queryGateBList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_GATE_BPojo">
+        select * from ST_GATE_B
+        <where>
+            <if test="listSTCD != null and listSTCD.size() > 0">
+                and STCD in
+                <foreach collection="listSTCD" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <select id="queryGateBListByType" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_GATE_BPojo">
+        select * from ST_GATE_B
+        <where>
+            <if test="listSTCD != null and listSTCD.size() > 0">
+                and STCD in
+                <foreach collection="listSTCD" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="mtype != null and mtype != ''">
+                and mtype = #{mtype}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteAll">
+        delete from ST_GATE_RNEW
+    </delete>
+
+
+    <update id="updateAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_GATE_RNEWPojo">
+        <foreach collection="list" item="obj" separator=";">
+            update ST_GATE_RNEW
+            <set>
+                <if test="obj.GTOPHGT != null">
+                    GTOPHGT = #{obj.GTOPHGT},
+                </if>
+                <if test="obj.GTQ != null">
+                    GTQ = #{obj.GTQ},
+                </if>
+                <if test="obj.TYPE != null and obj.TYPE != ''">
+                    TYPE = #{obj.TYPE},
+                </if>
+            </set>
+            where
+            STCD = #{obj.STCD,jdbcType=VARCHAR}
+            and TM = #{obj.TM,jdbcType=VARCHAR}
+            and EXKEY = #{obj.EXKEY,jdbcType=VARCHAR}
+            and EQPTP = #{obj.EQPTP,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+
+    <insert id="upsertOne" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_GATE_RNEWPojo">
+        merge into ST_GATE_RNEW t
+        using (select #{STCD} as STCD, #{TM} as TM, #{EXKEY} as EXKEY, #{EQPTP} as EQPTP from dual) s
+        on (t.STCD = s.STCD and t.TM = s.TM and t.EXKEY = s.EXKEY and t.EQPTP = s.EQPTP)
+        when matched then
+            update set
+                GTQ = #{GTQ},
+                GTOPNUM = #{GTOPNUM},
+                GTOPHGT = #{GTOPHGT},
+                MSQMT = #{MSQMT},
+                TYPE = #{TYPE}
+        when not matched then
+            insert (STCD,TM,EXKEY,EQPTP,EQPNO,GTQ,GTOPNUM,GTOPHGT,MSQMT,TYPE)
+            values (#{STCD},#{TM},#{EXKEY},#{EQPTP},#{EQPNO},#{GTQ},#{GTOPNUM},#{GTOPHGT},#{MSQMT},#{TYPE})
+    </insert>
+
+    <update id="upsertByStcd">
+        <![CDATA[
+        merge into ST_GATE_RNEW t
+        using (
+            select a.STCD,a.TM,a.EXKEY,a.EQPTP,a.EQPNO,a.GTQ,a.GTOPNUM,a.GTOPHGT,a.MSQMT,a.TYPE
+            from ST_GATE_R a inner join (
+                select MAX(TM) TM,STCD,EXKEY,EQPNO,EQPTP
+                from ST_GATE_R where STCD = #{stcd}
+                group by STCD,EXKEY,EQPNO,EQPTP
+            ) b on a.STCD = b.STCD and a.EXKEY = b.EXKEY and a.EQPNO = b.EQPNO and a.EQPTP = b.EQPTP and a.TM = b.TM
+        ) s
+        on (t.STCD = s.STCD and t.TM = s.TM and t.EXKEY = s.EXKEY and t.EQPTP = s.EQPTP)
+        when matched then
+            update set
+                t.GTQ = s.GTQ,
+                t.GTOPNUM = s.GTOPNUM,
+                t.GTOPHGT = s.GTOPHGT,
+                t.MSQMT = s.MSQMT,
+                t.TYPE = s.TYPE
+        when not matched then
+            insert (STCD,TM,EXKEY,EQPTP,EQPNO,GTQ,GTOPNUM,GTOPHGT,MSQMT,TYPE)
+            values (s.STCD,s.TM,s.EXKEY,s.EQPTP,s.EQPNO,s.GTQ,s.GTOPNUM,s.GTOPHGT,s.MSQMT,s.TYPE)
+        ]]>
+    </update>
+
+    <update id="upsertAll">
+        <![CDATA[
+        MERGE INTO ST_GATE_RNEW t
+        USING (
+            select a.STCD,a.TM,a.EXKEY,a.EQPTP,a.EQPNO,a.GTQ,a.GTOPNUM,a.GTOPHGT,a.MSQMT,a.TYPE
+            from ST_GATE_R a inner join (
+                select MAX(TM) TM,STCD,EXKEY,EQPNO,EQPTP
+                from ST_GATE_R
+                group by STCD,EXKEY,EQPNO,EQPTP
+            ) b on a.STCD = b.STCD and a.EXKEY = b.EXKEY and a.EQPNO = b.EQPNO and a.EQPTP = b.EQPTP and a.TM = b.TM
+        ) s
+        ON (t.STCD = s.STCD and t.EXKEY = s.EXKEY and t.EQPTP = s.EQPTP)
+        WHEN MATCHED THEN
+            UPDATE SET 
+                t.TM = s.TM,      
+                t.EQPNO = s.EQPNO,
+                t.GTQ = s.GTQ,
+                t.GTOPNUM = s.GTOPNUM,
+                t.GTOPHGT = s.GTOPHGT,
+                t.MSQMT = s.MSQMT,
+                t.TYPE = s.TYPE
+        WHEN NOT MATCHED THEN
+        INSERT (STCD, TM, EXKEY, EQPTP, EQPNO, GTQ, GTOPNUM, GTOPHGT, MSQMT, TYPE)
+        VALUES (s.STCD, s.TM, s.EXKEY, s.EQPTP, s.EQPNO, s.GTQ, s.GTOPNUM, s.GTOPHGT, s.MSQMT, s.TYPE);
+        ]]>
+    </update>
+</mapper>

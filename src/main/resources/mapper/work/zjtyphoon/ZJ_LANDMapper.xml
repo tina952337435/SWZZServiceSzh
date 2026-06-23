@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.zjtyphoon.ZJ_LANDData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_LANDPojo">
+        select A.* from ZJ_LAND A
+        <where>
+            <if test="ID != null and ID != ''">
+                and id = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                info like concat('%',concat(#{key},'%'))
+                or landaddress like concat('%',concat(#{key},'%'))
+                or strong like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and landtime >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and landtime <= #{etime} ]]>
+            </if>
+<!--            <if test="type != null">-->
+<!--                and GROUPID in-->
+<!--                <foreach collection="type" open="(" close=")" item="item" separator=",">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--            </if>-->
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM ZJ_LAND
+        <where>
+            <if test="ID != null and ID != ''">
+                and id = #{ID}
+            </if>
+            <if test="key != null and key != ''">
+                and (
+                info like concat('%',concat(#{key},'%'))
+                or landaddress like concat('%',concat(#{key},'%'))
+                or strong like concat('%',concat(#{key},'%'))
+                )
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and landtime >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and landtime <= #{etime} ]]>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_LANDPojo">
+        insert into ZJ_LAND
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null and id != ''">
+                id,
+            </if>
+            <if test="info != null and info != ''">
+                info,
+            </if>
+            <if test="landaddress != null and landaddress != ''">
+                landaddress,
+            </if>
+            <if test="landtime != null and landtime != ''">
+                landtime,
+            </if>
+            <if test="lat != null">
+                lat,
+            </if>
+            <if test="lng != null">
+                lng,
+            </if>
+            <if test="strong != null and strong != ''">
+                strong,
+            </if>
+            <if test="tfbh != null and tfbh != ''">
+                tfbh,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null and id != ''">
+                #{id},
+            </if>
+            <if test="info != null and info != ''">
+                #{info},
+            </if>
+            <if test="landaddress != null and landaddress != ''">
+                #{landaddress},
+            </if>
+            <if test="landtime != null and landtime != ''">
+                #{landtime},
+            </if>
+            <if test="lat != null">
+                #{lat},
+            </if>
+            <if test="lng != null">
+                #{lng},
+            </if>
+            <if test="strong != null and strong != ''">
+                #{strong},
+            </if>
+            <if test="tfbh != null and tfbh != ''">
+                #{tfbh},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_LANDPojo">
+        update ZJ_LAND
+        <set>
+            <if test="info != null and info != ''">
+                info = #{info},
+            </if>
+            <if test="landaddress != null and landaddress != ''">
+                landaddress = #{landaddress},
+            </if>
+            <if test="landtime != null and landtime != ''">
+                landtime = #{landtime},
+            </if>
+            <if test="lat != null">
+                lat = #{lat},
+            </if>
+            <if test="lng != null">
+                lng = #{lng},
+            </if>
+            <if test="strong != null and strong != ''">
+                strong = #{strong},
+            </if>
+            <if test="tfbh != null and tfbh != ''">
+                tfbh = #{tfbh},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <delete id="deleteOne">
+        delete from ZJ_LAND where id = #{ID}
+    </delete>
+
+    <insert id="insertALL" parameterType="list">
+        insert into ZJ_LAND(id,info,landaddress,landtime,lat,lng,strong,tfbh) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.id},
+            #{obj.info},
+            #{obj.landaddress},
+            #{obj.landtime},
+            #{obj.lat},
+            #{obj.lng},
+            #{obj.strong},
+            #{obj.tfbh}
+            )
+        </foreach>
+    </insert>
+
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="objList" item="obj" separator=";">
+            update ZJ_LAND
+            <set>
+                <if test="obj.info != null and obj.info != ''">
+                    info = #{obj.info},
+                </if>
+                <if test="obj.landaddress != null and obj.landaddress != ''">
+                    landaddress = #{obj.landaddress},
+                </if>
+                <if test="obj.landtime != null and obj.landtime != ''">
+                    landtime = #{obj.landtime},
+                </if>
+                <if test="obj.lat != null">
+                    lat = #{obj.lat},
+                </if>
+                <if test="obj.lng != null">
+                    lng = #{obj.lng},
+                </if>
+                <if test="obj.strong != null and obj.strong != ''">
+                    strong = #{obj.strong},
+                </if>
+                <if test="obj.tfbh != null and obj.tfbh != ''">
+                    tfbh = #{obj.tfbh},
+                </if>
+            </set>
+            where id = #{obj.id}
+        </foreach>
+    </update>
+
+    <delete id="deleteALL">
+        delete from ZJ_LAND where id in
+        <foreach collection="objList" open="(" close=")" item="obj" separator=",">
+            #{obj.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+</mapper>

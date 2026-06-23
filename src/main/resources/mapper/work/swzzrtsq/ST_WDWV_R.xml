@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.ST_WDWV_RData">
+
+    <!-- 查询最新一条记录 (按时间降序) -->
+    <select id="selectNew" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WDWV_RPojo">
+        SELECT A.STCD, A.TM, A.WNDV, A.WNDPWR, A.WNDDIR, A.WVHGT,A.WNANGLE,A.PRESSURE
+        FROM ST_WDWV_R A
+        INNER JOIN (
+        SELECT STCD, MAX(TM) AS TM
+        FROM ST_WDWV_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ AND TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ AND TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        GROUP BY STCD
+        ) B ON A.STCD = B.STCD AND A.TM = B.TM
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                AND A.STCD IN
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询历史记录 -->
+    <select id="selectHis" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WDWV_RPojo">
+        SELECT STCD, TM, WNDV, WNDPWR, WNDDIR, WVHGT,WNANGLE,PRESSURE
+        FROM ST_WDWV_R
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                AND STCD IN
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ AND TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ AND TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+    </select>
+
+    <!-- 批量插入 -->
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WDWV_RPojo">
+        INSERT INTO ST_WDWV_R (STCD, TM, WNDV, WNDPWR, WNDDIR, WVHGT,WNANGLE,PRESSURE) VALUES
+        <foreach collection="quPojo" item="pojo" separator=",">
+            (#{pojo.STCD}, #{pojo.TM}, #{pojo.WNDV}, #{pojo.WNDPWR}, #{pojo.WNDDIR}, #{pojo.WVHGT}, #{pojo.WNANGLE}, #{pojo.PRESSURE})
+        </foreach>
+    </insert>
+
+
+    <select id="selectHisAll" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_WDWV_RPojo">
+        SELECT STCD, TM, WNDV, WNDPWR, WNDDIR, WVHGT,WNANGLE,PRESSURE
+        FROM ST_WDWV_R
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                AND STCD IN
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ AND TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ AND TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+
+        order by tm asc
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectHisAllCount" resultType="integer">
+        SELECT count(1) FROM ST_WDWV_R
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                AND STCD IN
+                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ AND TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ AND TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>            
+    </select>
+
+</mapper>

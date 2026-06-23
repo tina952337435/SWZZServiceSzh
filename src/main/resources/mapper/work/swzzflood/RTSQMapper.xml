@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzflood.RTSQData">
+    <select id="getSCSW" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_WAS_RPojo">
+        select  TIME TM,case when SENID=12190083 then FACTV-0.26
+        when SENID =12200083 then FACTV-0.26
+        when SENID =11150083 then FACTV-0.26
+        when SENID =63301183 then FACTV-0.26
+        else FACTV end as UPZ,SENID STCD,STATE STATE from HPJSQ.RTSQ
+        <where>
+            <if test="idList != null and idList.size() > 0 ">
+                and SENID in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TIME >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TIME <= #{etime} ]]>
+            </if>
+
+            <if test="hour != null and hour != ''">
+                and date_format(TIME,'%H') = #{hour}
+            </if>
+            <![CDATA[ and FACTV < 10 ]]>
+        </where>
+        order by TIME asc
+    </select>
+    <select id="getSCSWLS" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_WAS_RPojo">
+        select  TIME TM,case when SENID=12190083 then FACTV-0.26
+        when SENID =12200083 then FACTV-0.26
+        when SENID =11150083 then FACTV-0.26
+        when SENID =63301183 then FACTV-0.26
+        else FACTV end as UPZ,SENID STCD,STATE STATE  from HPJSQ.RTSQ11
+        <where>
+
+            <if test="idList != null and idList.size() > 0 ">
+                and SENID in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TIME >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TIME <= #{etime} ]]>
+            </if>
+
+            <if test="hour != null and hour != ''">
+                and date_format(TIME,'%H') = #{hour}
+            </if>
+            <![CDATA[ and FACTV < 10 ]]>
+        </where>
+        order by TIME asc
+    </select>
+
+    <select id="GetWaterData" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_WAS_RPojo">
+        select  top  2000 TIME TM,case when SENID=12190083 then FACTV-0.26
+        when SENID =12200083 then FACTV-0.26
+        when SENID =11150083 then FACTV-0.26
+        when SENID =63301183 then FACTV-0.26
+        else FACTV end as UPZ,SENID STCD,STATE STATE from HPJSQ.RTSQ
+        <where>
+            <if test="idList != null and idList.size() > 0 ">
+                and SENID in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TIME > #{stime} ]]>
+            </if>
+            <![CDATA[ and FACTV < 10 ]]>
+        </where>
+        order by TIME asc
+    </select>
+
+    <select id="GetWaterDataLL" resultType="swzzmodeserver.workserver.pojo.swzzflood.ST_WAS_RPojo">
+        select  top  2000 TIME TM,FACTV  UPZ,SENID STCD,STATE STATE from HPJSQ.RTSQ
+        <where>
+            <if test="idList != null and idList.size() > 0 ">
+                and SENID in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TIME > #{stime} ]]>
+            </if>
+        </where>
+        order by TIME asc
+    </select>
+
+
+    <resultMap id="maphour" type="java.util.Map">
+        <result column="STCD" property="STCD" javaType="java.lang.String"/>
+        <result column="TM" property="TM" javaType="java.lang.String"/>
+        <result column="DRP" property="DRP" javaType="java.lang.String"/>
+        <result column="INTV" property="INTV" javaType="java.lang.String"/>
+    </resultMap>
+    <select id="getSCHOUR" resultMap="maphour">
+        select to_char(SENID) STCD,TIME as TM,V DRP,MINV INTV from HPJSQ.HOURDB
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TIME >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TIME <= #{etime} ]]>
+            </if>
+            <if test="idList != null and idList.size() > 0">
+                and SENID in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        order by TIME asc
+    </select>
+
+    <resultMap id="map" type="java.util.Map">
+        <result column="STCD" property="STCD" javaType="java.lang.String"/>
+        <result column="TM" property="TM" javaType="java.lang.String"/>
+        <result column="DRP" property="DRP" javaType="java.lang.String"/>
+        <result column="INTV" property="INTV" javaType="java.lang.String"/>
+    </resultMap>
+    <select id="getSCJY" resultMap="map">
+        select to_char(SENID) STCD,TIME + INTERVAL '-1' HOUR as TM,V DRP,MINV INTV from HPJSQ.HOURDB
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TIME >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TIME <= #{etime} ]]>
+            </if>
+             <if test="idList != null and idList.size() > 0">
+                 and SENID in
+                 <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                     #{id}
+                 </foreach>
+             </if>
+        </where>
+        order by TIME asc
+    </select>
+    <resultMap id="mapDay" type="java.util.Map">
+        <result column="STCD" property="STCD" javaType="java.lang.String"/>
+        <result column="TM" property="TM" javaType="java.lang.String"/>
+        <result column="DRP" property="DRP" javaType="java.lang.String"/>
+        <result column="INTV" property="INTV" javaType="java.lang.String"/>
+    </resultMap>
+    <select id="getSCJYDAY" resultMap="mapDay">
+        select to_char(SENID) STCD,TIME + INTERVAL '-1' DAY as TM,V DRP,MINV INTV from HPJSQ.DAYDB
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TIME + INTERVAL '-1' DAY >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TIME + INTERVAL '-1' DAY <= #{etime} ]]>
+            </if>
+            <if test="idList != null and idList.size() > 0">
+                and SENID in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        order by TIME asc
+    </select>
+
+    <resultMap id="map5MIN" type="java.util.Map">
+        <result column="STCD" property="STCD" javaType="java.lang.String"/>
+        <result column="TM" property="TM" javaType="java.lang.String"/>
+        <result column="DRP" property="DRP" javaType="java.lang.String"/>
+        <result column="INTV" property="INTV" javaType="java.lang.String"/>
+    </resultMap>
+    <select id="getSCJY_5MIN" resultMap="map5MIN">
+        select to_char(SENID) STCD,TIME as TM,CYCLE DRP,FACTV INTV from HPJSQ.RTSQ
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TIME >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TIME <= #{etime} ]]>
+            </if>
+            <if test="idList != null and idList.size() > 0">
+                and SENID in
+                <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        order by TIME asc
+    </select>
+</mapper>

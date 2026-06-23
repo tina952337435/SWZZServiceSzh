@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.DD_SOLUTION_AUTOData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTION_AUTOPojo">
+        select a.* from DD_SOLUTION_AUTO a
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="stime != null and stime != ''">
+               <![CDATA[ and DD_TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DD_TM <= #{etime} ]]>
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM DD_SOLUTION_AUTO
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and DD_TM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DD_TM <= #{etime} ]]>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTION_AUTOPojo">
+        insert into DD_SOLUTION_AUTO
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="DD_TM != null and DD_TM != ''">
+                DD_TM,
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="DD_TM != null and DD_TM != ''">
+                #{DD_TM},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                #{TYPE},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTION_AUTOPojo">
+        insert into DD_SOLUTION_AUTO(ID,DD_TM,TYPE) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ID,jdbcType=VARCHAR},
+            #{obj.DD_TM,jdbcType=VARCHAR},
+            #{obj.TYPE,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTION_AUTOPojo">
+        update DD_SOLUTION_AUTO
+        <set>
+            <if test="DD_TM != null and DD_TM != ''">
+                DD_TM = #{DD_TM},
+            </if>
+            <if test="TYPE != null and TYPE != ''">
+                TYPE = #{TYPE},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from DD_SOLUTION_AUTO where ID = #{ID}
+    </delete>
+</mapper>

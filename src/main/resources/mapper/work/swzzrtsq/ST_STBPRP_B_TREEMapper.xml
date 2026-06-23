@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.ST_STBPRP_B_TREEData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_B_TREEPojo">
+        select * from ST_STBPRP_B_TREE
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="PID != null and PID != ''">
+                and PID = #{PID}
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                and TITLE = #{TITLE}
+            </if>
+            <if test="TM != null and TM != ''">
+                and TM = #{TM}
+            </if>
+            <if test="ORDERBYID != null">
+                and ORDERBYID = #{ORDERBYID}
+            </if>
+            <if test="PATHNAME != null and PATHNAME != ''">
+                and PATHNAME = #{PATHNAME}
+            </if>
+        </where>
+        ORDER BY ORDERBYID
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_B_TREEPojo">
+        insert into ST_STBPRP_B_TREE
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                ID,
+            </if>
+            <if test="PID != null and PID != ''">
+                PID,
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                TITLE,
+            </if>
+            <if test="TM != null and TM != ''">
+                TM,
+            </if>
+            <if test="ORDERBYID != null">
+                ORDERBYID,
+            </if>
+            <if test="PATHNAME != null and PATHNAME != ''">
+                PATHNAME,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ID != null and ID != ''">
+                #{ID},
+            </if>
+            <if test="PID != null and PID != ''">
+                #{PID},
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                #{TITLE},
+            </if>
+            <if test="TM != null and TM != ''">
+                #{TM},
+            </if>
+            <if test="ORDERBYID != null">
+                #{ORDERBYID},
+            </if>
+            <if test="PATHNAME != null and PATHNAME != ''">
+                #{PATHNAME},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="upDateOne" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_B_TREEPojo">
+        update ST_STBPRP_B_TREE
+        <set>
+            <if test="ID != null and ID != ''">
+                ID = #{ID},
+            </if>
+            <if test="PID != null and PID != ''">
+                PID = #{PID},
+            </if>
+            <if test="TITLE != null and TITLE != ''">
+                TITLE = #{TITLE},
+            </if>
+            <if test="TM != null and TM != ''">
+                TM = #{TM},
+            </if>
+            <if test="ORDERBYID != null">
+                ORDERBYID = #{ORDERBYID},
+            </if>
+            <if test="PATHNAME != null and PATHNAME != ''">
+                PATHNAME = #{PATHNAME},
+            </if>
+        </set>
+        where ID = #{ID}
+    </update>
+
+    <delete id="deleteOne">
+        delete from ST_STBPRP_B_TREE where ID = #{ID}
+    </delete>
+
+
+    <select id="selectListByID" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_B_TREEPojo">
+        select * from ST_STBPRP_B_TREE
+        <where>
+            <if test="idList != null and idList.size() > 0">
+                and ID in
+                <foreach collection="idList" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="pidList != null and pidList.size() > 0">
+                and PID in
+                <foreach collection="pidList" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY ORDERBYID
+    </select>
+</mapper>
