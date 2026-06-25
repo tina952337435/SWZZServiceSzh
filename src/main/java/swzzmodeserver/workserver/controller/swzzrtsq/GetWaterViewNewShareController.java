@@ -718,7 +718,7 @@ public class GetWaterViewNewShareController {
             pagesize="1000";
         }
         System.out.print("单站流量startindex:::::::"+startindex+",pagesize:::::::"+pagesize);
-        mList = sFlow_RData.selectHisAll(stcdList, stime, etime,Integer.parseInt(pageindex),Integer.parseInt(pagesize));     
+        mList = sFlow_RData.selectHisAll(stcdList, stime, etime,startindex,Integer.parseInt(pagesize));     
 
 
         Integer integer = sFlow_RData.selectHisAllCount(stcdList, stime, etime);

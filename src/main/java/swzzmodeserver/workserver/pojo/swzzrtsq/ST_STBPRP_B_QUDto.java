@@ -36,6 +36,10 @@ public class ST_STBPRP_B_QUDto {
     private String MSQMT;
     private String ROTATE;
 
+    private Double VEL;
+    private Double MAX_VEL;
+    private Double DIR;
+
 
     private Double WNDV;
     private Integer WNDPWR;

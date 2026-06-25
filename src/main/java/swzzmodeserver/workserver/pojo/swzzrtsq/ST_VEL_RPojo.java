@@ -5,12 +5,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Data
-public class ST_FLOW_RPojo {
+public class ST_VEL_RPojo {
     private String STCD;
     private String TM;
-    private Double Z;
-    private Double Q;
+    private Double VEL;
+    private Double MAX_VEL;
+    private Double DIR;
     private String MSQMT;
-    private String STNM;
-    private Double V;
 }

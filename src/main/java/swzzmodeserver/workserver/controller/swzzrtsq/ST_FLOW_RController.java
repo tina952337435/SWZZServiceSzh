@@ -118,6 +118,31 @@ public class ST_FLOW_RController {
             return new ResultUtils<>(quDtoList, "操作成功", false, quDtoList.size(), watch.getTime());
         }
     }
+    @RequestMapping("/selectHisQV")
+    public ResultUtils selectHisQV(@RequestBody ColumnName param) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        Date date = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+        String stime = DateUtil.dateFormat(date, "yyyy-MM-dd HH:mm:ss"), etime = "";
+        List<String> stcdList = new ArrayList<>();
+        if (null != param.getStcd()) {
+            stcdList = Arrays.asList(param.getStcd().split(","));
+        }
+        if (null != param.getStime()) {
+            stime = param.getStime();
+        }
+        if (null != param.getEtime()) {
+            etime = param.getEtime();
+        }
+        List<ST_FLOW_RPojo> quDtoList = data.selectHisQV(stcdList, stime, etime);
+        watch.stop();
+        if (quDtoList.size() > 0) {
+            return new ResultUtils<>(quDtoList, "操作成功", true, quDtoList.size(), watch.getTime());
+        } else {
+            return new ResultUtils<>(quDtoList, "操作成功", false, quDtoList.size(), watch.getTime());
+        }
+    }
+    
 
     @RequestMapping("/selectSlAndYsl") // 进出水量
     public ResultUtils selectSlAndYsl(@RequestBody ColumnName param) {

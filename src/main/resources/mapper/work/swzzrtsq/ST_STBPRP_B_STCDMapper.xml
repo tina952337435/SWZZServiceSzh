@@ -161,6 +161,19 @@ TM > (SELECT MAX(TM) FROM "SZ_WATER"."ST_RIVER_BX_R" where tm>(SYSDATE -  24) an
         AND EXISTS (SELECT 1 FROM st_flow_r v WHERE v.STCD = a.STCD);
     </update>
 
+    <update id="UpdateWaterDataVel">
+        UPDATE st_stbprp_b_stcd a
+        SET
+        a.ZTM = (SELECT v.TM FROM ST_VEL_R v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1),
+        a.UPZ = (SELECT v.VEL FROM ST_VEL_R v WHERE v.STCD = a.STCD ORDER BY v.TM DESC LIMIT 1)
+        <where>
+            <if test="type != null and type != ''">
+                a.TYPE = #{type}
+            </if>
+        </where>
+        AND EXISTS (SELECT 1 FROM ST_VEL_R v WHERE v.STCD = a.STCD);
+    </update>
+
 
     <update id="UpdateWaterDataFeng">
         UPDATE st_stbprp_b_stcd a

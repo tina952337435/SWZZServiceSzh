@@ -30,6 +30,8 @@ public interface RTSQST_STBPRP_B_STCDData {
     Integer UpdateWaterDataPptn(@Param(value = "type") String type,@Param(value = "stcd") String stcd);
 
     Integer UpdateWaterDataFlow(@Param(value = "type") String type);
+    
+    Integer UpdateWaterDataVel(@Param(value = "type") String type);
 
     Integer UpdateWaterDataFeng(@Param(value = "type") String type);
 

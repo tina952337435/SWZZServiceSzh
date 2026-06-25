@@ -305,7 +305,7 @@
         </where>
     </select>
     <select id="querySUMDRPList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
-        select stcd,max(stnm)stnm,max(lgtd)lgtd,max(lttd)lttd,sum(drp) drp,mtype,max(lgtd84)lgtd84,max(lttd84)lttd84,max(addvnm) as addvnm from GETWATERVIEWPPTNR
+        select stcd,max(stnm)stnm,max(lgtd)lgtd,max(lttd)lttd,sum(drp) drp,mtype,max(lgtd84)lgtd84,max(lttd84)lttd84,max(addvnm) as addvnm,max(tm) as tm from GETWATERVIEWPPTNR
         <where>
             <if test="stime != null and stime != ''">
                 <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>

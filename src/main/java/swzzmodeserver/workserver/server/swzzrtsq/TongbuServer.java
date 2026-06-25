@@ -59,6 +59,9 @@ public class TongbuServer {
     private ST_FLOW_RData stFlowRData;
 
     @Autowired
+    private ST_VEL_RData stVelRData;
+
+    @Autowired
     private ST_WDWV_RData stWdwvRData;
 
     @Autowired
@@ -206,7 +209,8 @@ public class TongbuServer {
                 }
 
                 new javalog().writelog(model.getStnm() + "站入库水位数据长度：" + rows, filePathName);
-            } else if (model.getType().equals("2"))// 雨量
+            } 
+            else if (model.getType().equals("2"))// 雨量
             {
                 new javalog().writelog("进入主服务SyncRealData接口，开始同步雨量数据：" + stcd, filePathName, "SWZZServiceYL");
                 List<ST_PPTN_RPojo> listPptn = new ArrayList<>();
@@ -241,7 +245,8 @@ public class TongbuServer {
                     // }
 
                 }
-            } else if (model.getType().equals("3"))// 工情
+            } 
+            else if (model.getType().equals("3"))// 工情
             {
 
             } else if (model.getType().equals("5"))// 流量
@@ -269,7 +274,8 @@ public class TongbuServer {
                     new javalog().writelog("更新" + model.getStnm() + "站【流量】最新时间", filePathName, "SWZZServiceLL");
                     // }
                 }
-            } else if (model.getType().equals("8")) {// 风速风向
+            } 
+            else if (model.getType().equals("8")) {// 风速风向
                 new javalog().writelog("进入主服务SyncRealData接口，开始同步风速风向数据：" + stcd, filePathName, "SWZZServiceFX");
                 // List<tb_wind_informationPojo> listFeng =
                 // stWdwvRData.selecttb_wind_informationListtTop(stcdList, tm, null);
@@ -305,6 +311,31 @@ public class TongbuServer {
                 } catch (Exception e) {
                     new javalog().writelog(model.getStnm() + "站报错：" + e.getMessage(), filePathName,
                             "SWZZServiceFXError");
+                }
+            } 
+            else if (model.getType().equals("9")) {// 断面流速
+                new javalog().writelog("进入主服务SyncRealData接口，开始同步【流速】数据：" + stcd, filePathName, "SWZZServiceLS");
+                // 查询
+                // List<ST_WAS_RPojo> st_was_rLL = rtsqData.GetWaterDataLL(tm, null, stcdList,
+                // null);//达梦数据库
+                List<ST_WAS_RPojo> st_was_rLL = rtevData.GetWaterDataLL(stcdList, tm);// wds 老水情库
+                new javalog().writelog("【流速】数据长度：" + st_was_rLL.size(), filePathName, "SWZZServiceLS");
+                List<ST_VEL_RPojo> listLL = SyncWaterDataToListVel(st_was_rLL, model);
+                if (listLL.size() > 0) {
+                    // 插入操作
+                    new javalog().writelog("【流速】数据长度：" + listLL.size(), filePathName, "SWZZServiceLS");
+                    try {
+                        rows += stVelRData.insertAll(listLL);
+                    } catch (Exception e) {
+                        new javalog().writelog(model.getStnm() + "站入库【流速】数据报错：" + e.getMessage(), filePathName,
+                                "SWZZServiceLLError");
+                    }
+                    new javalog().writelog(model.getStnm() + "站入库【流速】数据长度：" + rows, filePathName, "SWZZServiceLS");
+                    // if (rows > 0) {
+                    // 更新最新时间
+                    UpdateWaterData(tab, model.getType(), model.getStcd());
+                    new javalog().writelog("更新" + model.getStnm() + "站【流速】最新时间", filePathName, "SWZZServiceLS");
+                    // }
                 }
             }
         }
@@ -447,6 +478,57 @@ public class TongbuServer {
                         }
                         if (!upzValue.equals(0)) {
                             wasInfo.setQ(upzValue);
+                        }
+                        list.add(wasInfo);
+
+                        strLastUPZ = upzValue.toString();
+                        strLastTM = strTM;
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            System.out.println("发生错误：" + ex.getMessage());
+        }
+        return list;
+    }
+
+    // 流速数据
+    private List<ST_VEL_RPojo> SyncWaterDataToListVel(List<ST_WAS_RPojo> st_was_r, V_ST_STBPRP_BTZDto model) {
+        List<ST_VEL_RPojo> list = new ArrayList<>();
+        try {
+            if (st_was_r.size() > 0) {
+                // 如果不需要严格的类型转换校验，只是想把字符串传下去
+                String strLastTM = (model.getTm() != null && !model.getTm().trim().isEmpty()) ? model.getTm().trim()
+                        : "";
+                String strLastUPZ = model.getUpz() != null
+                        ? String.format("%.2f", new java.math.BigDecimal(model.getUpz()))
+                        : "";
+                boolean flag = true;
+                for (ST_WAS_RPojo pojo : st_was_r) {
+                    flag = true;
+                    String strTM = pojo.getTM();
+                    if (!"".equals(strLastTM)) {
+                        if (strLastTM.equals(strTM)) {
+                            flag = false;
+                        }
+                    }
+                    if (flag) {
+                        ST_VEL_RPojo wasInfo = new ST_VEL_RPojo();
+                        wasInfo.setSTCD(model.getStcd());
+                        wasInfo.setTM(pojo.getTM());
+
+                        String upzStr = pojo.getUPZ();
+                        Double upzValue = 0.0;
+                        if (upzStr != null && !upzStr.trim().isEmpty()) {
+                            try {
+                                double temp = Double.parseDouble(upzStr);
+                                upzValue = Double.parseDouble(String.format("%.2f", temp));
+                            } catch (NumberFormatException e) {
+                                upzValue = 0.0;
+                            }
+                        }
+                        if (!upzValue.equals(0)) {
+                            wasInfo.setVEL(upzValue);
                         }
                         list.add(wasInfo);
 
@@ -623,7 +705,11 @@ public class TongbuServer {
             // }
             else if (tab.equals("st_flow_r")) {// 流量站
                 rows = rtsqstStbprpBStcdData.UpdateWaterDataFlow(type);
-            } else if (tab.equals("st_wdwv_r")) {// 风速风向站
+            }
+            else if (tab.equals("st_vel_r")) {// 流速站
+                rows = rtsqstStbprpBStcdData.UpdateWaterDataVel(type);
+            }
+             else if (tab.equals("st_wdwv_r")) {// 风速风向站
                 rows = rtsqstStbprpBStcdData.UpdateWaterDataFeng(type);
             }
         } catch (Exception e) {
@@ -985,29 +1071,31 @@ public class TongbuServer {
             LocalDateTime dateTime = LocalDateTime.parse(tm, formatter);
             LocalDateTime newDateTime = dateTime.plusSeconds(30);// 加上30秒钟
             String stime = newDateTime.format(outputFormatter);
-            String etime = newDateTime.plusDays(180).format(outputFormatter);//加180天
+            String etime = newDateTime.plusDays(180).format(outputFormatter);// 加180天
             List<Map<String, Object>> listMap = shuiwupingServer.getSJYJXY(1, 100000, stime, etime);
-            if(listMap.size()>0){
+            if (listMap.size() > 0) {
                 for (Map<String, Object> pojo : listMap) {
                     EmergencyResponseInfoPojo info = new EmergencyResponseInfoPojo();
-                    info.setID(pojo.get("ID")==null?null:pojo.get("ID").toString());
-                    info.setSTART_TIME(pojo.get("START_TIME")==null?null:pojo.get("START_TIME").toString());
-                    info.setYJD_NUMBER(pojo.get("YJD_NUMBER")==null?null:pojo.get("YJD_NUMBER").toString());
-                    info.setSIGNAL_STAGE(pojo.get("SIGNAL_STAGE")==null?null:pojo.get("SIGNAL_STAGE").toString());
-                    info.setSIGNAL_LEVEL(pojo.get("SIGNAL_LEVEL")==null?null:pojo.get("SIGNAL_LEVEL").toString());
-                    info.setSIGNAL_CATEGORY(pojo.get("SIGNAL_CATEGORY")==null?null:pojo.get("SIGNAL_CATEGORY").toString());
-                    info.setEARLY_WARNING_NUM(pojo.get("EARLY_WARNING_NUM")==null?null:Integer.valueOf(pojo.get("EARLY_WARNING_NUM").toString()));
-                    info.setTITLE(pojo.get("TITLE")==null?null:pojo.get("TITLE").toString());
-                    info.setCONTENT(pojo.get("CONTENT")==null?null:pojo.get("CONTENT").toString());
-                    info.setQXTYJ_DATE(pojo.get("QXTYJ_DATE")==null?null:pojo.get("QXTYJ_DATE").toString());
+                    info.setID(pojo.get("ID") == null ? null : pojo.get("ID").toString());
+                    info.setSTART_TIME(pojo.get("START_TIME") == null ? null : pojo.get("START_TIME").toString());
+                    info.setYJD_NUMBER(pojo.get("YJD_NUMBER") == null ? null : pojo.get("YJD_NUMBER").toString());
+                    info.setSIGNAL_STAGE(pojo.get("SIGNAL_STAGE") == null ? null : pojo.get("SIGNAL_STAGE").toString());
+                    info.setSIGNAL_LEVEL(pojo.get("SIGNAL_LEVEL") == null ? null : pojo.get("SIGNAL_LEVEL").toString());
+                    info.setSIGNAL_CATEGORY(
+                            pojo.get("SIGNAL_CATEGORY") == null ? null : pojo.get("SIGNAL_CATEGORY").toString());
+                    info.setEARLY_WARNING_NUM(pojo.get("EARLY_WARNING_NUM") == null ? null
+                            : Integer.valueOf(pojo.get("EARLY_WARNING_NUM").toString()));
+                    info.setTITLE(pojo.get("TITLE") == null ? null : pojo.get("TITLE").toString());
+                    info.setCONTENT(pojo.get("CONTENT") == null ? null : pojo.get("CONTENT").toString());
+                    info.setQXTYJ_DATE(pojo.get("QXTYJ_DATE") == null ? null : pojo.get("QXTYJ_DATE").toString());
                     list.add(info);
                 }
-                count=emergencyResponseInfoData.insertAll(list);
+                count = emergencyResponseInfoData.insertAll(list);
             }
-            
+
         } catch (Exception e) {
             // TODO: handle exception
-        }        
+        }
         return count;
     }
 

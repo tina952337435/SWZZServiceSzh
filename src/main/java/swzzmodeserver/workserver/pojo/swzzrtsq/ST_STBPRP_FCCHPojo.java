@@ -33,4 +33,8 @@ public class ST_STBPRP_FCCHPojo {
     private String UPZ;
     private List<GetWaterViewNewPojo> waterHisList;
     private String STATUS;//开关状态
+
+    private String DIR;
+    private String MAPSIZE;
+    private String ROTATE;
 }

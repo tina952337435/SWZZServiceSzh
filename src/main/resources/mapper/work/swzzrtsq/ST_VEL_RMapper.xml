@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.ST_FLOW_RData">
-    <select id="selectNew" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_FLOW_RPojo">
-        select A.STCD,A.TM,Z,Q,MSQMT from ST_FLOW_R as A inner join (
-        select STCD,MAX(TM) TM from ST_FLOW_R
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.ST_VEL_RData">
+    <select id="selectNew" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_VEL_RPojo">
+        select A.STCD,A.TM,VEL,MAX_VEL,DIR,MSQMT from ST_VEL_R as A inner join (
+        select STCD,MAX(TM) TM from ST_VEL_R
         <where>
             <if test="stime != null and stime != ''">
                 <![CDATA[ and TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
@@ -24,8 +24,8 @@
         </where>
     </select>
 
-    <select id="selectHis" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_FLOW_RPojo">
-        select * from ST_FLOW_R
+    <select id="selectHis" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_VEL_RPojo">
+        select * from ST_VEL_R
         <where>
             <if test="stcdList != null and stcdList.size() > 0">
                 and STCD in
@@ -42,16 +42,15 @@
         </where>
     </select>
 
-    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_FLOW_RPojo">
-        insert into ST_FLOW_R(STCD, TM,Z,Q,MSQMT) values
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_VEL_RPojo">
+        insert into ST_VEL_R(STCD, TM, VEL, MAX_VEL, DIR, MSQMT) values
         <foreach collection="quPojo" item="pojo" separator=",">
-            (#{pojo.STCD},#{pojo.TM},#{pojo.Z},#{pojo.Q},#{pojo.MSQMT})
+            (#{pojo.STCD},#{pojo.TM},#{pojo.VEL},#{pojo.MAX_VEL},#{pojo.DIR},#{pojo.MSQMT})
         </foreach>
     </insert>
 
-
-    <select id="selectHisAll" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_FLOW_RPojo">
-        select * from ST_FLOW_R
+    <select id="selectHisAll" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_VEL_RPojo">
+        select * from ST_VEL_R
         <where>
             <if test="stcdList != null and stcdList.size() > 0">
                 and STCD in
@@ -73,7 +72,7 @@
     </select>
 
     <select id="selectHisAllCount" resultType="integer">
-            SELECT count(1) FROM ST_FLOW_R
+            SELECT count(1) FROM ST_VEL_R
             <where>
             <if test="stcdList != null and stcdList.size() > 0">
                 and STCD in
@@ -89,34 +88,4 @@
             </if>
         </where>
     </select>
-
-
-<select id="selectHisQV" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_FLOW_RPojo">
-    SELECT
-        F.STCD,
-        F.TM AS TM,
-        F.Q AS Q,
-        V.VEL AS V
-    FROM
-    ST_FLOW_R F
-    LEFT JOIN
-    ST_VEL_R V ON F.STCD = V.STCD
-    AND F.TM=V.TM
-    <where>
-            <if test="stcdList != null and stcdList.size() > 0">
-                and F.STCD in
-                <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
-                    #{stcd}
-                </foreach>
-            </if>
-            <if test="stime != null and stime != ''">
-                <![CDATA[ and F.TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
-            </if>
-            <if test="etime != null and etime != ''">
-                <![CDATA[ and F.TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
-            </if>
-        </where>
-    ORDER BY
-    F.TM asc;
-</select>
 </mapper>
