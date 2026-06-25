@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -66,7 +67,8 @@ public class ST_FLOW_RController {
         for (ST_STBPRP_B_QUPojo quPojo : quList) {
             ST_STBPRP_B_QUDto quDto = new ST_STBPRP_B_QUDto();
             BeanUtils.copyProperties(quPojo, quDto);
-            List<ST_FLOW_RPojo> collect = flowRList.stream().filter(i -> i.getSTCD().equals(quDto.getSTCD())).collect(Collectors.toList());
+            List<ST_FLOW_RPojo> collect = flowRList.stream().filter(i -> i.getSTCD().equals(quDto.getSTCD()))
+                    .collect(Collectors.toList());
             if (collect.size() > 0) {
                 ST_FLOW_RPojo flowRPojo = collect.get(0);
                 if (null != flowRPojo.getZ()) {
@@ -117,7 +119,7 @@ public class ST_FLOW_RController {
         }
     }
 
-    @RequestMapping("/selectSlAndYsl")//进出水量
+    @RequestMapping("/selectSlAndYsl") // 进出水量
     public ResultUtils selectSlAndYsl(@RequestBody ColumnName param) {
         StopWatch watch = new StopWatch();
         watch.start();
@@ -175,18 +177,18 @@ public class ST_FLOW_RController {
         }
     }
 
-
     @RequestMapping("/queryByLLNew")
     public ResultUtils queryByLLNew(@RequestBody ColumnName param) {
         StopWatch watch = new StopWatch();
         watch.start();
         Date date = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
-        String stime = DateUtil.dateFormat(date, "yyyy-MM-dd HH:mm:ss"), etime = "", PID = "";
+        String stime = DateUtil.dateFormat(date, "yyyy-MM-dd HH:mm:ss"), etime = "";
+        List<String> pidList = new ArrayList<>();
         String dayhour = "Minute";
         String mtype = "";
         List<String> stcdList = new ArrayList<>();
         if (null != param.getPid()) {
-            PID = param.getPid();
+            pidList = Arrays.asList(param.getPid().split(","));
         }
         if (null != param.getStime()) {
             stime = param.getStime();
@@ -200,7 +202,7 @@ public class ST_FLOW_RController {
         if (null != param.getDatasource()) {
             mtype = param.getDatasource();
         }
-        List<ST_STBPRP_B_QUPojo> quList = quData.selectList("", "", null, PID, null);
+        List<ST_STBPRP_B_QUPojo> quList = quData.queryList("", "", null, pidList);
         if (null != quList && quList.size() > 0) {
             for (ST_STBPRP_B_QUPojo quPojo : quList) {
                 if (null != quPojo.getSTCD()) {
@@ -218,21 +220,28 @@ public class ST_FLOW_RController {
             for (int num = 0; num < quList.size(); num++) {
                 ST_STBPRP_B_QUPojo onestbprpBQuList = quList.get(num);
                 String stcd = onestbprpBQuList.getSTCD().toString();
-                List<GetWaterViewNewPojo> oneFlowList = flowRList.stream().filter(u -> u.getSTCD().equals(stcd) && onestbprpBQuList.getSTTP().equals(u.getMTYPE())).collect(Collectors.toList());
-                List<ST_STBPRP_BPojo> onestStbprpB = stStbprpBList.stream().filter(u -> u.getSTCD().equals(stcd) && onestbprpBQuList.getSTTP().equals(u.getMTYPE())).collect(Collectors.toList());
-                List<ST_STBPRP_B_QUPojo> tempquList = quList.stream().filter(u -> u.getSTCD().equals(stcd)).collect(Collectors.toList());
+                List<GetWaterViewNewPojo> oneFlowList = flowRList.stream()
+                        .filter(u -> u.getSTCD().equals(stcd) && onestbprpBQuList.getSTTP().equals(u.getMTYPE()))
+                        .collect(Collectors.toList());
+                List<ST_STBPRP_BPojo> onestStbprpB = stStbprpBList.stream()
+                        .filter(u -> u.getSTCD().equals(stcd) && onestbprpBQuList.getSTTP().equals(u.getMTYPE()))
+                        .collect(Collectors.toList());
+                List<ST_STBPRP_B_QUPojo> tempquList = quList.stream().filter(u -> u.getSTCD().equals(stcd))
+                        .collect(Collectors.toList());
                 if (oneFlowList.size() > 0) {
                     GetWaterViewNewPojo pojo = oneFlowList.get(0);
-                    if(tempquList.size()>0){
+                    if (tempquList.size() > 0) {
                         pojo.setOrderbyid(tempquList.get(0).getORDERBYID());
                         pojo.setSTNM(tempquList.get(0).getSTNM());
                     }
-                    if(onestStbprpB.size()>0){
+                    if (onestStbprpB.size() > 0) {
                         pojo.setADMAUTH(onestStbprpB.get(0).getADMAUTH());
                         pojo.setDTPR(onestStbprpB.get(0).getDTPR());
                     }
-                    List<ST_STBPRP_B_QUPojo> onequstcd=quList.stream().filter(o->o.getSTCD().equals(pojo.getSTCD())&&o.getSTTP().equals(pojo.getMTYPE())).collect(Collectors.toList());
-                    if(onequstcd.size()>0){
+                    List<ST_STBPRP_B_QUPojo> onequstcd = quList.stream()
+                            .filter(o -> o.getSTCD().equals(pojo.getSTCD()) && o.getSTTP().equals(pojo.getMTYPE()))
+                            .collect(Collectors.toList());
+                    if (onequstcd.size() > 0) {
                         pojo.setDIR(onequstcd.get(0).getDIR());
                         pojo.setMAPSIZE(String.valueOf(onequstcd.get(0).getMAPSIZE()));
                         pojo.setROTATE(onequstcd.get(0).getROTATE());
@@ -258,7 +267,9 @@ public class ST_FLOW_RController {
                             pojo.setGRZ(onestStbprpB.get(0).getGRZ().toString());
                         }
 
-                        List<ST_STBPRP_B_QUPojo> onequstcd = quList.stream().filter(o -> o.getSTCD().equals(pojo.getSTCD()) && o.getSTTP().equals(pojo.getMTYPE())).collect(Collectors.toList());
+                        List<ST_STBPRP_B_QUPojo> onequstcd = quList.stream()
+                                .filter(o -> o.getSTCD().equals(pojo.getSTCD()) && o.getSTTP().equals(pojo.getMTYPE()))
+                                .collect(Collectors.toList());
                         if (onequstcd.size() > 0) {
                             pojo.setDIR(onequstcd.get(0).getDIR());
                             pojo.setMAPSIZE(String.valueOf(onequstcd.get(0).getMAPSIZE()));

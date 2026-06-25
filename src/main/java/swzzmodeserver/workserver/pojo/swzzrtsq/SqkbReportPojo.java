@@ -96,4 +96,5 @@ public class SqkbReportPojo {
         private String tm;           // 时间
         private Double drp;          // 降雨量
     }
+    private String docDate;       // 日期
 }

@@ -11,7 +11,6 @@ import org.jfree.chart.axis.DateTickUnitType;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.annotations.CategoryLineAnnotation;
-import org.jfree.chart.annotations.CategoryTextAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.labels.ItemLabelAnchor;
 import org.jfree.chart.labels.ItemLabelPosition;
@@ -222,13 +221,10 @@ public class SqkbChartUtils {
                 }
             }
 
-            // 3. 创建数据集
+            // 3. 创建数据集（图例已关闭，"降雨量(mm)"移至横坐标结尾）
             DefaultCategoryDataset dataset = new DefaultCategoryDataset();
             for (int i = 0; i < hourlyData.size(); i++) {
-                // 注意：这里为了对齐截图，我们只显示部分标签，或者全部显示（取决于截图具体需求）
-                // 截图看起来是每隔几个显示一个，或者根据宽度自动调整。
-                // 为了还原度，我们先填入所有数据，后面控制 Axis 的显示。
-                dataset.addValue(rainValues[i], "降雨量(mm)", timeLabels[i]);
+                dataset.addValue(rainValues[i], "", timeLabels[i]);
             }
 
             // 4. 构建标题
@@ -236,14 +232,14 @@ public class SqkbChartUtils {
             String titleEtime = formatTitleTime(etime);
             String title = stationName + "\n" + "开始时间：" + titleStime + "-结束时间：" + titleEtime;
 
-            // 5. 创建图表
+            // 5. 创建图表（关闭图例）
             JFreeChart chart = ChartFactory.createBarChart(
                     title,
                     "",
                     "",
                     dataset,
                     PlotOrientation.VERTICAL,
-                    true,
+                    false,
                     true,
                     false
             );
@@ -275,6 +271,7 @@ public class SqkbChartUtils {
 
             // 10. Y 轴设置（数值轴）
             NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+            yAxis.setLabel("降雨量(mm)"); // 纵坐标顶部显示单位
             yAxis.setLabelFont(new Font("宋体", Font.PLAIN, 12));
             yAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 12));
 
@@ -301,16 +298,16 @@ public class SqkbChartUtils {
             xAxis.setAxisLinePaint(Color.BLACK);
             xAxis.setTickMarkPaint(Color.BLACK);
 
-            // 隐藏多余的标签（如果数据太多，每隔 N 个显示一个）
-            // 截图看起来比较稀疏，这里做一个简单的优化：如果数据点超过 10 个，每隔 2 个显示一个
-            if (timeLabels.length > 10) {
-                xAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45); // 倾斜防止重叠
-            } else {
-                xAxis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);
-            }
+            // 横坐标标签始终水平显示（24个小时全部显示）
+            xAxis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);
+            // 增大标签宽度比率，防止长标签被截断为省略号
+            xAxis.setMaximumCategoryLabelWidthRatio(3.0f);
+            // 增加左右边距，防止首尾标签被裁剪（首个标签"X日X时"较长）
+            xAxis.setLowerMargin(0.04);
+            xAxis.setUpperMargin(0.02);
 
             // 13. 整体背景（图表边框区域）
-            chart.setBackgroundPaint(new Color(245, 245, 245)); // 极浅灰，或者白色
+            chart.setBackgroundPaint(Color.WHITE); // 纯白背景
 
             // 14. 保存文件
             BufferedImage image = chart.createBufferedImage(900, 500);
@@ -446,7 +443,7 @@ public class SqkbChartUtils {
             CategoryPlot plot = chart.getCategoryPlot();
 
             // 4. 设置背景与边框
-            chart.setBackgroundPaint(new Color(240, 240, 240)); // 整体背景：极浅灰
+            chart.setBackgroundPaint(Color.WHITE); // 整体背景：纯白
             plot.setBackgroundPaint(Color.WHITE);                // 绘图区背景：纯白
             plot.setOutlinePaint(Color.BLACK);                   // 绘图区边框：黑色
             plot.setOutlineVisible(true);                        // 显示边框

@@ -27,4 +27,6 @@ public class EmployeeGetTokenPojo {
 
     @JsonProperty("XLTYPE")
     private String XLTYPE;
+    @JsonProperty("PID")
+    private String PID;
 }
