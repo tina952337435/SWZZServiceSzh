@@ -2,6 +2,10 @@ package swzzmodeserver.workserver.server.swzzrtsq;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -682,6 +686,26 @@ public class SqkbServer {
             paragraph.setAlignment(ParagraphAlignment.CENTER);
 
             if (imagePath != null && new File(imagePath).exists()) {
+                // 只读图片头部获取宽高，不解码像素
+                int imgWidth = 400;
+                int imgHeight = 250;
+                try (ImageInputStream iis = ImageIO.createImageInputStream(new File(imagePath))) {
+                    java.util.Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+                    if (readers.hasNext()) {
+                        ImageReader reader = readers.next();
+                        reader.setInput(iis);
+                        imgWidth = reader.getWidth(0);
+                        imgHeight = reader.getHeight(0);
+                        reader.dispose();
+                    }
+                } catch (Exception e) {
+                    // 降级使用默认尺寸
+                }
+
+                // 按最大展示宽度 480px 等比缩放
+                int maxWidthEMU = 480 * 9525;
+                int heightEMU = (int) ((double) imgHeight / imgWidth * maxWidthEMU);
+
                 // 插入图片
                 XWPFRun picRun = paragraph.createRun();
                 FileInputStream fis = new FileInputStream(new File(imagePath));
@@ -689,7 +713,7 @@ public class SqkbServer {
                 fis.read(imageBytes);
                 fis.close();
                 picRun.addPicture(new java.io.ByteArrayInputStream(imageBytes), 6,
-                        new File(imagePath).getName(), 400 * 9525, 250 * 9525);
+                        new File(imagePath).getName(), maxWidthEMU, heightEMU);
 
                 // 添加换行和图片说明（使用\r\n换行）
                 XWPFRun breakRun = paragraph.createRun();
