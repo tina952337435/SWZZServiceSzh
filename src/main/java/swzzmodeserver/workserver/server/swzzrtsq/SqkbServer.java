@@ -702,9 +702,14 @@ public class SqkbServer {
                     // 降级使用默认尺寸
                 }
 
-                // 按最大展示宽度 480px 等比缩放
+                // 按最大展示宽度 480px 等比缩放，同时限制最大高度，防止竖长图过高
                 int maxWidthEMU = 480 * 9525;
+                int maxHeightEMU = 330 * 9525;
                 int heightEMU = (int) ((double) imgHeight / imgWidth * maxWidthEMU);
+                if (heightEMU > maxHeightEMU) {
+                    heightEMU = maxHeightEMU;
+                    maxWidthEMU = (int) ((double) imgWidth / imgHeight * maxHeightEMU);
+                }
 
                 // 插入图片
                 XWPFRun picRun = paragraph.createRun();
