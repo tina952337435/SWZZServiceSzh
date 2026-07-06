@@ -12,4 +12,5 @@ public class ES_MODELFANGANZHANPojo {
     private String NORMAL;
     private String SPECIAL;
     private Double CZ;
+    private Double MAXDRP;
 }

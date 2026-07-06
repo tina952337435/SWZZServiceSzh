@@ -207,9 +207,10 @@ public class ES_TIDALFORECASTController {
             if (bpPojo.getStartdate() != null) {
                 maxYBTMString = bpPojo.getStartdate();
             }
-            List<DD_SOLUTIONPojo> listDD = dd_solutionData.selectListByDD_IDandDD_status(null, null, "15",
-                    maxYBTMString);
-
+            List<DD_SOLUTIONPojo> listDD =new ArrayList<>();
+            if(bpPojo.getSttp() ==null){//当bpPojo.getSttp()不等于null时，是手动触发的，必须要算的
+                listDD = dd_solutionData.selectListByDD_IDandDD_status(null, null, "15",maxYBTMString);
+            }
             // List<ES_TIDALFORECASTPojo> bpPojo
             // =data.selectList(null,null,null,null,maxYBTMString,maxYBTMString,typeList,null,null);
             if (listDD.size() == 0) {
@@ -296,6 +297,9 @@ public class ES_TIDALFORECASTController {
                 }
                 // }
                 // }
+            }
+            else{
+                return new ResultUtils<>(listGC, "当前时刻已经预报过了", true, listGC.size(), watch.getTime());
             }
         }
 

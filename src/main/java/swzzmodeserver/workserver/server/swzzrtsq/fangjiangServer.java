@@ -53,8 +53,10 @@ public class fangjiangServer {
               
             new   javalog().writelog("【放江模型】请求接口地址：" + url,filePathName,"SWZZServiceFangjiang");
             String jsonResult = apihelper.apipost(url,parmasMap, header);
+            new   javalog().writelog("调用放江模型接口返回内容jsonResult: " + jsonResult,filePathName,"SWZZServiceFangjiang");
             if (jsonResult != null && !jsonResult.isEmpty()) {
                 response = JSON.parseObject(jsonResult, PUMPSTATIONResponse.class);
+                new   javalog().writelog("调用放江模型接口返回内容response: " + response,filePathName,"SWZZServiceFangjiang");
             }
         } catch (Exception e) {
             new   javalog().writelog("调用放江模型接口报错: " + e.getMessage(),filePathName,"SWZZServiceFangjiang");

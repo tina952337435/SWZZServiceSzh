@@ -376,12 +376,12 @@ public class SqkbChartUtils {
 
             // 设置饼图颜色
             Color[] colors = {
-                    new Color(154, 205, 50),   // 小雨 - 黄绿色
-                    new Color(0, 191, 255),   // 中雨 - 深天蓝
-                    new Color(65, 105, 225),  // 大雨 - 皇家蓝
-                    new Color(220, 20, 60),   // 暴雨 - 深红色
-                    new Color(138, 43, 226),  // 大暴雨 - 蓝紫色
-                    new Color(255, 140, 0)    // 特大暴雨 - 橙色
+                    new Color(166,242,142),   // 小雨 - 黄绿色
+                    new Color(0,123,0),   // 中雨 - 深天蓝
+                    new Color(61,188,249),  // 大雨 - 皇家蓝
+                    new Color(0,0,249),   // 暴雨 - 深红色
+                    new Color(251,61,250),  // 大暴雨 - 蓝紫色
+                    new Color(123,0,0)    // 特大暴雨 - 橙色
             };
 
             int i = 0;
@@ -412,8 +412,9 @@ public class SqkbChartUtils {
      * @param saveDir 保存目录
      * @return 图片路径
      */
-    public static String generateAreaRainBarChart(Map<String, Double> areaRainMap, String saveDir) {
+    public static String generateAreaRainBarChart(Map<String, Double> areaRainMap, String saveDir,String AvgDrp) {
         try {
+            areaRainMap.put("全市", Double.parseDouble(AvgDrp));
             // 1. 全局主题设置：统一使用宋体
             StandardChartTheme theme = new StandardChartTheme("CN");
             theme.setExtraLargeFont(new Font("宋体", Font.BOLD, 16)); // 主标题
@@ -421,11 +422,18 @@ public class SqkbChartUtils {
             theme.setRegularFont(new Font("宋体", Font.PLAIN, 12));   // 坐标轴标签
             ChartFactory.setChartTheme(theme);
 
-            // 2. 创建数据集
+            // 2. 创建数据集：全市在第一个，其余按雨量从高到低排列
             DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-            // 对区域名称进行排序（可选，为了显示更整齐，如果不需排序可去掉）
+
+            // 全市始终排第一个
+            if (areaRainMap.containsKey("全市")) {
+                dataset.addValue(areaRainMap.get("全市"), "雨量(mm)", "全市");
+            }
+
+            // 其他区域按雨量值降序排列
             areaRainMap.entrySet().stream()
-                    .sorted(Map.Entry.comparingByKey())
+                    .filter(entry -> !"全市".equals(entry.getKey()))
+                    .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
                     .forEach(entry -> dataset.addValue(entry.getValue(), "雨量(mm)", entry.getKey()));
 
             // 3. 创建图表

@@ -1008,7 +1008,8 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                     }
                 }
                 // new javalog().writelog("雨量边界拼完了，listData的长度："+listData.size(), filePathName);
-            } else if (jydatatype.contains("zhongyangyb")) {
+            } 
+            else if (jydatatype.contains("zhongyangyb")) {
                 List<St_rnfl_fPojo> listDataRNFL = stRnflFData.selectByHourHX(startdate, enddate,
                         dateFormat.format(new Date(stimeLong - 3 * 24 * 60 * 60 * 1000)),
                         dateFormat.format(new Date(stimeLong)), null);
@@ -1080,48 +1081,64 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
             // }
             if (gcdatatype.equals("DDFN")) {
                 stnm = gcdatatype;
-                List<ES_MODELFANGANPojo> listFang = esModelfanganData.selectList("", null, null).stream()
-                        .filter(m -> m.getMAXDRP() != null).collect(Collectors.toList());
-                List<String> faids = listFang.stream().map(ES_MODELFANGANPojo::getID).collect(Collectors.toList());
-                List<ES_MODELGUANLIANPojo> listGuanlian = esModGuData.selectList("", "6", null, null);
-                List<ES_MODELFANGANZHANPojo> listFaZhan = esModelfanData.selectList("", faids, null, null);
-                List<ES_ZHANDIANPojo> listZHAN = list.stream().filter(m -> Integer.parseInt(m.getPTYPE()) >= 3)
-                        .collect(Collectors.toList());
-                long finalStimeLong = stimeLong;
-                listZHAN.forEach(m -> {
-                    String zhanData = "日常调度";
-                    List<ES_MODELGUANLIANPojo> listGuanlianTemp = listGuanlian.stream()
-                            .filter(n -> n.getSTCD().contains(m.getZHANID())).collect(Collectors.toList());
-                    if (listGuanlianTemp.size() > 0) {
-                        String yqID = listGuanlianTemp.get(0).getMKEYID();
-                        double num = listData.stream().filter(n -> n.getZHANID().equals(yqID))
-                                .mapToDouble(n -> Double.parseDouble(n.getZHANDATA())).sum();//根据降雨量默认调度方案
-                        
-                        List<ES_MODELFANGANPojo> listFangTemp = listFang.stream().filter(n -> n.getMAXDRP() >= num)
-                                .sorted(Comparator.comparingDouble(ES_MODELFANGANPojo::getMAXDRP))
-                                .collect(Collectors.toList());
-                                
-                        if (listFangTemp.size() > 0) {
+                try {                    
+                    List<ES_MODELGUANLIANPojo> listGuanlian = esModGuData.selectList("", "6", null, null);
+                    //根据降雨量匹配调度方案：134个分片转成15个大片
+                    List<ES_ZHANDIANDATADto> listData134=new ArrayList<>();
+                    List<ES_SLTONGJIPojo> esSltongjiList = esSltongjiData.selectList(null, "134", null, null, null);  
+                    esSltongjiList.forEach(esSltongji -> {
+                        List<String> yqIDList = Arrays.asList(esSltongji.getSTCD().split(","));
+                        double drptotal = listData.stream().filter(n ->yqIDList.contains( n.getZHANID()))
+                                    .mapToDouble(n -> Double.parseDouble(n.getZHANDATA())).sum();
+                        double drp=yqIDList.size()>0?drptotal/yqIDList.size():0;//平均降雨量
+                        ES_ZHANDIANDATADto dto = new ES_ZHANDIANDATADto();
+                        dto.setZHANID(esSltongji.getID());
+                        dto.setZHANDATA(String.format("%.1f", drp));
+                        listData134.add(dto);
+                    });   
+                    new javalog().writelog("listData134的长度："+ listData134.size(),filePathName, "mode");    
+                    //根据降雨量匹配调度方案   
+
+                    List<ES_MODELFANGANZHANPojo> listFaZhan = esModelfanData.selectList("", null, null, null);
+                    List<ES_ZHANDIANPojo> listZHAN = list.stream().filter(m -> Integer.parseInt(m.getPTYPE()) >= 3)
+                            .collect(Collectors.toList());
+                    long finalStimeLong = stimeLong;
+                    listZHAN.forEach(m -> {
+                        String zhanData = "日常调度";
+                        List<ES_MODELGUANLIANPojo> listGuanlianTemp = listGuanlian.stream()
+                                .filter(n -> n.getSTCD().contains(m.getZHANID())).collect(Collectors.toList());
+                        if (listGuanlianTemp.size() > 0) {
+                            new javalog().writelog("listGuanlianTemp的长度："+ listGuanlianTemp.size(),
+                        filePathName, "mode");    
+                            String yqID = listGuanlianTemp.get(0).getMKEYID();
+                            double num = listData134.stream().filter(n -> n.getZHANID().equals(yqID))
+                                    .mapToDouble(n -> Double.parseDouble(n.getZHANDATA())).sum();//根据降雨量默认调度方案
+                            new javalog().writelog("num的值："+ num,filePathName, "mode");   
                             List<ES_MODELFANGANZHANPojo> listFaZhanTemp = listFaZhan.stream()
-                                    .filter(n -> n.getFA_ID().equals(listFangTemp.get(0).getID()))
-                                    .collect(Collectors.toList());
+                            .filter(n -> n.getMAXDRP() != null && n.getMAXDRP().doubleValue() <= num)
+                            .collect(Collectors.toList());
+                            new javalog().writelog("listFaZhanTemp的长度："+ listFaZhanTemp.size(),filePathName, "mode"); 
                             if (listFaZhanTemp.size() > 0) {
                                 zhanData = listFaZhanTemp.get(0).getNORMAL();
                             }
                         }
-                    }
-                    for (int i = 0; i < timeCount; i++) {
-                        ES_ZHANDIANDATADto dto = new ES_ZHANDIANDATADto();
-                        dto.setID(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 16));
-                        dto.setZHANID(m.getZHANID());
-                        String tm = dateFormat.format(new Date(finalStimeLong + i * 60 * 60 * 1000));
-                        dto.setZHANTIME(tm);
-                        dto.setZHANDATA(zhanData);
-                        dto.setSOLUTIONID(solutionid);
-                        dto.setDD_FOR(username);
-                        listData.add(dto);
-                    }
-                });
+                        for (int i = 0; i < timeCount; i++) {
+                            ES_ZHANDIANDATADto dto = new ES_ZHANDIANDATADto();
+                            dto.setID(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 16));
+                            dto.setZHANID(m.getZHANID());
+                            String tm = dateFormat.format(new Date(finalStimeLong + i * 60 * 60 * 1000));
+                            dto.setZHANTIME(tm);
+                            dto.setZHANDATA(zhanData);
+                            dto.setSOLUTIONID(solutionid);
+                            dto.setDD_FOR(username);
+                            listData.add(dto);
+                        }
+                    });
+                } catch (Exception e) {
+                    new javalog().writelog(
+                        "报错了："+ e.getMessage(),
+                        filePathName, "mode");
+                }
             } else if (gcdatatype.equals("fangjiangliang")) {
                 stnm = gcdatatype;
                 new javalog().writelog("苏州河泵站采用放江量", filePathName);

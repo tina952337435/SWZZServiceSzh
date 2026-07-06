@@ -6,6 +6,7 @@ import swzzmodeserver.workserver.pojo.swzzqxsj.Tz_watersheddataPojo;
 import swzzmodeserver.workserver.pojo.swzzrtsq.*;
 import swzzmodeserver.workserver.server.swzzrtsq.GetWaterViewNewServer;
 import swzzmodeserver.workserver.server.swzzrtsq.ST_PPTN_RServer;
+import swzzmodeserver.workserver.server.swzzrtsq.TongbuServer;
 import swzzmodeserver.tools.*;
 import swzzmodeserver.tools.RainfallAnalyzer.EventRainResult;
 import swzzmodeserver.workserver.data.swzzflood.ST_RAINSTORMFREQUENCY_RData;
@@ -63,6 +64,12 @@ public class ST_PPTN_RController {
 
     @Autowired
     private ST_RAINSTORMFREQUENCY_RData stormData;
+
+    @Autowired
+    private TongbuServer tongbuServer;
+
+    @Autowired
+    private CommonUtills commonUtills;
 
     // 文件存储路径
     @Value("${file.path.templatefilepath}")
@@ -881,8 +888,9 @@ public class ST_PPTN_RController {
         List<String> stcdList = new ArrayList<>();
 
         if (!CommonUtills.isEmpty(PID)) {
+            List<String> pList = Arrays.asList(PID.split(","));
             // 查询配置的站码
-            List<ST_STBPRP_B_QUPojo> quList = quData.selectList("", STNM, null, PID, ADMAUTH);
+            List<ST_STBPRP_B_QUPojo> quList = quData.queryList(null, null, null, pList);
             if (null != quList && quList.size() > 0) {
                 for (ST_STBPRP_B_QUPojo quPojo : quList) {
                     if (null != quPojo.getSTCD()) {
@@ -894,134 +902,71 @@ public class ST_PPTN_RController {
             stcdList = Arrays.asList(stcd.split(","));
         }
 
-        // 查询累计降雨
+        // 查询基础站信息（所有配置的站，含站名/经纬度/河名/流域等）
         List<ST_STBPRP_BPojo> stStbprpBPojosList = stbprpBData.selectStbprpBList(stcdList, "", ADMAUTH);
-        // List<ST_PPTN_RPojo> sprlist = data.queryDRPList(stime,
-        // etime,ADMAUTH,stcdList);
 
         List<ST_PPTN_RPojo> mList = new ArrayList<>();
         if (pathname.equals("DAY")) {
-            /***
-             * Long dayCount=DateUtil.dateDiff(stime,etime,DateUtil.YMD,"d");
-             * if(dayCount>0){
-             * List<ST_PPTN_RPojo> finalMList = new ArrayList<>();
-             * for(int num=0;num<=dayCount;num++){
-             * Date
-             * time=DateUtil.addDays(DateUtil.strToDate(DateUtil.pastTM(stime,DateUtil.YMD)+"
-             * 08:00:00",DateUtil.YMDHMS),num);
-             * Date finatime=DateUtil.addDays(time,1);
-             * // List<ST_PPTN_RPojo>
-             * tempDrpList=sprlist.stream().filter(u->DateUtil.strToDate(u.getTM(),DateUtil.YMDHMS).getTime()>time.getTime()&&DateUtil.strToDate(u.getTM(),DateUtil.YMDHMS).getTime()<=finatime.getTime()).collect(toList());
-             * String _stime=DateUtil.dateToStr(time,DateUtil.YMDHMS);
-             * String _etime=DateUtil.dateToStr(finatime,DateUtil.YMDHMS);
-             * List<ST_PPTN_RPojo>
-             * tempDrpList=sprlist.stream().filter(u->u.getTM().compareTo(_stime)>0&&u.getTM().compareTo(_etime)<=0).collect(toList());
-             * 
-             * if(tempDrpList.size()>0){
-             * Map<String, List<ST_PPTN_RPojo>>
-             * mapDRP=tempDrpList.stream().collect(Collectors.groupingBy(ST_PPTN_RPojo::getSTCD));
-             * mapDRP.forEach((key, value)->{
-             * ST_PPTN_RPojo pojo=new ST_PPTN_RPojo();
-             * pojo.setSTCD(value.get(0).getSTCD());
-             * pojo.setSTNM(value.get(0).getSTNM());
-             * pojo.setBSNM(value.get(0).getBSNM());
-             * pojo.setRVNM(value.get(0).getRVNM());
-             * pojo.setHNNM(value.get(0).getHNNM());
-             * pojo.setLGTD(value.get(0).getLGTD());
-             * pojo.setLTTD(value.get(0).getLTTD());
-             * pojo.setMTYPE(value.get(0).getMTYPE());
-             * pojo.setSTLC(value.get(0).getSTLC());
-             * pojo.setDRP(value.stream().mapToDouble(ST_PPTN_RPojo::getDRP).sum());
-             * pojo.setTM(DateUtil.dateToStr(finatime,DateUtil.YMDHMS));
-             * finalMList.add(pojo);
-             * });
-             * }
-             * }
-             * mList=finalMList;
-             * System.out.println("结果时间："+DateUtil.dateFormat(DateUtil.getCustomerDate(),DateUtil.YMDHMS));
-             * 
-             * }
-             **/
             mList = data.queryDAYDRPList(stime, etime, ADMAUTH, stcdList);
         } else if (pathname.equals("HOUR")) {
-            /**
-             * Long HourCount=DateUtil.dateDiff(stime,etime,DateUtil.YMD,"h");
-             * List<ST_PPTN_RPojo> finalMList = new ArrayList<>();
-             * if(HourCount>0){
-             * for(int num=0;num<=HourCount;num++){
-             * Date time=DateUtil.addHours(DateUtil.strToDate(stime,DateUtil.YMDHMS),num);
-             * Date finatime=DateUtil.addHours(time,1);
-             * // List<ST_PPTN_RPojo>
-             * tempDrpList=sprlist.stream().filter(u->DateUtil.strToDate(u.getTM(),DateUtil.YMDHMS).getTime()>time.getTime()&&DateUtil.strToDate(u.getTM(),DateUtil.YMDHMS).getTime()<=finatime.getTime()).collect(toList());
-             * String _stime=DateUtil.dateToStr(time,DateUtil.YMDHMS);
-             * String _etime=DateUtil.dateToStr(finatime,DateUtil.YMDHMS);
-             * List<ST_PPTN_RPojo>
-             * tempDrpList=sprlist.stream().filter(u->u.getTM().compareTo(_stime)>0&&u.getTM().compareTo(_etime)<=0).collect(toList());
-             * if(tempDrpList.size()>0){
-             * Map<String, List<ST_PPTN_RPojo>>
-             * mapDRP=tempDrpList.stream().collect(Collectors.groupingBy(ST_PPTN_RPojo::getSTCD));
-             * mapDRP.forEach((key, value)->{
-             * ST_PPTN_RPojo pojo=new ST_PPTN_RPojo();
-             * pojo.setSTCD(value.get(0).getSTCD());
-             * pojo.setSTNM(value.get(0).getSTNM());
-             * pojo.setBSNM(value.get(0).getBSNM());
-             * pojo.setRVNM(value.get(0).getRVNM());
-             * pojo.setHNNM(value.get(0).getHNNM());
-             * pojo.setLGTD(value.get(0).getLGTD());
-             * pojo.setLTTD(value.get(0).getLTTD());
-             * pojo.setMTYPE(value.get(0).getMTYPE());
-             * pojo.setSTLC(value.get(0).getSTLC());
-             * pojo.setDRP(value.stream().mapToDouble(ST_PPTN_RPojo::getDRP).sum());
-             * pojo.setTM(DateUtil.dateToStr(finatime,DateUtil.YMDHMS));
-             * finalMList.add(pojo);
-             * });
-             * }
-             * 
-             * }
-             * mList=finalMList;
-             * System.out.println("结果时间："+DateUtil.dateFormat(DateUtil.getCustomerDate(),DateUtil.YMDHMS));
-             * 
-             * }
-             **/
             mList = data.queryHOURDRPList(stime, etime, ADMAUTH, stcdList);
         } else if (pathname.equals("SUM")) {
-            /**
-             * Map<String, List<ST_PPTN_RPojo>> mapDRP =
-             * sprlist.stream().collect(Collectors.groupingBy(ST_PPTN_RPojo::getSTCD));
-             * 
-             * List<ST_PPTN_RPojo> finalMList = new ArrayList<>();
-             * mapDRP.forEach((key, value)->{
-             * ST_PPTN_RPojo pojo=new ST_PPTN_RPojo();
-             * pojo.setSTCD(value.get(0).getSTCD());
-             * pojo.setSTNM(value.get(0).getSTNM());
-             * pojo.setBSNM(value.get(0).getBSNM());
-             * pojo.setRVNM(value.get(0).getRVNM());
-             * pojo.setHNNM(value.get(0).getHNNM());
-             * pojo.setLGTD(value.get(0).getLGTD());
-             * pojo.setLTTD(value.get(0).getLTTD());
-             * pojo.setMTYPE(value.get(0).getMTYPE());
-             * pojo.setSTLC(value.get(0).getSTLC());
-             * pojo.setDRP(value.stream().mapToDouble(ST_PPTN_RPojo::getDRP).sum());
-             * finalMList.add(pojo);
-             * });
-             * mList=finalMList;
-             **/
             mList = data.querySUMDRPList(stime, etime, ADMAUTH, stcdList);
-
         } else {
             mList = data.queryDRPList(stime, etime, ADMAUTH, stcdList);
         }
 
+        // 修复：确保断数据（无降雨记录）的站也出现在结果中
+        // 用 HashSet/HashMap 做 O(1) 查找，避免 stream 嵌套循环影响性能
+        java.util.Set<String> existStcdSet = new java.util.HashSet<>();
+        for (ST_PPTN_RPojo item : mList) {
+            if (item.getSTCD() != null) {
+                existStcdSet.add(item.getSTCD());
+            }
+        }
+        java.util.Map<String, ST_STBPRP_BPojo> baseInfoMap = new java.util.HashMap<>();
+        for (ST_STBPRP_BPojo b : stStbprpBPojosList) {
+            if (b.getSTCD() != null) {
+                baseInfoMap.putIfAbsent(b.getSTCD(), b);
+            }
+        }
+
+        for (String stcdItem : stcdList) {
+            if (stcdItem == null || stcdItem.isEmpty()) {
+                continue;
+            }
+            if (!existStcdSet.contains(stcdItem)) {
+                ST_STBPRP_BPojo baseInfo = baseInfoMap.get(stcdItem);
+                if (baseInfo != null) {
+                    ST_PPTN_RPojo emptyEntry = new ST_PPTN_RPojo();
+                    emptyEntry.setSTCD(stcdItem);
+                    emptyEntry.setSTNM(baseInfo.getSTNM());
+                    emptyEntry.setMTYPE(baseInfo.getMTYPE());
+                    emptyEntry.setLGTD(baseInfo.getLGTD());
+                    emptyEntry.setLTTD(baseInfo.getLTTD());
+                    emptyEntry.setADMAUTH(baseInfo.getADMAUTH());
+                    emptyEntry.setADDVNM(baseInfo.getADDVNM());
+                    emptyEntry.setRVNM(baseInfo.getRVNM());
+                    emptyEntry.setBSNM(baseInfo.getBSNM());
+                    emptyEntry.setHNNM(baseInfo.getHNNM());
+                    emptyEntry.setSTLC(baseInfo.getSTLC());
+                    emptyEntry.setATCUNIT(baseInfo.getATCUNIT());
+                    // emptyEntry.setDRP(0.0);
+                    // emptyEntry.setTM(stime);
+                    mList.add(emptyEntry);
+                }
+            }
+        }
+
+        // 补充 RVNM/HNNM/BSNM/ATCUNIT（用 HashMap 替代原来的 stream 嵌套循环）
         if (mList.size() > 0) {
             mList.forEach(u -> {
-                List<ST_STBPRP_BPojo> stStbprpBPojos = stStbprpBPojosList.stream().filter(item -> {
-                    return item.getSTCD().equals(u.getSTCD()) && item.getMTYPE().equals(u.getMTYPE());
-                }).collect(toList());
-                if (stStbprpBPojos.size() > 0) {
-                    u.setRVNM(stStbprpBPojos.get(0).getRVNM());
-                    u.setHNNM(stStbprpBPojos.get(0).getHNNM());
-                    u.setBSNM(stStbprpBPojos.get(0).getBSNM());
-                    u.setATCUNIT(stStbprpBPojos.get(0).getATCUNIT());
+                ST_STBPRP_BPojo matched = baseInfoMap.get(u.getSTCD());
+                if (matched != null) {
+                    u.setRVNM(matched.getRVNM());
+                    u.setHNNM(matched.getHNNM());
+                    u.setBSNM(matched.getBSNM());
+                    u.setATCUNIT(matched.getATCUNIT());
                 }
             });
         }
@@ -2168,6 +2113,10 @@ public class ST_PPTN_RController {
                 .mapToDouble(ST_PPTN_RPojo::getDRP)
                 // 求和
                 .sum();
+        // 使用 HALF_UP 模式四舍五入保留1位小数
+        totalDrp = new BigDecimal(totalDrp)
+        .setScale(1, RoundingMode.HALF_UP)
+        .doubleValue(); 
         return totalDrp;
     }
 
@@ -2232,6 +2181,47 @@ public class ST_PPTN_RController {
         } else {
             return new ResultUtils<>(result, "操作成功", false, result.size(), watch.getTime());
         }
+    }
+
+    /**
+     * 历史雨量数据补录接口
+     * 传入开始和结束时间，对 st_pptn_r 表中缺失的数据插入，已存在的数据更新雨量值
+     *
+     * 请求参数：
+     *   stime: 开始时间 yyyy-MM-dd HH:mm:ss (必填)
+     *   etime: 结束时间 yyyy-MM-dd HH:mm:ss (必填)
+     *   stcd:  站点列表，逗号分隔 (选填，不传则补全部雨量站)
+     *
+     * 返回：
+     *   fetchedCount:  从源系统拉取的总记录数
+     *   affectedCount: 实际写入的记录数
+     *   stationCount:  处理的站点数
+     *   errors:        错误列表
+     *   elapsedMs:     耗时毫秒
+     */
+    @RequestMapping("/repairHistoryPptn")
+    public Map<String, Object> repairHistoryPptn(@RequestBody ColumnName param) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+
+        String stime = param.getStime();
+        String etime = param.getEtime();
+        List<String> stcdList = new ArrayList<>();
+        if (param.getStcd() != null && !param.getStcd().isEmpty()) {
+            stcdList = Arrays.asList(param.getStcd().split(","));
+        }
+
+        // 参数校验
+        if (stime == null || stime.isEmpty() || etime == null || etime.isEmpty()) {
+            return commonUtills.returnJson("repair", -1, "开始时间和结束时间不能为空");
+        }
+
+        Map<String, Object> result = tongbuServer.repairHistoryPptnData(stime, etime, stcdList);
+
+        watch.stop();
+        result.put("elapsedMs", watch.getTime());
+        return commonUtills.returnJson("repair",
+                (Integer) result.get("affectedCount"), result);
     }
 
 }

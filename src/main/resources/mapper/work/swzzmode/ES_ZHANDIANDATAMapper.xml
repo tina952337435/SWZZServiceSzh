@@ -266,4 +266,17 @@
             )
         </foreach>
     </insert>
+
+    <!-- ES_ZHANDIANDATAMapper.xml 新增 SQL -->
+   <select id="selectListBySolutionIds" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATAPojo">
+    SELECT * FROM ES_ZHANDIANDATA
+    WHERE SOLUTIONID IN
+    <foreach collection="solutionIds" open="(" close=")" item="id" separator=",">
+        #{id}
+    </foreach>
+    AND ZHANID IN
+    <foreach collection="zhanid" open="(" close=")" item="zid" separator=",">
+        #{zid}
+    </foreach>
+</select>
 </mapper>

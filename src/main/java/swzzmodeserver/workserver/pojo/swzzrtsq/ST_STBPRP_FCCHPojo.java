@@ -37,4 +37,5 @@ public class ST_STBPRP_FCCHPojo {
     private String DIR;
     private String MAPSIZE;
     private String ROTATE;
+    private Double TAQ;
 }

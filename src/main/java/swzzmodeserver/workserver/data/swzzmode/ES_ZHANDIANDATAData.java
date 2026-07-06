@@ -47,4 +47,9 @@ public interface ES_ZHANDIANDATAData {
 
     Integer updateALLME(@Param(value = "list") List<ES_ZHANDIANDATAPojo> list);
 
+               // ES_ZHANDIANDATAData.java 新增方法
+    List<ES_ZHANDIANDATAPojo> selectListBySolutionIds(
+    @Param("solutionIds") List<String> solutionIds,
+    @Param("zhanid") List<String> zhanid);
+
 }

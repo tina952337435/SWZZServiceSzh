@@ -82,5 +82,12 @@ public interface RTSQST_PPTN_RData {
         @Param(value = "stime") String stime,
         @Param(value = "etime") String etime
     );
-    
+
+    /**
+     * 批量 upsert：存在 (STCD, TM) 则更新 DRP/INTV/PDR/DYP/WTH，不存在则插入
+     * @param quPojo 数据列表
+     * @return 受影响行数
+     */
+    Integer upsertAll(@Param("quPojo") List<ST_PPTN_RPojo> quPojo);
+
 }

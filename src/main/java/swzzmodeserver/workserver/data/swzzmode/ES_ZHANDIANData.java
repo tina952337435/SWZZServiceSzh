@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import swzzmodeserver.tools.ParamField;
 import swzzmodeserver.workserver.pojo.swzzmode.BDMS_PREDICTPojo;
 import swzzmodeserver.workserver.pojo.swzzmode.ES_SLTONGJIPojo;
+import swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATAPojo;
 import swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDto;
 import swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANPojo;
 
@@ -46,4 +47,6 @@ public interface ES_ZHANDIANData {
     Integer selectCount(@Param(value = "ID") String ID,
                         @Param(value = "ptype") List<String> ptype,
                         @Param(value = "key") String key);
+
+             
 }

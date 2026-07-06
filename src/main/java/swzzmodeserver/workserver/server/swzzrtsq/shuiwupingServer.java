@@ -246,4 +246,31 @@ public class shuiwupingServer {
         }
         return resultList;
     }
+
+
+    //天文潮位
+    public List<Map<String, Object>> getTianWenChaoWei(String stationid,String startTime,String endTime){
+        List<Map<String, Object>> resultList=new ArrayList<>();
+        try {
+            String access_token=getSwptToken();
+            HashMap<String, Object> header=new HashMap<>();
+            header.put("Content-Type","application/json;charset=UTF-8");
+            String url = UriComponentsBuilder.fromHttpUrl(shuiwupingtaiApi + "/service/api/swic/getTianWenChaoWei")
+                    .queryParam("client_id", client_id)
+                    .queryParam("access_token", access_token)
+                    .queryParam("STARTTIME", startTime) // 直接传原始字符串，它会自动编码
+                    .queryParam("ENDTIME", endTime)
+                    .queryParam("STATIONID", stationid)
+                    .toUriString();
+            new   javalog().writelog("【天文潮位】请求接口地址："+url,filePathName,"SyncRealDataSWPT"); 
+            String result= apihelper.apigethttps(url,header);        
+            ObjectMapper objectMapper = new ObjectMapper();
+            resultList = objectMapper.readValue(result, new TypeReference<List<Map<String, Object>>>() {});
+            new   javalog().writelog("【天文潮位】请求接口结果："+resultList.size(),filePathName,"SyncRealDataSWPT"); 
+        } catch (Exception e) {
+            new javalog().writelog("getTianWenChaoWei调用报错："+e.getMessage(),filePathName,"SyncRealDataSWPT");
+        }
+        return resultList;
+    }
+
 }

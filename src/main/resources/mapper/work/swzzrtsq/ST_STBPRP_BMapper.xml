@@ -276,7 +276,7 @@
     </delete>
 
     <select id="selectGQList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_FCCHPojo">
-        select A.STCD,A.STNM,A.RVNM,A.LGTD,A.LTTD,A.STLC,A.ADDVCD,A.ADMAUTH,A.COMMENTS,A.MODITIME,WRZ,WRQ,GRZ,GRQ,FLPQ,SFQ,IVHZ,IVHZTM,LAZ from ST_STBPRP_B as A left join ST_RVFCCH_B as B on A.STCD = B.STCD
+        select A.STCD,A.STNM,A.RVNM,A.LGTD,A.LTTD,A.STLC,A.ADDVCD,A.ADMAUTH,A.COMMENTS,A.MODITIME,WRZ,WRQ,GRZ,GRQ,FLPQ,SFQ,IVHZ,IVHZTM,LAZ,B.TAQ from ST_STBPRP_B as A left join ST_RVFCCH_B as B on A.STCD = B.STCD
         <where>
             <if test="STCDList != null and STCDList.size() > 0">
                 and A.STCD in

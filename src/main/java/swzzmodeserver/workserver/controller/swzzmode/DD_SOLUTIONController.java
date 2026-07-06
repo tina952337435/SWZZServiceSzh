@@ -647,10 +647,16 @@ public class DD_SOLUTIONController {
             List<String> zhanids = listZhan.stream()
                     .map(p -> p.getZHANID())
                     .collect(Collectors.toList());
-
-            ListDD.forEach(u -> {
-                List<ES_ZHANDIANDATAPojo> listData = es_zhandiandataData.selectList(null, null, null, u.getDD_ID(),
-                        zhanids, null, null);
+            
+            List<ES_ZHANDIANDATAPojo> allZhanData = es_zhandiandataData.selectListBySolutionIds(dd_ids,zhanids);
+            // 按 SOLUTIONID + ZHANID 建立二级索引 Map
+            Map<String, Map<String, List<ES_ZHANDIANDATAPojo>>> dataIndex = 
+            allZhanData.stream()
+                .collect(Collectors.groupingBy(
+                    ES_ZHANDIANDATAPojo::getSOLUTIONID,
+                    Collectors.groupingBy(ES_ZHANDIANDATAPojo::getZHANID)
+                ));
+            ListDD.forEach(u -> {               
                 DD_SOLUTIONTZParam dto = new DD_SOLUTIONTZParam();
                 dto.setID(u.getID());
                 dto.setDD_ID(u.getDD_ID());
@@ -669,22 +675,21 @@ public class DD_SOLUTIONController {
                 dto.setDD_STATUS(u.getDD_STATUS());
                 dto.setCJCOUNT(0);
 
+                Map<String, List<ES_ZHANDIANDATAPojo>> solutionData = 
+                dataIndex.getOrDefault(u.getDD_ID(), Collections.emptyMap());
                 List<DD_SOLUTIONTZParamChi> listTZ = new ArrayList<>();
                 listZhan.forEach(z -> {
-                    List<ES_ZHANDIANDATAPojo> listDataTemp = listData.stream()
-                            .filter(p -> p.getZHANID().equals(z.getZHANID()) && p.getSOLUTIONID().equals(u.getDD_ID()))
-                            .collect(Collectors.toList());
-                    if (listDataTemp.size() > 0) {
+                   List<ES_ZHANDIANDATAPojo> zhanDataList =solutionData.get(z.getZHANID());
+                   if (zhanDataList != null && !zhanDataList.isEmpty()) {
                         String DATA = "";
-                        if (Integer.parseInt(z.getPTYPE()) == 0) {
-
-                            BigDecimal sum = listDataTemp.stream()
+                        if (Integer.parseInt(z.getPTYPE()) == 0) {                            
+                            BigDecimal sum = zhanDataList.stream()
                                     .map(p -> p.getZHANDATA() != null ? new BigDecimal(p.getZHANDATA())
                                             : BigDecimal.ZERO)
                                     .reduce(BigDecimal.ZERO, BigDecimal::add);
                             DATA = sum.toString();
                         } else if (Integer.parseInt(z.getPTYPE()) >= 3) {
-                            DATA = listDataTemp.get(0).getZHANDATA();
+                            DATA = zhanDataList.get(0).getZHANDATA();
                         }
                         DD_SOLUTIONTZParamChi dtoChi = new DD_SOLUTIONTZParamChi();
                         dtoChi.setZHANID(z.getZHANID());
