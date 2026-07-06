@@ -207,9 +207,9 @@ public class ES_TIDALFORECASTController {
             if (bpPojo.getStartdate() != null) {
                 maxYBTMString = bpPojo.getStartdate();
             }
-            List<DD_SOLUTIONPojo> listDD =new ArrayList<>();
-            if(bpPojo.getSttp() ==null){//当bpPojo.getSttp()不等于null时，是手动触发的，必须要算的
-                listDD = dd_solutionData.selectListByDD_IDandDD_status(null, null, "15",maxYBTMString);
+            List<DD_SOLUTIONPojo> listDD = new ArrayList<>();
+            if (bpPojo.getSttp() == null) {// 当bpPojo.getSttp()不等于null时，是手动触发的，必须要算的
+                listDD = dd_solutionData.selectListByDD_IDandDD_status(null, null, "15", maxYBTMString);
             }
             // List<ES_TIDALFORECASTPojo> bpPojo
             // =data.selectList(null,null,null,null,maxYBTMString,maxYBTMString,typeList,null,null);
@@ -297,8 +297,7 @@ public class ES_TIDALFORECASTController {
                 }
                 // }
                 // }
-            }
-            else{
+            } else {
                 return new ResultUtils<>(listGC, "当前时刻已经预报过了", true, listGC.size(), watch.getTime());
             }
         }
@@ -474,6 +473,9 @@ public class ES_TIDALFORECASTController {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedTime = now.format(formatter);// 计算依据时间
+        if (bpPojo.getStartdate() != null) {
+            formattedTime = bpPojo.getStartdate();
+        }
 
         // 查询防汛泵站基础信息表
         List<ES_PUMP_BPojo> list = es_pump_bData.selectList(null, null, null);
@@ -496,8 +498,8 @@ public class ES_TIDALFORECASTController {
                     }
                 }
             }
-
-            list.forEach(n -> {
+            for (int ii = 0; ii < list.size(); ii++) {
+                ES_PUMP_BPojo n = list.get(ii);
                 PUMPSTATIONResponse responseNew = fangjiangServer.getFangjiangOverflow(n.getSTCD(), formattedTime);
                 if (responseNew != null) {
                     if (responseNew.getCode() == 200) {
@@ -516,8 +518,8 @@ public class ES_TIDALFORECASTController {
                                     String TM = newDateTime.format(formatter);
                                     // 将 double 转为 BigDecimal，设置保留2位小数，并使用 HALF_UP（常规的四舍五入）模式
                                     Double flow = BigDecimal.valueOf(flow_array.get(i) / (5 * 60))
-                                    .setScale(2, RoundingMode.HALF_UP)
-                                    .doubleValue(); 
+                                            .setScale(2, RoundingMode.HALF_UP)
+                                            .doubleValue();
                                     pojo.setSTCD(n.getZHANID());
                                     pojo.setTM(TM);
                                     pojo.setOMCN(pump_array.get(i));
@@ -535,7 +537,7 @@ public class ES_TIDALFORECASTController {
                         }
                     }
                 }
-            });
+            }
 
             if (listR.size() > 0) {
                 Integer num = 0;
@@ -554,7 +556,7 @@ public class ES_TIDALFORECASTController {
 
                     _length.addAndGet(es_pump_rData.insertALL(listNew));
                 }
-                
+
                 ES_PUMP_RNEWPojo pojo = new ES_PUMP_RNEWPojo();
                 pojo.setID(UUID.randomUUID().toString());
                 pojo.setCALC_TIME(listR.get(0).getRLSTM());
@@ -562,8 +564,9 @@ public class ES_TIDALFORECASTController {
                 es_pump_rnewData.insertOne(pojo);
 
                 try {
-                    List<ES_PUMP_RPojo> listRQ =  listR.stream().filter(u->u.getPMPQ()>0).collect(Collectors.toList());
-                    if(listRQ.size()>0){//有放江量，需要驱动模型计算
+                    List<ES_PUMP_RPojo> listRQ = listR.stream().filter(u -> u.getPMPQ() > 0)
+                            .collect(Collectors.toList());
+                    if (listRQ.size() > 0) {// 有放江量，需要驱动模型计算
                         now = LocalDateTime.now();
                         // 截取到整点（小时不变，分钟和秒都设置为0）
                         LocalDateTime truncatedToHour = now.truncatedTo(java.time.temporal.ChronoUnit.HOURS);
@@ -573,14 +576,14 @@ public class ES_TIDALFORECASTController {
                         String gcdatatype = "fangjiangliang";
                         String scwdatatype = "temperatezone";
                         int resultRows = huishuiApiService.startHuishuiJisuan(maxYBTMString, 24, jydatatype, gcdatatype,
-                                scwdatatype,"");
+                                scwdatatype, "");
                         if (resultRows > 0) {
                             new javalog().writelog(maxYBTMString + "模型计算成功", filePathName);
                         }
                     }
                 } catch (Exception e) {
-                    new javalog().writelog("放江量入库之后，模型计算失败："+e.getMessage(), filePathName,"SWZZServiceFangjiang");
-                }           
+                    new javalog().writelog("放江量入库之后，模型计算失败：" + e.getMessage(), filePathName, "SWZZServiceFangjiang");
+                }
 
             }
         }
