@@ -590,21 +590,21 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
         // paramFieldList.add(obj);
         // });
 
-        // int count = 4500;
-        // int number = paramFieldList.size() / count;
-        // if(paramFieldList.size() % count != 0){
-        // number = number + 1;
-        // }
-        // List<ES_ZHANDIANDATAPojo> nlist = new ArrayList<>();
-        // for(int i = 0;i < number;i++){
-        // if(i == number - 1){
-        // nlist = newzhandiandataList.subList(count * i,paramFieldList.size());
-        // }else {
-        // nlist = newzhandiandataList.subList(count * i,count * ( i + 1));
-        // }
-        // num += data.updateALL(nlist);
-        // }
-        num = batchUpdate(newzhandiandataList);
+        int count = 1000;
+        int number = newzhandiandataList.size() / count;
+        if (newzhandiandataList.size() % count != 0) {
+            number = number + 1;
+        }
+        List<ES_ZHANDIANDATAPojo> nlist = new ArrayList<>();
+        for (int i = 0; i < number; i++) {
+            if (i == number - 1) {
+                nlist = newzhandiandataList.subList(count * i, newzhandiandataList.size());
+            } else {
+                nlist = newzhandiandataList.subList(count * i, count * (i + 1));
+            }
+            num += data.updateALL(nlist);
+        }
+        // num = batchUpdate(newzhandiandataList);
         return num;
     }
 
@@ -1831,8 +1831,8 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                 } else {
                     list = list_DataUPDATE.subList(count * i, count * (i + 1));
                 }
+                integer += data.updateALL(list);
             }
-            integer += data.updateALL(list);
         }
         new javalog().writelog("FH_modify_batchJYQuan结束入库：" + list_DataUPDATE.size(), filePathName, "mode");
         return integer;
@@ -1922,8 +1922,8 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                 } else {
                     list = list_DataUPDATE.subList(count * i, count * (i + 1));
                 }
+                integer += data.updateALL(list);
             }
-            integer += data.updateALL(list);
         }
         new javalog().writelog("FH_modify_batchJYQuanJY最终修改的长度：" + integer, filePathName, "mode");
         return integer;
