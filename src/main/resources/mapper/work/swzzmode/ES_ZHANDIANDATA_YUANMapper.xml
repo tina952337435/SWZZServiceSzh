@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ES_ZHANDIANDATA_YUANData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATA_YUANPojo">
+        select a.* from ES_ZHANDIANDATA_YUAN a
+        <where>
+            <if test="SOLUTIONID != null and SOLUTIONID != ''">
+                and SOLUTIONID = #{SOLUTIONID}
+            </if>
+            <if test="zhanid != null and zhanid.size() > 0">
+                and ZHANID in
+                <foreach collection="zhanid" open="(" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+        order by YJZ asc
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATA_YUANPojo">
+        insert into ES_ZHANDIANDATA_YUAN
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZHANID != null and ZHANID != ''">
+                ZHANID,
+            </if>
+            <if test="ZHANDATA != null and ZHANDATA != ''">
+                ZHANDATA,
+            </if>
+            <if test="SOLUTIONID != null and SOLUTIONID != ''">
+                SOLUTIONID,
+            </if>
+            <if test="YJZ != null and YJZ != ''">
+                YJZ,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ZHANID != null and ZHANID != ''">
+                #{ZHANID},
+            </if>
+            <if test="ZHANDATA != null and ZHANDATA != ''">
+                #{ZHANDATA},
+            </if>
+            <if test="SOLUTIONID != null and SOLUTIONID != ''">
+                #{SOLUTIONID},
+            </if>
+            <if test="YJZ != null and YJZ != ''">
+                #{YJZ},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATA_YUANPojo">
+        insert into ES_ZHANDIANDATA_YUAN(ZHANID,ZHANDATA,SOLUTIONID,YJZ) values
+        <foreach collection="objList" item="obj" separator=",">
+            (
+            #{obj.ZHANID,jdbcType=VARCHAR},
+            #{obj.ZHANDATA,jdbcType=VARCHAR},
+            #{obj.SOLUTIONID,jdbcType=VARCHAR},
+            #{obj.YJZ}
+            )
+        </foreach>
+    </insert>
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ES_ZHANDIANDATA_YUANPojo">
+        update ES_ZHANDIANDATA_YUAN
+        <set>
+            <if test="ZHANDATA != null and ZHANDATA != ''">
+                ZHANDATA = #{ZHANDATA,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where
+        ZHANID = #{ZHANID,jdbcType=VARCHAR}
+        and SOLUTIONID = #{SOLUTIONID,jdbcType=VARCHAR}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_ZHANDIANDATA_YUAN where ZHANID = #{ZHANID} and SOLUTIONID=#{SOLUTIONID}
+    </delete>
+
+    <delete id="deleteALL" parameterType="list">
+        delete from ES_ZHANDIANDATA_YUAN where
+        SOLUTIONID in
+        <foreach collection="bpPojo" open="(" close=")" item="item" separator=",">
+            #{item.stcd,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+
+    <update id="updateALL" parameterType="list">
+        <foreach collection="list" item="obj" separator=";">
+            update ES_ZHANDIANDATA_YUAN
+            <set>
+                <if test="obj.ZHANDATA != null and obj.ZHANDATA != ''">
+                    ZHANDATA = #{obj.ZHANDATA,jdbcType=VARCHAR},
+                </if>
+            </set>
+            where
+            ZHANID = #{obj.ZHANID,jdbcType=VARCHAR}
+            and SOLUTIONID = #{obj.SOLUTIONID,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+</mapper>

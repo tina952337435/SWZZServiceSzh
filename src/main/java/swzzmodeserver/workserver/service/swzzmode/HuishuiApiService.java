@@ -720,6 +720,7 @@ public class HuishuiApiService {
                 subjectListPojo.getSbjID());
 
         List<ES_MODELFANGANZHANPojo> listZhan = new ArrayList<>();
+        List<ES_MODELFANGANPojo> listFang = new ArrayList<>();
         for (int num = 0; num < bjZhan.size(); num++) {
             Map<String, Object> res = bjZhan.get(num);
             int id = (int) res.get("id");
@@ -745,6 +746,7 @@ public class HuishuiApiService {
                         JSONArray planArray = regionObj.getJSONArray("plan");
                         if (planArray != null) {
                             System.out.println("包含的预案信息:");
+                            String newFa_name = "";
                             for (int k = 1; k < planArray.size(); k++) {// 索引0个不需要
                                 JSONObject planObj = planArray.getJSONObject(k);
                                 // 读取 plan 里面的具体字段
@@ -767,7 +769,34 @@ public class HuishuiApiService {
                                         zhanPojo.setCZ(null); // 或者设置默认值 0.0
                                     }
                                     listZhan.add(zhanPojo);
+
+                                    newFa_name += scheduleObjsArray.getString(j) + ",";
                                 }
+
+                                double maxDrp = 0;
+                                if (planName.equals("日常调度")) {
+                                    maxDrp = 50;
+                                } else if (planName.equals("防汛防台蓝色预警")) {
+                                    maxDrp = 100;
+                                } else if (planName.equals("防汛防台黄色预警")) {
+                                    maxDrp = 150;
+                                } else if (planName.equals("防汛防台橙色预警")) {
+                                    maxDrp = 200;
+                                } else if (planName.equals("防汛防台红色预警")) {
+                                    maxDrp = 1000;
+                                }
+                                ES_MODELFANGANPojo pojo = new ES_MODELFANGANPojo();
+                                pojo.setID(name);
+                                pojo.setFA_NAME(planName);
+                                pojo.setNOTE(description);
+                                pojo.setTYPE("防洪调度");
+                                pojo.setNEWFA_NAME(newFa_name);
+                                pojo.setTYPE(planIndex);
+                                pojo.setYJZ(Double.valueOf(i));
+                                if (maxDrp > 0) {
+                                    pojo.setMAXDRP(maxDrp);
+                                }
+                                listFang.add(pojo);
                             }
                         }
                         System.out.println("区域名称: " + name + ", ID: " + regionID);
@@ -782,67 +811,70 @@ public class HuishuiApiService {
             esModelfanganzhanData.deleteAll();
             rows = esModelfanganzhanData.insertALL(listZhan);
 
-            List<ES_MODELFANGANPojo> listFang = new ArrayList<>();
-            // 假设 listZhan 已经被赋值
-            Map<String, List<ES_MODELFANGANZHANPojo>> mapByFaId = listZhan.stream()
-                    .collect(Collectors.groupingBy(ES_MODELFANGANZHANPojo::getFA_ID));
+            // ****************************旧代码 */
 
-            for (Map.Entry<String, List<ES_MODELFANGANZHANPojo>> entry : mapByFaId.entrySet()) {
-                String faId = entry.getKey(); // 获取 FA_ID
-                List<ES_MODELFANGANZHANPojo> pojos = entry.getValue(); // 获取该 FA_ID 下的所有对象
+            // List<ES_MODELFANGANPojo> listFang = new ArrayList<>();
+            // // 假设 listZhan 已经被赋值
+            // Map<String, List<ES_MODELFANGANZHANPojo>> mapByFaId = listZhan.stream()
+            // .collect(Collectors.groupingBy(ES_MODELFANGANZHANPojo::getFA_ID));
 
-                String zhanIdsStr = pojos.stream()
-                        .map(ES_MODELFANGANZHANPojo::getZHANID)
-                        .collect(Collectors.joining(","));
+            // for (Map.Entry<String, List<ES_MODELFANGANZHANPojo>> entry :
+            // mapByFaId.entrySet()) {
+            // String faId = entry.getKey(); // 获取 FA_ID
+            // List<ES_MODELFANGANZHANPojo> pojos = entry.getValue(); // 获取该 FA_ID 下的所有对象
 
-                String slpStr = pojos.stream()
-                        .map(ES_MODELFANGANZHANPojo::getSPECIAL)
-                        .collect(Collectors.joining(","));
+            // String zhanIdsStr = pojos.stream()
+            // .map(ES_MODELFANGANZHANPojo::getZHANID)
+            // .collect(Collectors.joining(","));
 
-                List<Map<String, Object>> filteredList = bjZhan.stream()
-                        .filter(map -> {
-                            // 1. 获取站名，防止 null
-                            String name = (String) map.get("name");
-                            // 2. 判断是否包含关键词
-                            return name != null && slpStr.contains(name);
-                        })
-                        .collect(Collectors.toList());
+            // String slpStr = pojos.stream()
+            // .map(ES_MODELFANGANZHANPojo::getSPECIAL)
+            // .collect(Collectors.joining(","));
 
-                // 假设 filteredList 是你已经筛选好的 List
-                String idStr = filteredList.stream()
-                        .map(map -> map.get("id")) // 1. 提取 ID 字段
-                        .filter(Objects::nonNull) // 2. 过滤掉 null 值（防止报错）
-                        .map(Object::toString) // 3. 转为字符串
-                        .collect(Collectors.joining(",")); // 4. 逗号拼接
+            // List<Map<String, Object>> filteredList = bjZhan.stream()
+            // .filter(map -> {
+            // // 1. 获取站名，防止 null
+            // String name = (String) map.get("name");
+            // // 2. 判断是否包含关键词
+            // return name != null && slpStr.contains(name);
+            // })
+            // .collect(Collectors.toList());
 
-                double maxDrp = 0;
-                if (pojos.get(0).getNORMAL().equals("日常调度")) {
-                    maxDrp = 50;
-                } else if (pojos.get(0).getNORMAL().equals("防汛防台蓝色预警")) {
-                    maxDrp = 100;
-                } else if (pojos.get(0).getNORMAL().equals("防汛防台黄色预警")) {
-                    maxDrp = 150;
-                } else if (pojos.get(0).getNORMAL().equals("防汛防台橙色预警")) {
-                    maxDrp = 200;
-                } else if (pojos.get(0).getNORMAL().equals("防汛防台红色预警")) {
-                    maxDrp = 1000;
-                }
-                String newFa_name = zhanIdsStr + "," + idStr;
-                if (newFa_name.contains("1795167015")) {// 特殊处理：苏州河河口闸，浏河闸
-                    newFa_name += ",9999999999";// 归为其他工程
-                }
-                ES_MODELFANGANPojo pojo = new ES_MODELFANGANPojo();
-                pojo.setID(faId);
-                pojo.setFA_NAME(pojos.get(0).getNORMAL());
-                pojo.setNOTE(pojos.get(0).getZHANNAME());
-                pojo.setTYPE("防洪调度");
-                pojo.setNEWFA_NAME(newFa_name);
-                if (maxDrp > 0) {
-                    pojo.setMAXDRP(maxDrp);
-                }
-                listFang.add(pojo);
-            }
+            // // 假设 filteredList 是你已经筛选好的 List
+            // String idStr = filteredList.stream()
+            // .map(map -> map.get("id")) // 1. 提取 ID 字段
+            // .filter(Objects::nonNull) // 2. 过滤掉 null 值（防止报错）
+            // .map(Object::toString) // 3. 转为字符串
+            // .collect(Collectors.joining(",")); // 4. 逗号拼接
 
+            // double maxDrp = 0;
+            // if (pojos.get(0).getNORMAL().equals("日常调度")) {
+            // maxDrp = 50;
+            // } else if (pojos.get(0).getNORMAL().equals("防汛防台蓝色预警")) {
+            // maxDrp = 100;
+            // } else if (pojos.get(0).getNORMAL().equals("防汛防台黄色预警")) {
+            // maxDrp = 150;
+            // } else if (pojos.get(0).getNORMAL().equals("防汛防台橙色预警")) {
+            // maxDrp = 200;
+            // } else if (pojos.get(0).getNORMAL().equals("防汛防台红色预警")) {
+            // maxDrp = 1000;
+            // }
+            // String newFa_name = zhanIdsStr + "," + idStr;
+            // if (newFa_name.contains("1795167015")) {// 特殊处理：苏州河河口闸，浏河闸
+            // newFa_name += ",9999999999";// 归为其他工程
+            // }
+            // ES_MODELFANGANPojo pojo = new ES_MODELFANGANPojo();
+            // pojo.setID(faId);
+            // pojo.setFA_NAME(pojos.get(0).getNORMAL());
+            // pojo.setNOTE(pojos.get(0).getZHANNAME());
+            // pojo.setTYPE("防洪调度");
+            // pojo.setNEWFA_NAME(newFa_name);
+            // if (maxDrp > 0) {
+            // pojo.setMAXDRP(maxDrp);
+            // }
+            // listFang.add(pojo);
+            // }
+            // ****************************旧代码 */
             if (listFang.size() > 0) {
                 esModelfanganData.deleteAll();
                 rows += esModelfanganData.insertALL(listFang);

@@ -88,6 +88,9 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
     @Autowired
     private ES_PUMP_BData es_pump_bData;
 
+    @Autowired
+    private ES_ZHANDIANDATA_YUANData es_ZHANDIANDATA_YUANData;
+
     @Value("${file.path.templatefilepath}")
     private String filePathName;
 
@@ -119,7 +122,8 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
             RTSQST_STBPRP_BData rtsqStbprpBData,
             ES_PUMP_RData es_pump_rData,
             ES_PUMP_BData es_pump_bData,
-            ES_SLTONGJIData esSltongjiData) {
+            ES_SLTONGJIData esSltongjiData,
+            ES_ZHANDIANDATA_YUANData es_ZHANDIANDATA_YUANData) {
         this.rData = rData;
         this.data = data;
         this.xsData = xsData;
@@ -149,6 +153,7 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
         this.es_pump_rData = es_pump_rData;
         this.es_pump_bData = es_pump_bData;
         this.esSltongjiData = esSltongjiData;
+        this.es_ZHANDIANDATA_YUANData = es_ZHANDIANDATA_YUANData;
     }
 
     @Override
@@ -1081,11 +1086,18 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
             if (gcdatatype.equals("DDFN")) {
                 stnm = gcdatatype;
                 try {
+                    // 分区调度方案
+                    List<ES_MODELFANGANPojo> listFang = esModelfanganData.selectList(null, null, null);
+                    List<ES_ZHANDIANDATA_YUANPojo> listFQ = new ArrayList<>();
+
                     List<ES_MODELGUANLIANPojo> listGuanlian = esModGuData.selectList("", "6", null, null);
                     // 根据降雨量匹配调度方案：134个分片转成15个大片
                     List<ES_ZHANDIANDATADto> listData134 = new ArrayList<>();
                     List<ES_SLTONGJIPojo> esSltongjiList = esSltongjiData.selectList(null, "134", null, null, null);
-                    esSltongjiList.forEach(esSltongji -> {
+                    List<String> wuPianList = Arrays.asList("嘉宝北片,蕴南片,青松片青浦区,淀北片,中心片".split(","));
+                    double wupianDrp = 0;
+                    for (int numII = 0; numII < esSltongjiList.size(); numII++) {
+                        ES_SLTONGJIPojo esSltongji = esSltongjiList.get(numII);
                         List<String> yqIDList = Arrays.asList(esSltongji.getSTCD().split(","));
                         double drptotal = listData.stream().filter(n -> yqIDList.contains(n.getZHANID()))
                                 .mapToDouble(n -> Double.parseDouble(n.getZHANDATA())).sum();
@@ -1094,7 +1106,30 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                         dto.setZHANID(esSltongji.getID());
                         dto.setZHANDATA(String.format("%.1f", drp));
                         listData134.add(dto);
-                    });
+
+                        if (wuPianList.contains(esSltongji.getTITLE())) {
+                            wupianDrp += drp;
+                        }
+
+                        ES_ZHANDIANDATA_YUANPojo yPojo = getIndexPlan(listFang, esSltongji.getTITLE(), drp, solutionid);
+                        if (yPojo != null) {
+                            listFQ.add(yPojo);
+                        }
+                    }
+
+                    // 苏州河河口闸根据五片平均雨量匹配规则
+                    double wupianDrpAvg = wupianDrp / wuPianList.size();
+                    ES_ZHANDIANDATA_YUANPojo yPojoSzh = getIndexPlan(listFang, "苏州河河口闸", wupianDrpAvg, solutionid);
+                    listFQ.add(yPojoSzh);
+                    // 苏州河河口闸根据五片平均雨量匹配规则
+
+                    try {
+                        if (listFQ.size() > 0) {
+                            es_ZHANDIANDATA_YUANData.insertALL(listFQ);
+                        }
+                    } catch (Exception e) {
+                        // TODO: handle exception
+                    }
                     new javalog().writelog("listData134的长度：" + listData134.size(), filePathName, "mode");
                     // 根据降雨量匹配调度方案
 
@@ -1674,6 +1709,34 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
             new javalog().writelog("upDataZhandianData接口报错：" + e.getMessage(), filePathName);
         }
         return number;
+    }
+
+    private ES_ZHANDIANDATA_YUANPojo getIndexPlan(List<ES_MODELFANGANPojo> listFang, String areaName, double drp,
+            String solutionid) {
+        String planIndex = "";
+        List<ES_MODELFANGANPojo> listFangTemp = listFang.stream()
+                .filter(n -> n.getID().equals(areaName))
+                .collect(Collectors.toList());
+        new javalog().writelog(areaName + "的listFangTemp长度：" + listFangTemp.size(),
+                filePathName, "mode");
+        if (listFangTemp.size() > 0) {
+            List<ES_MODELFANGANPojo> listFangTempT = listFangTemp.stream()
+                    .filter(n -> n.getMAXDRP() != null && n.getMAXDRP().doubleValue() <= drp)
+                    .collect(Collectors.toList());
+            planIndex = "4";
+            if (listFangTempT.size() > 0) {
+                planIndex = listFangTempT.get(0).getTYPE();
+            }
+            ES_ZHANDIANDATA_YUANPojo yPojo = new ES_ZHANDIANDATA_YUANPojo();
+            yPojo.setZHANID(areaName);
+            yPojo.setSOLUTIONID(solutionid);
+            yPojo.setZHANDATA(planIndex);
+            yPojo.setYJZ(listFangTemp.get(0).getYJZ());
+            return yPojo;
+        } else {
+            return null;
+        }
+
     }
 
     @Override
