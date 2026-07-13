@@ -677,4 +677,33 @@
         VALUES (s.STCD, s.TM, s.DRP, s.INTV, s.PDR, s.DYP, s.WTH)
     </insert>
 
+    <!-- 补录同步：达梦 MERGE INTO 仅更新已存在的记录，不插入新记录 -->
+    <update id="updatePptnBatch" parameterType="java.util.List">
+        MERGE INTO ST_PPTN_R t
+        USING (
+            <foreach collection="quPojo" item="pojo" separator=" UNION ALL ">
+                SELECT
+                    #{pojo.STCD} AS STCD,
+                    TO_DATE(#{pojo.TM}, 'YYYY-MM-DD HH24:MI:SS') AS TM,
+                    #{pojo.DRP} AS DRP,
+                    #{pojo.INTV} AS INTV,
+                    #{pojo.PDR} AS PDR,
+                    #{pojo.DYP} AS DYP,
+                    #{pojo.WTH} AS WTH
+                FROM DUAL
+            </foreach>
+        ) s ON (t.STCD = s.STCD AND t.TM = s.TM)
+        WHEN MATCHED THEN UPDATE SET
+            t.DRP = s.DRP,
+            t.INTV = s.INTV,
+            t.PDR = s.PDR,
+            t.DYP = s.DYP,
+            t.WTH = s.WTH
+        WHERE NVL(t.DRP, -1) != NVL(s.DRP, -1)
+           OR NVL(t.INTV, -1) != NVL(s.INTV, -1)
+           OR NVL(t.PDR, -1) != NVL(s.PDR, -1)
+           OR NVL(t.DYP, -1) != NVL(s.DYP, -1)
+           OR NVL(t.WTH, ' ') != NVL(s.WTH, ' ')
+    </update>
+
 </mapper>

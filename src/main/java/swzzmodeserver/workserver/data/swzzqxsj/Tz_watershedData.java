@@ -11,9 +11,9 @@ import java.util.List;
 public interface Tz_watershedData {
 
     List<Tz_watershedPojo> selectList(@Param(value = "ID") String ID, @Param(value = "key") String key,
-                                      @Param(value = "stime") String stime, @Param(value = "etime") String etime,
-                                      @Param(value = "type")List<String> type,
-                                      @Param(value = "startindex") Integer startindex,@Param(value = "pagesize") Integer pagesize);
+            @Param(value = "stime") String stime, @Param(value = "etime") String etime,
+            @Param(value = "type") List<String> type,
+            @Param(value = "startindex") Integer startindex, @Param(value = "pagesize") Integer pagesize);
 
     Integer updateOne(Tz_watershedPojo bdmsPredictPojo);
 
@@ -22,6 +22,10 @@ public interface Tz_watershedData {
     Integer deleteOne(@Param(value = "ID") String ID);
 
     Integer selectCount(@Param(value = "ID") String ID, @Param(value = "key") String key,
-                        @Param(value = "stime") String stime, @Param(value = "etime") String etime,
-                        @Param(value = "type")List<String> type);
+            @Param(value = "stime") String stime, @Param(value = "etime") String etime,
+            @Param(value = "type") List<String> type);
+
+    List<Tz_watershedPojo> selectListByID(@Param(value = "idList") List<String> idList,
+            @Param(value = "key") String key);
+
 }

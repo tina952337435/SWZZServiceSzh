@@ -2,7 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.RTSQST_PPTN_RData">
     <select id="selectListSL323" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
-    select top  2000  * from SL323.ST_PPTN_R
+    select top  2000  * from SL323.ST_PPTN_QX_R
+    <where>
+        <if test="stime != null and stime != ''">
+            <![CDATA[ and TM >#{stime} ]]>
+        </if>
+        <if test="etime != null and etime != ''">
+            <![CDATA[ and TM <=#{etime} ]]>
+        </if>
+        <if test="stcdList != null and stcdList.size() > 0">
+            and STCD in
+            <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                #{stcd}
+            </foreach>
+        </if>
+    </where>
+    order by TM asc
+</select>
+
+    <!-- 补录同步专用：无 top 限制，避免数据截断 -->
+    <select id="selectListSL323NoLimit" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
+    select * from SL323.ST_PPTN_QX_R
     <where>
         <if test="stime != null and stime != ''">
             <![CDATA[ and TM >#{stime} ]]>

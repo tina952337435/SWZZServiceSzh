@@ -59,6 +59,9 @@ public class HuishuiApiService {
     @Autowired
     private ES_MODELGUANLIANData esModelGuanlianData;
 
+    @Autowired
+    private ES_ZHANDIANDATA_YUANData es_ZHANDIANDATA_YUANData;
+
     @Value("${file.path.templatefilepath}")
     private String filePathName;
 
@@ -220,6 +223,44 @@ public class HuishuiApiService {
     // 设置预报调度任务SetTask
     public int modelSetTask(String stime, String etime, int hour, String dd_id, String DD_DISTRIBY) {
         int resultRows = 0;
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> mapList = new HashMap<>();
+        String result = "";
+        try {
+            result = modelSetTaskNew(stime, etime, hour, dd_id, DD_DISTRIBY);
+            new javalog().writelog("设置任务接口返回结果：" + result, filePathName);
+            mapList = objectMapper.readValue(result, new TypeReference<Map<String, Object>>() {
+            });
+            Map<String, Object> info = (Map<String, Object>) mapList.get("info");
+
+            Boolean success = (Boolean) info.get("success");
+            if (success) {// 调用接口成功
+                String taskID = mapList.get("taskID").toString();
+                System.out.println("任务编号：" + taskID);
+                new javalog().writelog("任务编号：" + taskID, filePathName);
+                // **************************************************************定时获取模型的状态
+                int TaskStatus = 0;
+                while (TaskStatus == 0) {// 等于1代表计算完成
+                    TaskStatus = modelGetTaskStatus(taskID);
+                    System.out.println("任务状态：" + TaskStatus);
+                    new javalog().writelog("任务" + taskID + "的状态：" + TaskStatus, filePathName);
+                }
+                if (TaskStatus == 1) {
+                    new javalog().writelog("任务" + taskID + "计算完成，状态：" + TaskStatus, filePathName);
+                    resultRows = onResultOk(dd_id, stime, etime, taskID, DD_DISTRIBY);
+                } else {
+                    System.out.println("任务报错，模型计算不了");
+                }
+            } else {
+                System.out.println("设置任务报错：" + result);
+            }
+        } catch (IOException e) {
+            // System.out.println("调用" + parmasMap + "接口报错,接口返回结果是：" + result);
+        }
+        return resultRows;
+    }
+
+    public String modelSetTaskNew(String stime, String etime, int hour, String dd_id, String DD_DISTRIBY) {
         GetSubjectListPojo subjectListPojo = modelGetSubjectList();
         List<ES_ZHANDIANDATAPojo> bjData = data.selectList(null, null, null, dd_id, null, null, null);
         List<Map<String, Object>> bjZhan = modelGetScheduleObjList(subjectListPojo.getDocid(),
@@ -263,23 +304,25 @@ public class HuishuiApiService {
                     ES_ZHANDIANDATAPojo bj = bjDataTemp.get(_index);
                     String gcDATA = bj.getZHANDATA();
                     if (type == 3) {// 工程
-                        if (!isNumeric(gcDATA)) {
-                            List<Map<String, Object>> planList = (List<Map<String, Object>>) res.get("plan");
-                            List<Map<String, Object>> planTemp = new ArrayList<>();
-                            for (Map<String, Object> dataItem : planList) {
-                                // 检查 bCur 字段是否等于 true
-                                String name = dataItem.get("name").toString();
-                                if (name.equals(gcDATA)) {
-                                    planTemp.add(dataItem);
-                                }
-                            }
-                            item.put("valType", 4);// 4代表是采用规则调度
-                            int valIdex = planTemp.size() > 0 ? (int) planTemp.get(0).get("index") : 0;
-                            if (_index == 0) {
-                                vals.add(Double.valueOf(valIdex));
-                                // break;//跳出循环
-                            }
-                        } else {
+                        if (!isNumeric(gcDATA)) {// 采用分区预案调度
+                            // List<Map<String, Object>> planList = (List<Map<String, Object>>)
+                            // res.get("plan");
+                            // List<Map<String, Object>> planTemp = new ArrayList<>();
+                            // for (Map<String, Object> dataItem : planList) {
+                            // // 检查 bCur 字段是否等于 true
+                            // String name = dataItem.get("name").toString();
+                            // if (name.equals(gcDATA)) {
+                            // planTemp.add(dataItem);
+                            // }
+                            // }
+                            // item.put("valType", 4);// 4代表是采用规则调度
+                            // int valIdex = planTemp.size() > 0 ? (int) planTemp.get(0).get("index") : 0;
+                            // if (_index == 0) {
+                            // vals.add(Double.valueOf(valIdex));
+                            // // break;//跳出循环
+                            // }
+                            continue;// 跳出当前循环
+                        } else {// 流量调度时，优先采用流量调度
                             item.put("valType", 2);// 2代表是采用流量调度
                             vals.add(Double.valueOf(gcDATA));
                             // break;//跳出循环
@@ -297,9 +340,30 @@ public class HuishuiApiService {
                 }
             }
             System.out.println(id + "，" + res.get("name") + "，" + vals.size());
-            item.put("vals", vals);
-            scheduleObjs.add(item);
+
+            if (vals.size() > 0) {
+                item.put("vals", vals);
+                scheduleObjs.add(item);
+            }
         }
+
+        List<ES_ZHANDIANDATA_YUANPojo> bjDataFQ = es_ZHANDIANDATA_YUANData.selectList(dd_id, null);
+        // 分区调度预案
+        if (bjDataFQ.size() > 0) {
+            Map<String, Object> itemFQ = new HashMap<>();
+            itemFQ.put("id", 30000000);
+            itemFQ.put("type", 3);
+            itemFQ.put("valType", 4);
+            ArrayList<Integer> valsFQ = new ArrayList<>();
+            for (int i = 0; i < bjDataFQ.size(); i++) {
+                valsFQ.add(Integer.valueOf(bjDataFQ.get(i).getZHANDATA()));
+            }
+            if (valsFQ.size() > 0) {
+                itemFQ.put("vals", valsFQ);
+                scheduleObjs.add(itemFQ);
+            }
+        }
+        // 分区调度预案
 
         // 设置预报调度数据
         // scheduleObjs=[];
@@ -326,48 +390,14 @@ public class HuishuiApiService {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             parmasMap = objectMapper.writeValueAsString(taskData);
-            System.out.println("传给模型的参数：" + parmasMap);
-            new javalog().writelog("传给模型的参数，parmasMap（" + parmasMap + "）", filePathName);
+            new javalog().writelog(parmasMap, filePathName, "modecanshu");
         } catch (IOException e) {
-            System.out.println("解析参数报错：" + e.getMessage());
             new javalog().writelog("解析参数报错：" + e.getMessage(), filePathName);
         }
         HashMap<String, Object> header = new HashMap<>();
         header.put("Content-Type", "application/json;charset=UTF-8");
         String result = apihelper.apipost(HuishuiApi, parmasMap, header);
-
-        Map<String, Object> mapList = new HashMap<>();
-        try {
-            new javalog().writelog("设置任务接口返回结果：" + result, filePathName);
-            mapList = objectMapper.readValue(result, new TypeReference<Map<String, Object>>() {
-            });
-            Map<String, Object> info = (Map<String, Object>) mapList.get("info");
-
-            Boolean success = (Boolean) info.get("success");
-            if (success) {// 调用接口成功
-                String taskID = mapList.get("taskID").toString();
-                System.out.println("任务编号：" + taskID);
-                new javalog().writelog("任务编号：" + taskID, filePathName);
-                // **************************************************************定时获取模型的状态
-                int TaskStatus = 0;
-                while (TaskStatus == 0) {// 等于1代表计算完成
-                    TaskStatus = modelGetTaskStatus(taskID);
-                    System.out.println("任务状态：" + TaskStatus);
-                    new javalog().writelog("任务" + taskID + "的状态：" + TaskStatus, filePathName);
-                }
-                if (TaskStatus == 1) {
-                    new javalog().writelog("任务" + taskID + "计算完成，状态：" + TaskStatus, filePathName);
-                    resultRows = onResultOk(dd_id, stime, etime, taskID, DD_DISTRIBY);
-                } else {
-                    System.out.println("任务报错，模型计算不了");
-                }
-            } else {
-                System.out.println("设置任务报错：" + result);
-            }
-        } catch (IOException e) {
-            System.out.println("调用" + parmasMap + "接口报错,接口返回结果是：" + result);
-        }
-        return resultRows;
+        return result;
     }
 
     // 获取模型任务状态GetTaskStatus

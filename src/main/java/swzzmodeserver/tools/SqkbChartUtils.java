@@ -528,12 +528,11 @@ public class SqkbChartUtils {
      * @param stime 开始时间
      * @param etime 结束时间
      * @param wrz 警戒水位
-     * @param ivhz 历史最高水位
      * @param saveDir 保存目录
      * @return 图片路径
      */
     public static String generateWaterLevelChart(List<Map<String, Object>> waterDataList, String stationName,
-                                             String stime, String etime, Double wrz, Double ivhz, String saveDir) {
+                                             String stime, String etime, Double wrz, String saveDir) {
         try {
             if (waterDataList == null || waterDataList.isEmpty()) {
                 return null;
@@ -548,8 +547,6 @@ public class SqkbChartUtils {
 
             // 2. 准备时间序列数据集
             TimeSeries waterSeries = new TimeSeries("水位(m)");
-            TimeSeries warnSeries = new TimeSeries("警戒水位");
-            TimeSeries histSeries = new TimeSeries("历史最高水位");
 
             // 用于解析时间的格式，根据你的数据库字段调整，这里假设是 yyyy-MM-dd HH:mm:ss
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -565,19 +562,24 @@ public class SqkbChartUtils {
 
                 // 使用 Millisecond 包装日期（也可以根据精度用 Minute.class）
                 waterSeries.add(new Millisecond(date), upz);
-
-                if (wrz != null) {
-                    warnSeries.add(new Millisecond(date), wrz);
-                }
-                if (ivhz != null) {
-                    histSeries.add(new Millisecond(date), ivhz);
-                }
             }
 
             TimeSeriesCollection dataset = new TimeSeriesCollection();
             dataset.addSeries(waterSeries);
-            dataset.addSeries(warnSeries);
-            dataset.addSeries(histSeries);
+
+            // 警戒水位序列（仅在有值时添加）
+            TimeSeries warnSeries = null;
+            if (wrz != null) {
+                warnSeries = new TimeSeries("警戒水位");
+                for (Map<String, Object> record : waterDataList) {
+                    String tmStr = record.get("tm") != null ? record.get("tm").toString() : "";
+                    if (!tmStr.isEmpty()) {
+                        Date date = sdf.parse(tmStr);
+                        warnSeries.add(new Millisecond(date), wrz);
+                    }
+                }
+                dataset.addSeries(warnSeries);
+            }
 
             // 3. 创建时间序列图表
             JFreeChart chart = ChartFactory.createTimeSeriesChart(
@@ -598,8 +600,8 @@ public class SqkbChartUtils {
             XYPlot plot = chart.getXYPlot();
             plot.setBackgroundPaint(Color.WHITE);
 
-            // 设置渲染器（线条样式）
-            XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+            // 获取已有渲染器并设置线条样式
+            XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
 
             // 水位线：蓝色，实线，宽度2
             renderer.setSeriesPaint(0, new Color(0, 0, 255));
@@ -609,18 +611,9 @@ public class SqkbChartUtils {
             // 警戒水位：橙色，虚线
             if (wrz != null) {
                 renderer.setSeriesPaint(1, new Color(251, 90, 16));
-                renderer.setSeriesStroke(1, new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, new float[]{5.0f, 5.0f}, 0.0f));
+                renderer.setSeriesStroke(1, new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[]{10.0f, 6.0f}, 0.0f));
                 renderer.setSeriesShapesVisible(1, false);
             }
-
-            // 历史最高水位：红色，虚线
-            if (ivhz != null) {
-                renderer.setSeriesPaint(2, new Color(255, 16, 16));
-                renderer.setSeriesStroke(2, new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, new float[]{5.0f, 5.0f}, 0.0f));
-                renderer.setSeriesShapesVisible(2, false);
-            }
-
-            plot.setRenderer(renderer);
 
             // 5. Y轴设置
             NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
@@ -629,7 +622,7 @@ public class SqkbChartUtils {
             // 如果需要保留自动计算最大值逻辑：
             /*
             double maxVal = waterDataList.stream().mapToDouble(r -> ((Number)r.get("upz")).doubleValue()).max().orElse(0);
-            maxVal = Math.max(maxVal, Math.max(wrz != null ? wrz : 0, ivhz != null ? ivhz : 0));
+            maxVal = Math.max(maxVal, wrz != null ? wrz : 0);
             yAxis.setRange(0, maxVal * 1.2);
             */
 
@@ -657,14 +650,6 @@ public class SqkbChartUtils {
                     XYTextAnnotation ann = new XYTextAnnotation("警戒水位", timeMillis + xOffset, wrz);
                     ann.setFont(new Font("宋体", Font.PLAIN, 12));
                     ann.setPaint(new Color(251, 90, 16));
-                    ann.setTextAnchor(TextAnchor.CENTER_LEFT);
-                    plot.addAnnotation(ann);
-                }
-
-                if (ivhz != null) {
-                    XYTextAnnotation ann = new XYTextAnnotation("历史最高水位", timeMillis + xOffset, ivhz);
-                    ann.setFont(new Font("宋体", Font.PLAIN, 12));
-                    ann.setPaint(new Color(255, 16, 16));
                     ann.setTextAnchor(TextAnchor.CENTER_LEFT);
                     plot.addAnnotation(ann);
                 }

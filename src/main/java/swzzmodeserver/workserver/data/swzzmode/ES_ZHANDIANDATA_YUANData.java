@@ -10,12 +10,9 @@ import java.util.List;
 @Mapper
 public interface ES_ZHANDIANDATA_YUANData {
 
-        List<ES_ZHANDIANDATA_YUANPojo> selectList(@Param(value = "ID") String ID,
-                        @Param(value = "startindex") Integer startindex, @Param(value = "pagesize") Integer pagesize,
+        List<ES_ZHANDIANDATA_YUANPojo> selectList(
                         @Param(value = "SOLUTIONID") String SOLUTIONID,
-                        @Param(value = "zhanid") List<String> zhanid,
-                        @Param(value = "startdate") String startdate,
-                        @Param(value = "enddate") String enddate);
+                        @Param(value = "zhanid") List<String> zhanid);
 
         Integer updateOne(ES_ZHANDIANDATA_YUANPojo bdmsPredictPojo);
 

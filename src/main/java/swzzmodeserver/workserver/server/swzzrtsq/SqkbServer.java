@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.lang.reflect.Array;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -73,6 +74,8 @@ public class SqkbServer {
      */
     public ResultUtils<SqkbReportPojo> getReportData(String stime, String etime) {
         try {
+            List<String> pidList = Arrays.asList("201901101419326076-1-1,201901101419326076-5".split(","));
+            quData.queryList(null, null, null, pidList);
             // 1. 查询所有降雨数据
             List<ST_PPTN_RPojo> rainData = data.selectListByTime(null, stime, etime, null);
 
@@ -148,7 +151,7 @@ public class SqkbServer {
             // 3. 生成各区降水量柱状图
             if (reportData.getAreaRainMap() != null && !reportData.getAreaRainMap().isEmpty()) {
                 String areaBarChartPath = SqkbChartUtils.generateAreaRainBarChart(reportData.getAreaRainMap(),
-                        chartSavePath,reportData.getAvgDrp());
+                        chartSavePath, reportData.getAvgDrp());
                 if (areaBarChartPath != null) {
                     reportData.setImage3Path(new File(areaBarChartPath).getName());
                     reportData.setImage3PathTitle("各区降水量对照图");
@@ -178,11 +181,11 @@ public class SqkbServer {
             List<Map<String, Object>> stationList = new ArrayList<>();
             for (Map.Entry<String, Double> entry : stationSumMap.entrySet()) {
                 String stcd = entry.getKey();
-                Double drp = entry.getValue();                
+                Double drp = entry.getValue();
 
                 // 过滤：雨量小于0.1的不传
                 // if (drp == null || drp < 0.1) {
-                //     continue;
+                // continue;
                 // }
 
                 ST_STBPRP_BPojo station = stationMap.get(stcd);
@@ -195,27 +198,27 @@ public class SqkbServer {
                     continue;
                 }
 
-                if(stcd.equals("63422650")){//边角需要插值的点
-                    //RainfallStr.push({ lon:-58570.8187561 , lat:-14245.7293732, value: f }); 
-                    
+                if (stcd.equals("63422650")) {// 边角需要插值的点
+                    // RainfallStr.push({ lon:-58570.8187561 , lat:-14245.7293732, value: f });
+
                     Map<String, Object> itemNew = new HashMap<>();
                     itemNew.put("lat", -14245.7293732);
                     itemNew.put("lon", -58570.8187561);
                     itemNew.put("value", String.valueOf(drp));
-                    stationList.add(itemNew); 
+                    stationList.add(itemNew);
                 }
-                if(stcd.equals("63422480")){
-                    // RainfallStr.push({ lon:-45857.005352, lat:-45373.137903, value: f });   
-                    
+                if (stcd.equals("63422480")) {
+                    // RainfallStr.push({ lon:-45857.005352, lat:-45373.137903, value: f });
+
                     Map<String, Object> itemNew = new HashMap<>();
                     itemNew.put("lat", -45373.137903);
                     itemNew.put("lon", -45857.005352);
                     itemNew.put("value", String.valueOf(drp));
-                    stationList.add(itemNew); 
+                    stationList.add(itemNew);
                 }
-                if(stcd.equals("X1160101")){
-                    // RainfallStr.push({ lon:-18971.869913,lat:-60205.822566, value: f }); 
-                    
+                if (stcd.equals("X1160101")) {
+                    // RainfallStr.push({ lon:-18971.869913,lat:-60205.822566, value: f });
+
                     Map<String, Object> itemNew = new HashMap<>();
                     itemNew.put("lat", -60205.822566);
                     itemNew.put("lon", -18971.869913);
@@ -325,7 +328,7 @@ public class SqkbServer {
 
             // 保存文件
             String dateStr = formatTimeRangeStr(reportData.getStime());
-            String fileName = dateStr + "暴雨分析.docx";
+            String fileName = "汛情快报[" + reportData.getYear() + reportData.getQihao() + "]" + dateStr + "暴雨分析.docx";
             String savePath = templateFilePath + File.separator + "sqkb" + File.separator;
             File saveDir = new File(savePath);
             if (!saveDir.exists()) {
@@ -339,22 +342,23 @@ public class SqkbServer {
             document.close();
 
             // 保存成功后，向XQKB_LIST表新增一条记录
-            try {
-                XQKB_LISTPojo xqkbPojo = new XQKB_LISTPojo();
-                xqkbPojo.setXQKB_ID(UUID.randomUUID().toString()); // 主键
-                xqkbPojo.setXQKB_TITLE(reportData.getTitle()); // 标题
-                xqkbPojo.setXQKB_TM(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())); // 填报时间
-                xqkbPojo.setXQKB_STM(reportData.getStime()); // 开始时间
-                xqkbPojo.setXQKB_ETM(reportData.getEtime()); // 结束时间
-                xqkbPojo.setXQKB_QIHAO(reportData.getQihao()); // 期号
-                xqkbPojo.setXQKB_FILE(fileName); // 文件路径/文件名
-                xqkbPojo.setXQKB_OWEN(reportData.getAuthor() != null ? reportData.getAuthor() : ""); // 编写人
-                xqkbPojo.setXQKB_TYPE("水情快报"); // 类型
-                xqkbListData.insertOne(xqkbPojo);
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (reportData.isRecord()) {// 排除下载的功能，只是生成图片
+                try {
+                    XQKB_LISTPojo xqkbPojo = new XQKB_LISTPojo();
+                    xqkbPojo.setXQKB_ID(UUID.randomUUID().toString()); // 主键
+                    xqkbPojo.setXQKB_TITLE(reportData.getTitle()); // 标题
+                    xqkbPojo.setXQKB_TM(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())); // 填报时间
+                    xqkbPojo.setXQKB_STM(reportData.getStime()); // 开始时间
+                    xqkbPojo.setXQKB_ETM(reportData.getEtime()); // 结束时间
+                    xqkbPojo.setXQKB_QIHAO(reportData.getQihao()); // 期号
+                    xqkbPojo.setXQKB_FILE(fileName); // 文件路径/文件名
+                    xqkbPojo.setXQKB_OWEN(reportData.getAuthor() != null ? reportData.getAuthor() : ""); // 编写人
+                    xqkbPojo.setXQKB_TYPE("水情快报"); // 类型
+                    xqkbListData.insertOne(xqkbPojo);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-
             Map<String, String> result = new HashMap<>();
             result.put("filePath", fileName);
             result.put("fileName", fileName);
@@ -616,7 +620,8 @@ public class SqkbServer {
                         return chartSavePath + File.separator + reportData.getImage3Path();
                     } else {
                         if (reportData.getAreaRainMap() != null && !reportData.getAreaRainMap().isEmpty()) {
-                            return SqkbChartUtils.generateAreaRainBarChart(reportData.getAreaRainMap(), chartSavePath,reportData.getAvgDrp());
+                            return SqkbChartUtils.generateAreaRainBarChart(reportData.getAreaRainMap(), chartSavePath,
+                                    reportData.getAvgDrp());
                         }
                     }
                     break;
@@ -818,18 +823,18 @@ public class SqkbServer {
         // 构建站点信息Map (stcd -> stationInfo)
         Map<String, ST_STBPRP_BPojo> stationMap = new HashMap<>();
         Map<String, String> stcdToAddvnm = new HashMap<>();
-        String xingzhengArea="闵行区,宝山区,嘉定区,浦东新区,金山区,松江区,青浦区,奉贤区,崇明区,中心城区,徐汇区,黄浦区,杨浦区,长宁区,普陀区,虹口区,静安区" ;
-        String zhognxinArea="中心城区,徐汇区,黄浦区,杨浦区,长宁区,普陀区,虹口区,静安区" ;
+        String xingzhengArea = "闵行区,宝山区,嘉定区,浦东新区,金山区,松江区,青浦区,奉贤区,崇明区,中心城区,徐汇区,黄浦区,杨浦区,长宁区,普陀区,虹口区,静安区";
+        String zhognxinArea = "中心城区,徐汇区,黄浦区,杨浦区,长宁区,普陀区,虹口区,静安区";
         if (stationList != null) {
             for (ST_STBPRP_BPojo s : stationList) {
-                stationMap.put(s.getSTCD(), s);                
+                stationMap.put(s.getSTCD(), s);
                 if (s.getADDVNM() != null) {
                     String addvnm = s.getADDVNM();
-                    if(xingzhengArea.contains(addvnm)){
-                        if(zhognxinArea.contains(addvnm)){
-                            addvnm="中心城区";
+                    if (xingzhengArea.contains(addvnm)) {
+                        if (zhognxinArea.contains(addvnm)) {
+                            addvnm = "中心城区";
                         }
-                        stcdToAddvnm.put(s.getSTCD(),addvnm);
+                        stcdToAddvnm.put(s.getSTCD(), addvnm);
                     }
                 }
             }
@@ -909,10 +914,11 @@ public class SqkbServer {
 
             // 2. 加个判断：只有当值不等于 "未知" 时，才执行添加操作
             if (!"未知".equals(addvnm)) {
-                // String addvnm = entry.getKey();//stcdToAddvnm.getOrDefault(entry.getKey(), "未知");
+                // String addvnm = entry.getKey();//stcdToAddvnm.getOrDefault(entry.getKey(),
+                // "未知");
                 hnnmRainMap.computeIfAbsent(addvnm, k -> new ArrayList<>()).add(entry.getValue());
             }
-            
+
         }
 
         // 计算每个分区的面雨量（算术平均）
@@ -1000,7 +1006,7 @@ public class SqkbServer {
         String rainLevelDesc = getRainLevelDescription(countLightRain, countMediumRain, countHeavyRain,
                 countRainstorm, countSevereRain, countExtremeRain);
         String timeRangeStr = formatTimeRangeStr(stime, etime);
-        String overview =  timeRangeStr
+        String overview = timeRangeStr
                 + "全市平均降水量" + df.format(avgDrp) + "mm，单站最大降水量为" + maxDrpStation
                 + df.format(maxDrp) + "mm，最大60min降水量为" + maxDrpStation
                 + df.format(max60Result.get("maxDrp")) + "mm（" + max60Result.get("timeRange") + "），降水分布图如图1。";
@@ -1130,7 +1136,7 @@ public class SqkbServer {
         try {
             // 查询水情代表站配置 PID=2026031114184492913-3
             List<ST_STBPRP_B_QUPojo> stationList = quData.selectList("", "", null, "2026031114184492913-3", null);
-            List<ST_STBPRP_B_QUPojo> stationListSW = quData.selectList("", "", null, "2026031114184492913-33", null);//不算潮位站
+            List<ST_STBPRP_B_QUPojo> stationListSW = quData.selectList("", "", null, "2026031114184492913-33", null);// 不算潮位站
 
             if (stationList == null || stationList.isEmpty()) {
                 return "全市防汛代表站潮水位均未超警。";
@@ -1141,7 +1147,6 @@ public class SqkbServer {
                     .map(ST_STBPRP_B_QUPojo::getSTCD)
                     .filter(s -> s != null && !s.isEmpty())
                     .collect(Collectors.toList());
-
 
             List<String> stcdListSWW = stationListSW.stream()
                     .map(ST_STBPRP_B_QUPojo::getSTCD)
@@ -1173,7 +1178,6 @@ public class SqkbServer {
             double maxChangeValue = 0;
             List<GetWaterViewNewPojo> maxChangeStationWaterList = null;
             Double maxChangeWrz = null;
-            Double maxChangeIvhz = null;
 
             for (Map.Entry<String, List<GetWaterViewNewPojo>> entry : stationWaterMap.entrySet()) {
                 List<GetWaterViewNewPojo> waterList = entry.getValue();
@@ -1216,17 +1220,15 @@ public class SqkbServer {
                 if (startWaterLevel != null && maxWaterLevel != null) {
                     double change = maxWaterLevel - startWaterLevel;
                     if (change > 0) {
-                        
 
                         // 记录水位上涨最大的站点
-                        if(stcdListSWW.contains(entry.getKey()))
-                        {
+                        if (stcdListSWW.contains(entry.getKey())) {
                             String slp = waterList.get(0).getSLP(); // 使用STLC作为水利片字段
                             if (slp == null || slp.isEmpty()) {
                                 slp = "其他水利片";
                             }
                             slpChangeMap.computeIfAbsent(slp, k -> new ArrayList<>()).add(change);
-                            
+
                             if (change > maxChangeValue) {
                                 maxChangeValue = change;
                                 maxChangeStationStcd = entry.getKey();
@@ -1234,18 +1236,8 @@ public class SqkbServer {
                                 maxChangeStationNameSlp = slp + maxChangeStationName;
                                 maxChangeStationWaterList = new ArrayList<>(waterList);
                                 maxChangeWrz = wrz;
-                                // 获取历史最高水位IVHZ
-                                Double ivhz = null;
-                                try {
-                                    ivhz = waterList.get(0).getIVHZ() != null
-                                            ? Double.parseDouble(waterList.get(0).getIVHZ().toString())
-                                            : null;
-                                } catch (Exception e) {
-                                    // ignore
-                                }
-                                maxChangeIvhz = ivhz;
                             }
-                        }                     
+                        }
                     }
                 }
             }
@@ -1288,7 +1280,7 @@ public class SqkbServer {
                         chartDataList.add(item);
                     }
                     String waterChartPath = SqkbChartUtils.generateWaterLevelChart(
-                            chartDataList, maxChangeStationName, stime, etime, maxChangeWrz, maxChangeIvhz,
+                            chartDataList, maxChangeStationName, stime, etime, maxChangeWrz,
                             templateFilePath + File.separator + "sqkb");
                     if (waterChartPath != null) {
                         report.setImage5PathTitle(report.getMaxChangeStationNameSlp() + "水位过程线");
@@ -1541,7 +1533,7 @@ public class SqkbServer {
         }
 
         // 生成各区降水量柱状图
-        String barChartPath = SqkbChartUtils.generateAreaRainBarChart(areaRainMap, tempDir,report.getAvgDrp());
+        String barChartPath = SqkbChartUtils.generateAreaRainBarChart(areaRainMap, tempDir, report.getAvgDrp());
         if (barChartPath != null && new File(barChartPath).exists()) {
             chartPaths.add(barChartPath);
             addChartImageToWord(document, barChartPath, "各区降水量对照", dateStr);

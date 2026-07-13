@@ -14,9 +14,6 @@
                 </foreach>
             </if>
         </where>
-        <if test="startindex != null and pagesize != null">
-            limit #{startindex},#{pagesize}
-        </if>
         order by YJZ asc
     </select>
 

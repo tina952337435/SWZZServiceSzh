@@ -210,8 +210,7 @@ public class TongbuServer {
                 }
 
                 new javalog().writelog(model.getStnm() + "站入库水位数据长度：" + rows, filePathName);
-            } 
-            else if (model.getType().equals("2"))// 雨量
+            } else if (model.getType().equals("2"))// 雨量
             {
                 new javalog().writelog("进入主服务SyncRealData接口，开始同步雨量数据：" + stcd, filePathName, "SWZZServiceYL");
                 List<ST_PPTN_RPojo> listPptn = new ArrayList<>();
@@ -246,8 +245,7 @@ public class TongbuServer {
                     // }
 
                 }
-            } 
-            else if (model.getType().equals("3"))// 工情
+            } else if (model.getType().equals("3"))// 工情
             {
 
             } else if (model.getType().equals("5"))// 流量
@@ -275,8 +273,7 @@ public class TongbuServer {
                     new javalog().writelog("更新" + model.getStnm() + "站【流量】最新时间", filePathName, "SWZZServiceLL");
                     // }
                 }
-            } 
-            else if (model.getType().equals("8")) {// 风速风向
+            } else if (model.getType().equals("8")) {// 风速风向
                 new javalog().writelog("进入主服务SyncRealData接口，开始同步风速风向数据：" + stcd, filePathName, "SWZZServiceFX");
                 // List<tb_wind_informationPojo> listFeng =
                 // stWdwvRData.selecttb_wind_informationListtTop(stcdList, tm, null);
@@ -313,8 +310,7 @@ public class TongbuServer {
                     new javalog().writelog(model.getStnm() + "站报错：" + e.getMessage(), filePathName,
                             "SWZZServiceFXError");
                 }
-            } 
-            else if (model.getType().equals("9")) {// 断面流速
+            } else if (model.getType().equals("9")) {// 断面流速
                 new javalog().writelog("进入主服务SyncRealData接口，开始同步【流速】数据：" + stcd, filePathName, "SWZZServiceLS");
                 // 查询
                 // List<ST_WAS_RPojo> st_was_rLL = rtsqData.GetWaterDataLL(tm, null, stcdList,
@@ -669,7 +665,7 @@ public class TongbuServer {
                             wasInfo.setWNDDIR(directionNM);
                             wasInfo.setWNANGLE(direction);
                         }
-                        if (windSpeed > -1000) {// 存在-10000.0这种值，不存入数据库，是缺测
+                        if (windSpeed > -1000 && isWindSpeed && isDirection) {// 存在-10000.0这种值，不存入数据库，是缺测
                             list.add(wasInfo);
                         }
                         strLastTM = strTM;
@@ -706,11 +702,9 @@ public class TongbuServer {
             // }
             else if (tab.equals("st_flow_r")) {// 流量站
                 rows = rtsqstStbprpBStcdData.UpdateWaterDataFlow(type);
-            }
-            else if (tab.equals("st_vel_r")) {// 流速站
+            } else if (tab.equals("st_vel_r")) {// 流速站
                 rows = rtsqstStbprpBStcdData.UpdateWaterDataVel(type);
-            }
-             else if (tab.equals("st_wdwv_r")) {// 风速风向站
+            } else if (tab.equals("st_wdwv_r")) {// 风速风向站
                 rows = rtsqstStbprpBStcdData.UpdateWaterDataFeng(type);
             }
         } catch (Exception e) {
@@ -920,11 +914,11 @@ public class TongbuServer {
                 }
                 if (tab.equals("st_tide_r")) {// 天文潮位
                     // 查询
-                    List<Map<String, Object>> st_was_r = shuiwupingServer.getTianWenChaoWei( stcd, stime, etime);
+                    List<Map<String, Object>> st_was_r = shuiwupingServer.getTianWenChaoWei(stcd, stime, etime);
                     List<ST_TIDE_RPojo> listT = new ArrayList<>();
-                    if(st_was_r.size()>0){
-                        st_was_r.forEach(u->{
-                            try {                                
+                    if (st_was_r.size() > 0) {
+                        st_was_r.forEach(u -> {
+                            try {
                                 ST_TIDE_RPojo tide_rPojo = new ST_TIDE_RPojo();
                                 tide_rPojo.setSTCD(model.getStcd());
                                 tide_rPojo.setTM(u.get("DATETIME").toString());
@@ -934,7 +928,7 @@ public class TongbuServer {
                                 // TODO: handle exception
                             }
                         });
-                        if(listT.size()>0){                            
+                        if (listT.size() > 0) {
                             // 插入操作
                             try {
                                 rows += stTideRData.insertAll(listT);
@@ -949,8 +943,8 @@ public class TongbuServer {
                                 UpdateWaterData(tab, model.getType(), model.getStcd());
                             }
                         }
-                    }  
-                    
+                    }
+
                 }
             } else if (model.getType().equals("5"))// 流量
             {
@@ -1682,6 +1676,130 @@ public class TongbuServer {
         result.put("fetchedCount", totalFetched);
         result.put("affectedCount", totalAffected);
         result.put("stationCount", stations.size());
+        result.put("errors", errors);
+        return result;
+    }
+
+    /**
+     * 市气象局雨量补录同步（仅更新，不插入）
+     * 每隔3分钟由外部定时器调用，查询所有市气象局站点指定时间段的雨量数据
+     * 对已存在的 (STCD, TM) 记录更新 DRP/INTV/PDR/DYP/WTH，不插入新记录
+     *
+     * 背景：市气象局的补录数据没有更新时间戳，无法通过增量方式发现，
+     * 只能通过周期性回看已入库时间段的源数据来捕获补录修正。
+     *
+     * @param stimeParam 基准时间（查询窗口结束时间），null 或空则取当前时间，格式 yyyy-MM-dd HH:mm:ss
+     * @param hours      往前回看小时数，默认 4
+     * @return 统计结果 Map
+     */
+    public Map<String, Object> syncRecentPptnQixiang(String stimeParam, int hours) {
+        Map<String, Object> result = new HashMap<>();
+        int totalFetched = 0;
+        int totalAffected = 0;
+        List<String> errors = new ArrayList<>();
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime baseTime;
+        if (stimeParam != null && !stimeParam.isEmpty()) {
+            baseTime = LocalDateTime.parse(stimeParam, fmt);
+        } else {
+            baseTime = LocalDateTime.now();
+        }
+        String etime = baseTime.format(fmt);
+        String tm = baseTime.minusHours(hours).format(fmt);
+
+        new javalog().writelog(
+                "市气象局雨量补录开始：时间窗口 " + tm + " ~ " + etime,
+                filePathName, "SWZZServiceYL_BL");
+
+        try {
+            // 1. 获取所有市气象局雨量站配置（TYPE=2, SOURCE=市气象局, ISSTATUS=1）
+            List<V_ST_STBPRP_BTZDto> stations = rtsqstStbprpBData.GetSyncSTCD(
+                    null, Arrays.asList("2"), "1", Arrays.asList("市气象局"));
+
+            if (stations == null || stations.isEmpty()) {
+                result.put("fetchedCount", 0);
+                result.put("affectedCount", 0);
+                result.put("stationCount", 0);
+                result.put("timeWindow", tm + " ~ " + etime);
+                result.put("errors", errors);
+                new javalog().writelog("市气象局雨量补录：未找到站点配置", filePathName, "SWZZServiceYL_BL");
+                return result;
+            }
+
+            // 2. 收集所有 ZSTCD 设备码（admauth字段），去重后作为 SL323 查询的 stcdList
+            Set<String> allZstcd = new LinkedHashSet<>();
+            for (V_ST_STBPRP_BTZDto s : stations) {
+                String admauth = s.getAdmauth();
+                if (admauth != null && !admauth.isEmpty()) {
+                    for (String code : admauth.split(",")) {
+                        String trimmed = code.trim();
+                        if (!trimmed.isEmpty()) {
+                            allZstcd.add(trimmed);
+                        }
+                    }
+                }
+            }
+
+            if (allZstcd.isEmpty()) {
+                result.put("fetchedCount", 0);
+                result.put("affectedCount", 0);
+                result.put("stationCount", stations.size());
+                result.put("timeWindow", tm + " ~ " + etime);
+                result.put("errors", errors);
+                new javalog().writelog("市气象局雨量补录：设备码列表为空", filePathName, "SWZZServiceYL_BL");
+                return result;
+            }
+
+            List<String> stcdList = new ArrayList<>(allZstcd);
+            new javalog().writelog(
+                    "市气象局雨量补录：站点数=" + stations.size() + "，设备码数=" + stcdList.size(),
+                    filePathName, "SWZZServiceYL_BL");
+
+            // 3. 从市气象局 SL323 源库拉取过去4小时数据（使用无 top 限制的查询）
+            List<ST_PPTN_RPojo> listPptn = rtsqstPptnRData.selectListSL323NoLimit(stcdList, tm, etime);
+            totalFetched = listPptn.size();
+
+            new javalog().writelog(
+                    "市气象局雨量补录：拉取源数据 " + totalFetched + " 条",
+                    filePathName, "SWZZServiceYL_BL");
+
+            // 4. 分批更新（仅更新已存在的记录，不插入新记录）
+            if (!listPptn.isEmpty()) {
+                int batchSize = 500;
+                int batches = (listPptn.size() + batchSize - 1) / batchSize;
+                for (int i = 0; i < listPptn.size(); i += batchSize) {
+                    int end = Math.min(i + batchSize, listPptn.size());
+                    List<ST_PPTN_RPojo> batch = listPptn.subList(i, end);
+                    try {
+                        int affected = rtsqstPptnRData.updatePptnBatch(batch);
+                        totalAffected += affected;
+                    } catch (Exception e) {
+                        new javalog().writelog(
+                                "市气象局雨量补录 upsert 第" + ((i / batchSize) + 1) + "/" + batches + "批报错：" + e.getMessage(),
+                                filePathName, "SWZZServiceYL_BL");
+                        errors.add("批量更新第" + ((i / batchSize) + 1) + "批: " + e.getMessage());
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            new javalog().writelog(
+                    "市气象局雨量补录异常：" + e.getMessage(),
+                    filePathName, "SWZZServiceYL_BL");
+            errors.add("全局异常: " + e.getMessage());
+        }
+
+        new javalog().writelog(
+                "市气象局雨量补录完成：站点数="
+                        + (result.containsKey("stationCount") ? result.get("stationCount") : "?")
+                        + "，拉取=" + totalFetched + "，更新=" + totalAffected,
+                filePathName, "SWZZServiceYL_BL");
+
+        result.put("fetchedCount", totalFetched);
+        result.put("affectedCount", totalAffected);
+        result.put("stationCount", result.containsKey("stationCount") ? result.get("stationCount") : 0);
+        result.put("timeWindow", tm + " ~ " + etime);
         result.put("errors", errors);
         return result;
     }

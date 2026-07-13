@@ -90,4 +90,21 @@ public interface RTSQST_PPTN_RData {
      */
     Integer upsertAll(@Param("quPojo") List<ST_PPTN_RPojo> quPojo);
 
+    /**
+     * 批量更新（仅更新已存在的记录，不插入新记录）
+     * 用于补录同步：只覆盖已有 (STCD, TM) 的数据，不创建新记录
+     * @param quPojo 数据列表
+     * @return 受影响行数
+     */
+    Integer updatePptnBatch(@Param("quPojo") List<ST_PPTN_RPojo> quPojo);
+
+    /**
+     * 从 SL323 源查询雨量数据（无 top 限制，用于补录场景避免数据截断）
+     */
+    List<ST_PPTN_RPojo> selectListSL323NoLimit(
+        @Param(value = "stcdList") List<String> stcdList,
+        @Param(value = "stime") String stime,
+        @Param(value = "etime") String etime
+    );
+
 }

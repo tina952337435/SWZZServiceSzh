@@ -346,4 +346,31 @@
         ORDER BY
         t.FTM;
     </select>
+
+    <select id="selectListByID" resultType="swzzmodeserver.workserver.pojo.swzzqxsj.Tz_watersheddataPojo">
+        select a.* from "tz_watersheddata" a
+        <where>
+            <if test="idList != null and idList.size() > 0">
+                and KEYID in
+                <foreach collection="idList" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="key != null and key != ''">
+                and FPDR = #{key}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and RLSTM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and RLSTM <= #{etime} ]]>
+            </if>
+            <if test="type != null and type.size() > 0">
+                and TYPE in
+                <foreach collection="type" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
 </mapper>

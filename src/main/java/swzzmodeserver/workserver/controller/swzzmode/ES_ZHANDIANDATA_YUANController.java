@@ -32,7 +32,7 @@ public class ES_ZHANDIANDATA_YUANController {
     public ResultUtils findResult(@RequestBody ParamField bpPojo) {
         StopWatch watch = new StopWatch();
         watch.start();
-        String ID = "", key = "", pageindex = "", pagesize = "10", soid = "", startdate = "", enddate = "";
+        String soid = "";
         List<String> type = new ArrayList<>();
         String stime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date().getTime() - 24 * 60 * 60 * 1000),
                 etime = "";
@@ -40,42 +40,13 @@ public class ES_ZHANDIANDATA_YUANController {
             watch.stop();
             return new ResultUtils<>(null, "存在非法字符", false, -1, watch.getTime());
         }
-        if (null != bpPojo.getStcd()) {
-            ID = bpPojo.getStcd();
-        }
-        if (null != bpPojo.getKwtxt()) {
-            key = bpPojo.getKwtxt();
-        }
-        if (null != bpPojo.getStartdate()) {
-            stime = bpPojo.getStartdate();
-        }
-        if (null != bpPojo.getEnddate()) {
-            etime = bpPojo.getEnddate();
-        }
         if (null != bpPojo.getPattem()) {
             type = Arrays.asList(bpPojo.getPattem().split(","));
-        }
-        if (null != bpPojo.getPageindex()) {
-            pageindex = bpPojo.getPageindex();
-        }
-        if (null != bpPojo.getPagesize()) {
-            pagesize = bpPojo.getPagesize();
         }
         if (null != bpPojo.getStrExp()) {
             soid = bpPojo.getStrExp();
         }
-        if (null != bpPojo.getStartdate()) {
-            startdate = bpPojo.getStartdate();
-        }
-        if (null != bpPojo.getEnddate()) {
-            enddate = bpPojo.getEnddate();
-        }
-        Integer startindex = null;
-        if (!"".equals(pageindex) && !"".equals(pagesize)) {
-            startindex = (Integer.parseInt(pageindex) - 1) * Integer.parseInt(pagesize);
-        }
-        List<ES_ZHANDIANDATA_YUANPojo> fxList = data.selectList(ID, startindex, Integer.valueOf(pagesize), soid, type,
-                startdate, enddate);
+        List<ES_ZHANDIANDATA_YUANPojo> fxList = data.selectList(soid, type);
         watch.stop();
         if (fxList.size() > 0) {
             return new ResultUtils<>(fxList, "操作成功", true, fxList.size(), watch.getTime());

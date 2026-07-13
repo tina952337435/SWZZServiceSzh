@@ -1719,6 +1719,28 @@ public class GetWaterViewNewController {
         }
     }
 
+    /**
+     * 市气象局雨量补录同步接口
+     * 每3分钟由外部定时器调用，查询所有市气象局站点指定时间段的雨量数据
+     * 仅更新已存在的 (STCD, TM) 记录，不插入新记录
+     *
+     * @param stime 基准时间（查询窗口结束时间），不传则取当前时间，格式 yyyy-MM-dd HH:mm:ss
+     * @param hours 往前回看小时数，默认 4
+     */
+    @RequestMapping("/syncRecentPptnQixiang")
+    public ResultUtils syncRecentPptnQixiang(
+            @RequestParam(required = false) String stime,
+            @RequestParam(required = false, defaultValue = "4") int hours) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        new javalog().writelog("进入市气象局雨量补录同步接口：stime=" + stime + ", hours=" + hours,
+                templatefilepath, "SWZZServiceYL_BL");
+        Map<String, Object> resultMap = tongbuServer.syncRecentPptnQixiang(stime, hours);
+        watch.stop();
+        int fetchedCount = (int) resultMap.getOrDefault("fetchedCount", 0);
+        return new ResultUtils<>(resultMap, "补录同步完成", true, fetchedCount, watch.getTime());
+    }
+
     @RequestMapping("/selectListByHisYB")
     public ResultUtils selectListByHisYB(@RequestBody ColumnName param) {
         StopWatch watch = new StopWatch();

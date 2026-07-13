@@ -86,4 +86,19 @@
     <delete id="deleteOne">
         delete from "tz_watershed" where KEYID = #{ID}
     </delete>
+
+    <select id="selectListByID" resultType="swzzmodeserver.workserver.pojo.swzzqxsj.Tz_watershedPojo">
+        select a.* from "tz_watershed" a
+        <where>
+            <if test="idList != null and idList.size() > 0">
+                and KEYID in
+                <foreach collection="idList" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="key != null and key != ''">
+                and NAME like concat('%',concat(#{key},'%'))
+            </if>
+        </where>
+    </select>
 </mapper>
