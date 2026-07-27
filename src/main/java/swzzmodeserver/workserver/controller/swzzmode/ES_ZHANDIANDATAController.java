@@ -628,50 +628,6 @@ public class ES_ZHANDIANDATAController {
         }
     }
 
-    /**
-     * 优化版 MODIFY_MODEZHANDData - 使用 HashMap 预索引解决 O(n³) 性能问题
-     */
-    @RequestMapping("/MODIFY_MODEZHANDDataNew")
-    public ResultUtils MODIFY_MODEZHANDDataNew(@RequestBody ParamFields bpPojo) {
-        StopWatch watch = new StopWatch();
-        watch.start();
-        String startdate = "", enddate = "", solutionid = "0",
-                jydatatype = "SK", gcdatatype = "", scwdatatype = "", username = "";
-        if (CommonUtills.isEmpty(FieldIsValid.getColumnName(bpPojo, ParamFields.class))) {
-            watch.stop();
-            return new ResultUtils<>(null, "存在非法字符", false, -1, watch.getTime());
-        }
-        if (null != bpPojo.getStartdate()) {
-            startdate = bpPojo.getStartdate();
-        }
-        if (null != bpPojo.getEnddate()) {
-            enddate = bpPojo.getEnddate();
-        }
-        if (null != bpPojo.getSolutionid()) {
-            solutionid = bpPojo.getSolutionid();
-        }
-        if (null != bpPojo.getJydatatype()) {
-            jydatatype = bpPojo.getJydatatype();
-        }
-        if (null != bpPojo.getGcdatatype()) {
-            gcdatatype = bpPojo.getGcdatatype();
-        }
-        if (null != bpPojo.getScwdatatype()) {
-            scwdatatype = bpPojo.getScwdatatype();
-        }
-        if (null != bpPojo.getUsername()) {
-            username = bpPojo.getUsername();
-        }
-        Integer num = service.MODIFY_MODEZHANDDataNew(startdate, enddate, solutionid, jydatatype, gcdatatype,
-                scwdatatype, username);
-        watch.stop();
-        if (num > 0) {
-            return new ResultUtils<>(num, "操作成功", true, num, watch.getTime());
-        } else {
-            return new ResultUtils<>(num, "操作成功", false, num, watch.getTime());
-        }
-    }
-
     @RequestMapping("/YBSHUIWEI")
     public ResultUtils YBSHUIWEI(@RequestBody ParamFields bpPojo) {
         StopWatch watch = new StopWatch();
@@ -1057,4 +1013,43 @@ public class ES_ZHANDIANDATAController {
             return new ResultUtils<>(num, "操作成功", false, num, watch.getTime());
         }
     }
+
+    @RequestMapping("/BigModeLineardifference")
+    public ResultUtils BigModeLineardifference(@RequestBody ParamFields bpPojo) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        String type = "", solutionid = "0", stcd = "", startDate = "", endDate = "";
+
+        List<ES_ZHANDIANDATAPojo> dataList = new ArrayList<>();
+        if (CommonUtills.isEmpty(FieldIsValid.getColumnName(bpPojo, ParamFields.class))) {
+            watch.stop();
+            return new ResultUtils<>(null, "存在非法字符", false, -1, watch.getTime());
+        }
+        if (null != bpPojo.getType()) {
+            type = bpPojo.getType();
+        }
+        if (null != bpPojo.getSolutionid()) {
+            solutionid = bpPojo.getSolutionid();
+        }
+        if (null != bpPojo.getStcd()) {
+            stcd = bpPojo.getStcd();
+        }
+        if (null != bpPojo.getListMode()) {
+            dataList = bpPojo.getListMode();
+        }
+        if (null != bpPojo.getStartdate()) {
+            startDate = bpPojo.getStartdate();
+        }
+        if (null != bpPojo.getEnddate()) {
+            endDate = bpPojo.getEnddate();
+        }
+        Integer num = service.BigModeLineardifference(solutionid, stcd, startDate, endDate);
+        watch.stop();
+        if (num > 0) {
+            return new ResultUtils<>(num, "操作成功", true, num, watch.getTime());
+        } else {
+            return new ResultUtils<>(num, "操作成功", false, num, watch.getTime());
+        }
+    }
+
 }

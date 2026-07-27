@@ -97,6 +97,21 @@ public class SqkbReportPojo {
         private Double drp; // 降雨量
     }
 
+    /** 各站水位涨幅明细 */
+    private List<WaterLevelStationPojo> waterLevelStationList;
+
+    @Data
+    public static class WaterLevelStationPojo {
+        private String stnm;        // 站名
+        private Double change;      // 最大涨幅(m)
+        private Double maxLevel;    // 最高水位(m)
+        private String maxTm;       // 最高水位出现时间
+        private Double minLevel;    // 最高之前最低水位(m)
+        private String minTm;       // 最低水位出现时间
+        private String slp;         // 所属水利片
+        private Double wrz;         // 警戒水位
+    }
+
     private String docDate; // 日期
 
     private boolean record;

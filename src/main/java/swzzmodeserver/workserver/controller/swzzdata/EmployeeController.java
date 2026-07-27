@@ -181,6 +181,22 @@ public class EmployeeController {
         }
         watch.stop();
         if(pojoList.size() > 0){
+            try{
+                Date date = new Date(System.currentTimeMillis());
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String str = sdf.format(date);
+                Sys_logPojo pojo = new Sys_logPojo();
+                pojo.setEMP_ID(CommonUtills.getUUid());
+                pojo.setLOGO_DATE(str);
+                pojo.setEMP_NAME(pojoList.get(0).getNAME());
+                pojo.setSTATUS("登录成功");
+                pojo.setNAME(pojoList.get(0).getQX_LOGIN());
+                pojo.setFLAG("平台");
+                logData.insertOne(pojo);
+            }catch(Exception e){
+                
+            }
+            
             // System.out.print("name"+name+":password"+password+"\n");
             // System.out.print("pojoList"+pojoList);
             String ps = pojoList.get(0).getQX_PASSWORD();//加密

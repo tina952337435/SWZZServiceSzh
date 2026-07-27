@@ -113,6 +113,7 @@
                 <![CDATA[ and "TIME" <= to_date('${etime}','YYYY-MM-DD HH24:MI:SS') ]]>
             </if>
         </where>
-        <!-- order by "TIME" asc -->
+        <!-- and ROWNUM &lt;= 2000 -->
+        order by "TIME" asc
     </select>
 </mapper>

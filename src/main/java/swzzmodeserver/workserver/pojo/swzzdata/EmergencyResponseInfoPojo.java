@@ -62,4 +62,15 @@ public class EmergencyResponseInfoPojo {
      * QXTYJ_DATE: 气象预警时间 (日期时间型)
      */
     private String QXTYJ_DATE;
+
+    /**
+     * DEPTWX: 响应区域
+     */
+    private String DEPTWX;
+
+    /**
+     * 区响应发布单位
+     */
+    private String XY_DW;
+    
 }

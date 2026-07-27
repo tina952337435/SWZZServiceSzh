@@ -32,6 +32,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class HuishuiApiService {
@@ -400,19 +401,11 @@ public class HuishuiApiService {
         return result;
     }
 
-    // 获取模型任务状态GetTaskStatus
+    // 获取模型任务状态GetTaskStatus：0、计算中；1、计算完成；-1、计算不下去，模型报错了
     public int modelGetTaskStatus(String taskID) {
         int Status = 0;
-        String parmasMap = "{\"version\": 1,\"taskID\":\"" + taskID + "\",\"api\": \"GetTaskStatus\"}";
-        HashMap<String, Object> header = new HashMap<>();
-        header.put("Content-Type", "application/json;charset=UTF-8");
-        String result = apihelper.apipost(HuishuiApi, parmasMap, header);
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> mapList = new HashMap<>();
-        List<Map<String, Object>> dataList = new ArrayList<>();
         try {
-            mapList = objectMapper.readValue(result, new TypeReference<Map<String, Object>>() {
-            });
+            Map<String, Object> mapList = GetTaskStatus(taskID);
             Map<String, Object> info = (Map<String, Object>) mapList.get("info");
             Boolean success = (Boolean) info.get("success");
             if (!success) {// 调用接口成功
@@ -427,15 +420,30 @@ public class HuishuiApiService {
                     }
                 }
             } else {
-                System.out.println("模型计算完成：" + result);
                 // ****************************************************************保存结果
                 Status = 1;
             }
-        } catch (IOException e) {
-            System.out.println("调用" + parmasMap + "接口报错,接口返回结果是：" + result);
+        } catch (Exception e) {
         }
         return Status;
     }
+
+    //获取模型任务状态GetTaskStatus
+    public Map<String, Object>  GetTaskStatus(String taskID) {
+        String parmasMap = "{\"version\": 1,\"taskID\":\"" + taskID + "\",\"api\": \"GetTaskStatus\"}";
+        HashMap<String, Object> header = new HashMap<>();
+        header.put("Content-Type", "application/json;charset=UTF-8");
+        String result = apihelper.apipost(HuishuiApi, parmasMap, header);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> mapList = new HashMap<>();
+        try {
+            mapList = objectMapper.readValue(result, new TypeReference<Map<String, Object>>() {});
+        } catch (IOException e) {
+            System.out.println("调用" + parmasMap + "接口报错,接口返回结果是：" + result);
+        }
+        return mapList;
+    }
+
 
     // 计算完成之后保存计算结果
     public int onResultOk(String _dd_id, String stime, String etime, String taskID, String DD_DISTRIBY) {
@@ -798,11 +806,12 @@ public class HuishuiApiService {
                                     } else {
                                         zhanPojo.setCZ(null); // 或者设置默认值 0.0
                                     }
-                                    listZhan.add(zhanPojo);
-
-                                    newFa_name += scheduleObjsArray.getString(j) + ",";
+                                    listZhan.add(zhanPojo);                                    
                                 }
-
+                                newFa_name = IntStream.range(0, scheduleObjsArray.size())
+                                            .mapToObj(scheduleObjsArray::getString)
+                                            .collect(Collectors.joining(","));
+                                
                                 double maxDrp = 0;
                                 if (planName.equals("日常调度")) {
                                     maxDrp = 50;
@@ -1037,9 +1046,9 @@ public class HuishuiApiService {
                 }
             } catch (IOException e) {
                 System.out.println("调用" + parmasMap + "接口报错,接口返回结果是：" + result);
+                new javalog().writelog("调用" + parmasMap + "接口报错,接口返回结果是：" + result, filePathName);
             }
         }
         return listGetAreaXSLPojo;
     }
-
 }

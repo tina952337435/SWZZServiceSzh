@@ -15,7 +15,6 @@ import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.labels.ItemLabelAnchor;
 import org.jfree.chart.labels.ItemLabelPosition;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
-import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PlotOrientation;
@@ -25,6 +24,7 @@ import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.ui.TextAnchor;
+import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.time.Millisecond;
@@ -210,18 +210,16 @@ public class SqkbChartUtils {
                 rainValues[i] = drp;
 
                 String tm = record.get("tm") != null ? record.get("tm").toString() : "";
-                // 格式化 X 轴标签：如 "05日14时"
                 String day = tm.substring(8, 10);
                 String hour = tm.substring(11, 13);
-                if(i == 0){
-                    timeLabels[i] = day + "日" + hour + "时";
-                }
-                else{                        
+                if (i == 0 || "00".equals(hour)) {
+                    timeLabels[i] = day + "日\n" + hour + "时";
+                } else {
                     timeLabels[i] = hour;
                 }
             }
 
-            // 3. 创建数据集（图例已关闭，"降雨量(mm)"移至横坐标结尾）
+            // 3. 创建数据集
             DefaultCategoryDataset dataset = new DefaultCategoryDataset();
             for (int i = 0; i < hourlyData.size(); i++) {
                 dataset.addValue(rainValues[i], "", timeLabels[i]);
@@ -251,65 +249,64 @@ public class SqkbChartUtils {
             CategoryPlot plot = chart.getCategoryPlot();
 
             // 7. 背景设置
-            plot.setBackgroundPaint(Color.WHITE); // 绘图区纯白
-            plot.setOutlineVisible(false);        // 去掉绘图区边框
+            plot.setBackgroundPaint(Color.WHITE);
+            plot.setOutlineVisible(false);
 
-            // 8. 柱子渲染器设置（关键：消除白边和阴影）
+            // 8. 柱子渲染器设置
             BarRenderer renderer = (BarRenderer) plot.getRenderer();
-            renderer.setSeriesPaint(0, new Color(34, 145, 34)); // 设置柱子颜色 #229122
-            renderer.setDrawBarOutline(false);      // 不绘制柱子边框
-            renderer.setShadowVisible(false);       // 不绘制阴影
-            renderer.setBarPainter(new StandardBarPainter()); // 关键：使用标准画家消除渐变白边
-
-            // 9. 数据标签设置（柱子顶部的数字）
+            renderer.setSeriesPaint(0, new Color(34, 145, 34));
+            renderer.setDrawBarOutline(false);
+            renderer.setShadowVisible(false);
+            renderer.setBarPainter(new StandardBarPainter());
             renderer.setDefaultItemLabelsVisible(true);
-            renderer.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator("{2}", new DecimalFormat("0.0")));
+            renderer.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator("{2}", new DecimalFormat("0.0")) {
+                @Override
+                public String generateLabel(CategoryDataset dataset, int row, int column) {
+                    Number v = dataset.getValue(row, column);
+                    if (v != null && v.doubleValue() <= 0) return "";
+                    return super.generateLabel(dataset, row, column);
+                }
+            });
             renderer.setDefaultItemLabelPaint(Color.BLACK);
-            renderer.setDefaultItemLabelFont(new Font("宋体", Font.PLAIN, 10));
-            // 标签位置：柱子正上方居中
+            renderer.setDefaultItemLabelFont(new Font("宋体", Font.PLAIN, 14));
             renderer.setDefaultPositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BOTTOM_CENTER));
 
-            // 10. Y 轴设置（数值轴）
+            // 9. Y 轴设置
             NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-            yAxis.setLabel("降雨量(mm)"); // 纵坐标顶部显示单位
-            yAxis.setLabelFont(new Font("宋体", Font.PLAIN, 12));
-            yAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 12));
-
-            // Y 轴刻度设置
+            yAxis.setLabel("降雨量(mm)");
+            yAxis.setLabelFont(new Font("宋体", Font.PLAIN, 14));
+            yAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 14));
             yAxis.setTickMarkPaint(Color.BLACK);
             yAxis.setAxisLinePaint(Color.BLACK);
-            yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits()); // 自动整数刻度，或者手动设置
+            yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-            // 动态设置 Y 轴最大值，留出 20% 空间给标签
             double maxVal = Arrays.stream(rainValues).max().orElse(10.0);
             double upperMargin = maxVal * 0.2;
-            if (upperMargin < 2) upperMargin = 2; // 至少留点空隙
+            if (upperMargin < 2) upperMargin = 2;
             yAxis.setRange(0, maxVal + upperMargin);
 
-            // 11. 网格线设置（水平虚线）
+            // 10. 网格线设置
             plot.setRangeGridlinesVisible(true);
-            plot.setRangeGridlinePaint(new Color(200, 200, 200)); // 浅灰色
-            plot.setRangeGridlineStroke(new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, new float[]{2.0f, 4.0f}, 0.0f));
+            plot.setRangeGridlinePaint(new Color(200, 200, 200));
+            plot.setRangeGridlineStroke(new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                    1.0f, new float[]{2.0f, 4.0f}, 0.0f));
 
-            // 12. X 轴设置（分类轴）
+            // 11. X 轴设置
             CategoryAxis xAxis = plot.getDomainAxis();
-            xAxis.setLabelFont(new Font("宋体", Font.PLAIN, 12));
-            xAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 11));
+            xAxis.setLabelFont(new Font("宋体", Font.PLAIN, 14));
+            xAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 14));
             xAxis.setAxisLinePaint(Color.BLACK);
             xAxis.setTickMarkPaint(Color.BLACK);
-
-            // 横坐标标签始终水平显示（24个小时全部显示）
             xAxis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);
-            // 增大标签宽度比率，防止长标签被截断为省略号
+            xAxis.setMaximumCategoryLabelLines(2);
             xAxis.setMaximumCategoryLabelWidthRatio(3.0f);
-            // 增加左右边距，防止首尾标签被裁剪（首个标签"X日X时"较长）
             xAxis.setLowerMargin(0.04);
             xAxis.setUpperMargin(0.02);
 
             // 13. 整体背景（图表边框区域）
             chart.setBackgroundPaint(Color.WHITE); // 纯白背景
 
-            // 14. 保存文件
+            // 12. 保存文件
             BufferedImage image = chart.createBufferedImage(900, 500);
             File file = new File(savePath);
             File parentDir = file.getParentFile();
@@ -343,7 +340,7 @@ public class SqkbChartUtils {
      * @param saveDir 保存目录
      * @return 图片路径
      */
-    public static String generateRainLevelPieChart(Map<String, Integer> rainLevels, String saveDir) {
+    public static String generateRainLevelPieChart(Map<String, Integer> rainLevels, String saveDir, int totalStations) {
         try {
             StandardChartTheme theme = new StandardChartTheme("CN");
             theme.setLargeFont(new Font("宋体", Font.BOLD, 14));
@@ -352,11 +349,10 @@ public class SqkbChartUtils {
             ChartFactory.setChartTheme(theme);
 
             DefaultPieDataset dataset = new DefaultPieDataset();
-            int total = 0;
+            // 只加入有数据的等级
             for (Map.Entry<String, Integer> entry : rainLevels.entrySet()) {
                 if (entry.getValue() > 0) {
                     dataset.setValue(entry.getKey(), entry.getValue());
-                    total += entry.getValue();
                 }
             }
 
@@ -368,20 +364,35 @@ public class SqkbChartUtils {
                     false
             );
 
+            final int total = totalStations > 0 ? totalStations : 1;
             PiePlot plot = (PiePlot) chart.getPlot();
             // 1. 设置 Plot 区域背景为白色（修复灰色背景的关键）
             plot.setBackgroundPaint(Color.WHITE);
             plot.setOutlineVisible(false);
-            plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0}({1}) {2}", new DecimalFormat("0"), new DecimalFormat("0.00%")));
+            // 自定义标签生成器：百分比统一用 totalStations 做分母
+            plot.setLabelGenerator(new org.jfree.chart.labels.PieSectionLabelGenerator() {
+                public String generateSectionLabel(org.jfree.data.general.PieDataset dataset,
+                        Comparable key) {
+                    Number value = dataset.getValue(key);
+                    if (value == null) value = 0;
+                    int v = value.intValue();
+                    double pct = v * 100.0 / total;
+                    return key + "(" + v + ") " + String.format("%.2f%%", pct);
+                }
+                public java.text.AttributedString generateAttributedSectionLabel(
+                        org.jfree.data.general.PieDataset dataset, Comparable key) {
+                    return null;
+                }
+            });
 
             // 设置饼图颜色
             Color[] colors = {
-                    new Color(166,242,142),   // 小雨 - 黄绿色
-                    new Color(0,123,0),   // 中雨 - 深天蓝
-                    new Color(61,188,249),  // 大雨 - 皇家蓝
-                    new Color(0,0,249),   // 暴雨 - 深红色
-                    new Color(251,61,250),  // 大暴雨 - 蓝紫色
-                    new Color(123,0,0)    // 特大暴雨 - 橙色
+                    new Color(166,242,142),   // 小雨
+                    new Color(0,123,0),       // 中雨
+                    new Color(61,188,249),    // 大雨
+                    new Color(0,0,249),       // 暴雨
+                    new Color(251,61,250),    // 大暴雨
+                    new Color(123,0,0)        // 特大暴雨
             };
 
             int i = 0;
@@ -393,6 +404,12 @@ public class SqkbChartUtils {
 
             // 设置背景白色
             chart.setBackgroundPaint(Color.WHITE);
+
+            // 扇区标签和图例字号
+            plot.setLabelFont(new Font("宋体", Font.PLAIN, 14));
+            if (chart.getLegend() != null) {
+                chart.getLegend().setItemFont(new Font("宋体", Font.PLAIN, 14));
+            }
 
             BufferedImage image = chart.createBufferedImage(800, 500);
             String fileName = "rain_level_pie_" + System.currentTimeMillis() + ".png";
@@ -434,7 +451,11 @@ public class SqkbChartUtils {
             areaRainMap.entrySet().stream()
                     .filter(entry -> !"全市".equals(entry.getKey()))
                     .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
-                    .forEach(entry -> dataset.addValue(entry.getValue(), "雨量(mm)", entry.getKey()));
+                    .forEach(entry -> {
+                        String label = entry.getKey();
+                        if ("中心城区".equals(label)) label = "中心\n城区";
+                        dataset.addValue(entry.getValue(), "雨量(mm)", label);
+                    });
 
             // 3. 创建图表
             JFreeChart chart = ChartFactory.createBarChart(
@@ -475,6 +496,7 @@ public class SqkbChartUtils {
             renderer.setDrawBarOutline(false); // 不绘制柱子边框
             renderer.setShadowVisible(false);  // 关闭阴影
             renderer.setBarPainter(new StandardBarPainter()); // 消除渐变效果
+            renderer.setDefaultItemLabelFont(new Font("宋体", Font.PLAIN, 14));
 
             // 7. 设置数值标签（在柱子正上方）
             renderer.setDefaultItemLabelsVisible(true);
@@ -490,6 +512,8 @@ public class SqkbChartUtils {
             rangeAxis.setTickMarkPaint(Color.BLACK); // 刻度线黑色
             rangeAxis.setAxisLinePaint(Color.BLACK); // 轴线黑色
             rangeAxis.setLowerBound(0); // 从0开始
+            rangeAxis.setLabelFont(new Font("宋体", Font.PLAIN, 14));
+            rangeAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 14));
 
             // 动态调整Y轴最大值
             if (!areaRainMap.isEmpty()) {
@@ -503,7 +527,9 @@ public class SqkbChartUtils {
             CategoryAxis domainAxis = plot.getDomainAxis();
             domainAxis.setAxisLinePaint(Color.BLACK); // 轴线黑色
             domainAxis.setTickMarkPaint(Color.BLACK); // 刻度线黑色
-            domainAxis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD); // 标签水平
+            domainAxis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);
+            domainAxis.setMaximumCategoryLabelLines(2);
+            domainAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 14));
 
             // 10. 保存图片
             BufferedImage image = chart.createBufferedImage(900, 500);
@@ -553,9 +579,16 @@ public class SqkbChartUtils {
 
             Date lastDate = null; // 记录最后的时间点，用于标注
 
+            // 记录水位最小/最大值，用于动态设置Y轴范围
+            double waterMin = Double.MAX_VALUE;
+            double waterMax = Double.MIN_VALUE;
+
             for (Map<String, Object> record : waterDataList) {
                 String tmStr = record.get("tm") != null ? record.get("tm").toString() : "";
                 Double upz = record.get("upz") != null ? ((Number) record.get("upz")).doubleValue() : 0;
+
+                if (upz < waterMin) waterMin = upz;
+                if (upz > waterMax) waterMax = upz;
 
                 Date date = sdf.parse(tmStr);
                 lastDate = date; // 更新最后时间
@@ -594,11 +627,17 @@ public class SqkbChartUtils {
 
             // 设置副标题
             String subtitle = "开始时间：" + stime + " - 结束时间：" + etime;
-            chart.addSubtitle(new TextTitle(subtitle, new Font("宋体", Font.PLAIN, 12)));
+            chart.addSubtitle(new TextTitle(subtitle, new Font("宋体", Font.PLAIN, 14)));
 
             // 4. 获取 XYPlot 进行高级设置
             XYPlot plot = chart.getXYPlot();
             plot.setBackgroundPaint(Color.WHITE);
+
+            // 水平虚线网格
+            plot.setRangeGridlinesVisible(true);
+            plot.setRangeGridlinePaint(new Color(200, 200, 200));
+            plot.setRangeGridlineStroke(new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
+                    10.0f, new float[]{5.0f, 5.0f}, 0.0f));
 
             // 获取已有渲染器并设置线条样式
             XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
@@ -615,16 +654,26 @@ public class SqkbChartUtils {
                 renderer.setSeriesShapesVisible(1, false);
             }
 
-            // 5. Y轴设置
+            // 图例字号
+            if (chart.getLegend() != null) {
+                chart.getLegend().setItemFont(new Font("宋体", Font.PLAIN, 14));
+            }
+
+            // 5. Y轴设置：根据实际数据动态计算范围
             NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-            yAxis.setTickUnit(new NumberTickUnit(0.5)); // 刻度间隔0.5
-            yAxis.setRange(0, 7); // 你原来的逻辑是自动算最大值，这里为了演示写死或保留你的逻辑均可
-            // 如果需要保留自动计算最大值逻辑：
-            /*
-            double maxVal = waterDataList.stream().mapToDouble(r -> ((Number)r.get("upz")).doubleValue()).max().orElse(0);
-            maxVal = Math.max(maxVal, wrz != null ? wrz : 0);
-            yAxis.setRange(0, maxVal * 1.2);
-            */
+            yAxis.setTickUnit(new NumberTickUnit(0.5));
+            // 纳入警戒水位范围
+            if (wrz != null) {
+                waterMin = Math.min(waterMin, wrz);
+                waterMax = Math.max(waterMax, wrz);
+            }
+            // 下界向下取整到0.5，上界向上取整到1.0（间距不足0.5则再加1.0）
+            double yLower = Math.floor(waterMin / 0.5) * 0.5;
+            double yUpper = Math.ceil(waterMax / 1.0) * 1.0;
+            if (yUpper - waterMax < 0.5) yUpper += 1.0;
+            yAxis.setRange(yLower, yUpper);
+            yAxis.setLabelFont(new Font("宋体", Font.PLAIN, 14));
+            yAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 14));
 
             // 6. X轴设置（解决密集问题的核心代码）
             DateAxis xAxis = (DateAxis) plot.getDomainAxis();
@@ -638,6 +687,7 @@ public class SqkbChartUtils {
 
             // 设置日期格式（如果标签显示日期的话）
             xAxis.setDateFormatOverride(new SimpleDateFormat("dd HH:mm"));
+            xAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 14));
             // --- 核心设置结束 ---
 
             // 7. 添加文字标注（改为 XYTextAnnotation）
@@ -648,7 +698,7 @@ public class SqkbChartUtils {
 
                 if (wrz != null) {
                     XYTextAnnotation ann = new XYTextAnnotation("警戒水位", timeMillis + xOffset, wrz);
-                    ann.setFont(new Font("宋体", Font.PLAIN, 12));
+                    ann.setFont(new Font("宋体", Font.PLAIN, 14));
                     ann.setPaint(new Color(251, 90, 16));
                     ann.setTextAnchor(TextAnchor.CENTER_LEFT);
                     plot.addAnnotation(ann);

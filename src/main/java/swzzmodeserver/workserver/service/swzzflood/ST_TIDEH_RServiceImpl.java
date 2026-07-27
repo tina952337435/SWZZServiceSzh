@@ -22,7 +22,9 @@ import swzzmodeserver.workserver.pojo.swzzflood.ST_TIDE_RPojo;
 import swzzmodeserver.workserver.pojo.swzzmode.ST_HIGHLOWTIDE_RPojo;
 import swzzmodeserver.workserver.pojo.swzzmode.ST_STBPRP_B_STCDPojo;
 import swzzmodeserver.workserver.pojo.swzzqxsj.St_windyweater_rPojo;
+import swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo;
 import swzzmodeserver.workserver.pojo.swzzzjk.ST_TIDEHIGHParam;
+import swzzmodeserver.workserver.server.swzzrtsq.GetWaterViewNewServer;
 import swzzmodeserver.workserver.pojo.swzzflood.ST_WAS_RPojo;
 import swzzmodeserver.workserver.service.swzzmode.ES_ZHANDIANDATAServiceImpl;
 import swzzmodeserver.workserver.pojo.swzzwater.BP_DATAPojo;
@@ -53,6 +55,8 @@ public class ST_TIDEH_RServiceImpl implements ST_TIDEH_RService{
     private String templatefilepath;
     @Autowired
     private BP_DATAData bp_dataData;
+     @Autowired
+    private GetWaterViewNewServer server;
     @Override
     public List<ST_TIDEHIGHParam> WATER_ST_TIDE_RHTIDE(List<String> stcdList, String stime, String etime, String type) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -129,20 +133,21 @@ public class ST_TIDEH_RServiceImpl implements ST_TIDEH_RService{
     public List<ST_TIDEHIGHParam> WATER_ST_TIDE_RHTIDEHS(List<String> stcdList, String stime, String etime, String type) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         //List<ST_TIDE_RPojo> list = stTideRData.selectTideList(stcdList, stime, etime);
-        List<TB_TIDE_MEASUREDPojo> list = tbTideMeasuredData.selectList(stcdList, stime, etime);
-        list.sort(Comparator.comparing(TB_TIDE_MEASUREDPojo::getDt_time));
+        List<GetWaterViewNewPojo> list = server.selectListByHisIsTime(stcdList, stime, etime, null);
+        list.sort(Comparator.comparing(GetWaterViewNewPojo::getTM));
+
         List<ST_TIDEHIGHParam> listData = new ArrayList<>();
         List<ST_TIDEH_RPojo> listR = stTideRData.selectTideHList(stcdList, stime, etime);
         List<ST_TIDEHHL_RPojo> listHHL = stTidehhlRData.selectList(null, null, stime, etime, null, null, null).stream()
                 .filter(m -> stcdList.contains(m.getSTCD())).collect(Collectors.toList());
         Set<String> tmSet = new TreeSet<>();
-        for (TB_TIDE_MEASUREDPojo pojo : list){
-            tmSet.add(pojo.getDt_time());
+        for (GetWaterViewNewPojo pojo : list){
+            tmSet.add(pojo.getTM());
         }
         for(String stcd : stcdList){
-            List<TB_TIDE_MEASUREDPojo> listTemp = list.stream().filter(m -> m.getSt_stationid().replaceAll(" ","").equals(stcd)).collect(Collectors.toList());
+            List<GetWaterViewNewPojo> listTemp = list.stream().filter(m -> m.getSTCD().replaceAll(" ","").equals(stcd)).collect(Collectors.toList());
             tmSet.forEach(tm->{
-                List<TB_TIDE_MEASUREDPojo> listTempT = listTemp.stream().filter(m -> m.getDt_time().equals(tm)).collect(Collectors.toList());
+                List<GetWaterViewNewPojo> listTempT = listTemp.stream().filter(m -> m.getTM().equals(tm)).collect(Collectors.toList());
                 if(listTempT.size() > 0 ){
                     Date time = null;
                     try {
@@ -189,11 +194,11 @@ public class ST_TIDEH_RServiceImpl implements ST_TIDEH_RService{
                     }
                     ST_TIDEHIGHParam dto = new ST_TIDEHIGHParam();
                     dto.setSTCD(stcd);
-                    dto.setTDZ(String.valueOf(listTempT.get(0).getNm_watervalue()));
+                    dto.setTDZ(String.valueOf(listTempT.get(0).getUPZ()));
                     dto.setTM(tm);
                     if (isHTDZ){
                         dto.setHTDZ(String.valueOf(htdz));
-                        dto.setZTDZ(String.valueOf(listTempT.get(0).getNm_watervalue() - htdz));
+                        dto.setZTDZ(String.valueOf(Double.valueOf(listTempT.get(0).getUPZ()) - htdz));
                     }
                     listData.add(dto);
                 }

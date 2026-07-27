@@ -8,9 +8,13 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import swzzmodeserver.workserver.pojo.swzzrtsq.MaxRainResultPojo;
+import swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_BPojo;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -204,5 +208,166 @@ public class ST_PPTN_RServer {
             }
         }
         return pptnList;
+    }
+
+    /**
+     * 计算多时段最大滑动雨量
+     * @param rainData 雨量数据（仅DRP>0的记录，含STCD, TM, DRP）
+     * @param stationInfoList 站点基础信息（STCD, STNM, HNNM, LGTD, LTTD）
+     * @param stime 查询开始时间
+     * @param etime 查询结束时间
+     * @return MaxRainResultPojo
+     */
+    public MaxRainResultPojo calculateMaxSlidingRain(List<ST_PPTN_RPojo> rainData,
+                                                      List<ST_STBPRP_BPojo> stationInfoList,
+                                                      String stime, String etime) {
+        MaxRainResultPojo result = new MaxRainResultPojo();
+        List<MaxRainResultPojo.StationItem> stationItems = new ArrayList<>();
+
+        // 构建 STCD → 站点基础信息的 Map
+        Map<String, ST_STBPRP_BPojo> infoMap = new HashMap<>();
+        if (stationInfoList != null) {
+            for (ST_STBPRP_BPojo b : stationInfoList) {
+                if (b.getSTCD() != null) {
+                    infoMap.put(b.getSTCD(), b);
+                }
+            }
+        }
+
+        // 收集所有 STCD
+        Set<String> allStcds = new LinkedHashSet<>();
+        allStcds.addAll(infoMap.keySet());
+
+        // 按 STCD 分组，构建 (epoch → drp×10) 的 Map，用于快速查找
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Map<String, Map<Long, Long>> rainMap = new HashMap<>();
+        if (rainData != null) {
+            for (ST_PPTN_RPojo r : rainData) {
+                if (r.getSTCD() == null || r.getTM() == null || r.getDRP() == null) continue;
+                try {
+                    long epoch = sdf.parse(r.getTM()).getTime();
+                    long val = Math.round(r.getDRP() * 10.0);
+                    rainMap.computeIfAbsent(r.getSTCD(), k -> new HashMap<>()).put(epoch, val);
+                } catch (Exception ignored) {}
+            }
+        }
+
+        // 解析起止时间为 epoch
+        long stEpoch, etEpoch;
+        try {
+            stEpoch = sdf.parse(stime).getTime();
+            etEpoch = sdf.parse(etime).getTime();
+        } catch (Exception e) {
+            return result;
+        }
+        long gridStep = 5 * 60 * 1000L; // 5 分钟
+        int gridSize = (int) ((etEpoch - stEpoch) / gridStep) + 1;
+
+        long[] windowMs = {60L * 60 * 1000, 3L * 60 * 60 * 1000, 6L * 60 * 60 * 1000,
+                12L * 60 * 60 * 1000, 24L * 60 * 60 * 1000};
+
+        for (String stcd : allStcds) {
+            Map<Long, Long> stRain = rainMap.getOrDefault(stcd, Collections.emptyMap());
+
+            // 重建完整 5 分钟时间网格
+            long[] times = new long[gridSize];
+            long[] prefix = new long[gridSize + 1];
+            for (int i = 0; i < gridSize; i++) {
+                times[i] = stEpoch + i * gridStep;
+                Long v = stRain.get(times[i]);
+                long drpLong = (v != null) ? v : 0L;
+                prefix[i + 1] = prefix[i] + drpLong;
+            }
+
+            MaxRainResultPojo.StationItem item = new MaxRainResultPojo.StationItem();
+            item.setStcd(stcd);
+
+            ST_STBPRP_BPojo info = infoMap.get(stcd);
+            if (info != null) {
+                item.setStnm(info.getSTNM());
+                item.setHnnm(info.getHNNM());
+                item.setAddvnm(info.getADDVNM());
+                item.setLgtd(info.getLGTD());
+                item.setLttd(info.getLTTD());
+            }
+
+            // 单次遍历计算全部 5 个窗口
+            long[] maxSums = new long[5];
+            int[] maxLefts = new int[5];
+            int[] maxRights = new int[5];
+            int[] lefts = new int[5];
+
+            for (int right = 0; right < gridSize; right++) {
+                long tRight = times[right];
+                for (int w = 0; w < 5; w++) {
+                    while (lefts[w] < right && tRight - times[lefts[w]] >= windowMs[w]) {
+                        lefts[w]++;
+                    }
+                    long sum = prefix[right + 1] - prefix[lefts[w]];
+                    if (sum > maxSums[w]) {
+                        maxSums[w] = sum;
+                        maxLefts[w] = lefts[w];
+                        maxRights[w] = right;
+                    }
+                }
+            }
+
+            for (int w = 0; w < 5; w++) {
+                MaxRainResultPojo.WindowRainInfo win = new MaxRainResultPojo.WindowRainInfo();
+                win.setStcd(stcd);
+                win.setDrp(maxSums[w] / 10.0);
+                win.setStime(sdf.format(new Date(times[maxLefts[w]])));
+                win.setEtime(sdf.format(new Date(times[maxRights[w]])));
+                if (info != null) {
+                    win.setStnm(info.getSTNM());
+                }
+                setWindowField(item, w, win);
+            }
+
+            stationItems.add(item);
+        }
+
+        result.setStations(stationItems);
+
+        MaxRainResultPojo.Summary summary = new MaxRainResultPojo.Summary();
+        summary.setMax60min(findGlobalMax(stationItems, 0));
+        summary.setMax3h(findGlobalMax(stationItems, 1));
+        summary.setMax6h(findGlobalMax(stationItems, 2));
+        summary.setMax12h(findGlobalMax(stationItems, 3));
+        summary.setMax24h(findGlobalMax(stationItems, 4));
+        result.setSummary(summary);
+
+        return result;
+    }
+
+    private void setWindowField(MaxRainResultPojo.StationItem item, int w,
+                                 MaxRainResultPojo.WindowRainInfo win) {
+        switch (w) {
+            case 0: item.setMax60min(win); break;
+            case 1: item.setMax3h(win); break;
+            case 2: item.setMax6h(win); break;
+            case 3: item.setMax12h(win); break;
+            case 4: item.setMax24h(win); break;
+        }
+    }
+
+    private MaxRainResultPojo.WindowRainInfo findGlobalMax(List<MaxRainResultPojo.StationItem> items, int windowIndex) {
+        MaxRainResultPojo.WindowRainInfo best = null;
+        double maxDrp = -1;
+        for (MaxRainResultPojo.StationItem item : items) {
+            MaxRainResultPojo.WindowRainInfo win = null;
+            switch (windowIndex) {
+                case 0: win = item.getMax60min(); break;
+                case 1: win = item.getMax3h(); break;
+                case 2: win = item.getMax6h(); break;
+                case 3: win = item.getMax12h(); break;
+                case 4: win = item.getMax24h(); break;
+            }
+            if (win != null && win.getDrp() != null && win.getDrp() > maxDrp) {
+                maxDrp = win.getDrp();
+                best = win;
+            }
+        }
+        return best;
     }
 }

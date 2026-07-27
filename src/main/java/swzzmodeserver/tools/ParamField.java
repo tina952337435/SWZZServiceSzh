@@ -1,7 +1,11 @@
 package swzzmodeserver.tools;
 
 import lombok.Data;
+
+import java.util.List;
+
 import org.springframework.stereotype.Component;
+import swzzmodeserver.workserver.pojo.swzzmode.ES_JISUANZHANPojo;
 
 /**
  * 公共字段类
@@ -42,4 +46,8 @@ public class ParamField {
     private String EQPTP;
     private String name;
     private String sttp;
+    private Integer hour;
+    private List<ES_JISUANZHANPojo> ddList;
+    private String dd_id;
+    private String taskID;
 }

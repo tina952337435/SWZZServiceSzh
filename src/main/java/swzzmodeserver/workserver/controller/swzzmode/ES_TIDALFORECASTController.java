@@ -30,6 +30,8 @@ import swzzmodeserver.workserver.server.swzzrtsq.shuizhaServer;
 import swzzmodeserver.workserver.service.swzzmode.HuishuiApiService;
 import swzzmodeserver.workserver.data.swzzwater.WATERTB_TIDE_HIGHLOWData;
 
+// import static org.mockito.Answers.values;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -407,6 +409,7 @@ public class ES_TIDALFORECASTController {
         Integer num = 0;
         List<ES_TIDALFORECASTPojo> listFast = new ArrayList<>();
         List<ES_TIDALFORECASTPojo> list = new ArrayList<>();
+        Boolean isInsert = false;
         try {
             listFast = data.selectMaxFast(bpPojo.get(0).getSTCD(), null, null);
             if (listFast.size() > 0) {
@@ -421,43 +424,58 @@ public class ES_TIDALFORECASTController {
                     }
                 }).collect(Collectors.toList());
                 if (list.size() > 0) {
-                    num = data.insertALL(list);// 去掉重复的之后再放入库
-
-                    ES_TIDALFORECASTPojo pojoNew = listFast.get(0);
-                    pojoNew.setYBTM(bpPojo.get(0).getYBTM());
-                    list.add(0, pojoNew);
+                    List<Double> values = new ArrayList<>();
+                    // 带上已入库最后一条，确保新旧数据衔接处也被校验
+                    values.add(listFast.get(0).getTDZ());
+                    list.forEach(u -> {
+                        values.add(u.getTDZ());
+                    });
+                    // 核心：只判断合法/非法
+                    if (Boolean.FALSE.equals(ComputeHL.validateTideValues(values))) {//不是两高两低潮位数据，等等再同步
+                        isInsert = false;
+                        // 数据异常，处理掉
+                    } else {
+                        num = data.insertALL(list);// 去掉重复的之后再放入库
+                        ES_TIDALFORECASTPojo pojoNew = listFast.get(0);
+                        pojoNew.setYBTM(bpPojo.get(0).getYBTM());
+                        list.add(0, pojoNew);
+                        isInsert = true;
+                    }
 
                 }
             }
         } catch (Exception ex) {
         }
-        try {
-            if (list.size() > 0) {
-                // 余弦曲线插值：生成5分钟间隔的插值数据
-                List<ES_TIDALFORECASTGCPojo> interpolatedData = tideinterpolation.interpolateTideData(list, 5);
-                if (listFast.size() > 0) {
-                    if (!interpolatedData.isEmpty()) {
-                        interpolatedData.remove(0);
+        if (isInsert) {
+            try {
+                if (list.size() > 0) {
+                    // 余弦曲线插值：生成5分钟间隔的插值数据
+                    List<ES_TIDALFORECASTGCPojo> interpolatedData = tideinterpolation.interpolateTideData(list, 5);
+                    if (listFast.size() > 0) {
+                        if (!interpolatedData.isEmpty()) {
+                            interpolatedData.remove(0);
+                        }
                     }
+                    es_tidalforecastgcData.insertALL(interpolatedData);
                 }
-                es_tidalforecastgcData.insertALL(interpolatedData);
+            } catch (Exception ex) {
+                System.out.println("余弦曲线插值报错：" + ex.getMessage());
             }
-        } catch (Exception ex) {
-            System.out.println("余弦曲线插值报错：" + ex.getMessage());
-        }
-        try {
-            if (list.size() > 0) {
-                // 样条函数插值：成5分钟间隔的插值数据
-                List<ES_TIDALFORECASTGCPojo> interpolatedData2 = TideSplineInterpolator.interpolateTideData(list, 5);
-                if (listFast.size() > 0) {
-                    if (!interpolatedData2.isEmpty()) {
-                        interpolatedData2.remove(0);
+            try {
+                if (list.size() > 0) {
+                    // 样条函数插值：成5分钟间隔的插值数据
+                    List<ES_TIDALFORECASTGCPojo> interpolatedData2 = TideSplineInterpolator.interpolateTideData(list,
+                            5);
+                    if (listFast.size() > 0) {
+                        if (!interpolatedData2.isEmpty()) {
+                            interpolatedData2.remove(0);
+                        }
                     }
+                    es_tidalforecastgcData.insertALL(interpolatedData2);
                 }
-                es_tidalforecastgcData.insertALL(interpolatedData2);
+            } catch (Exception ex) {
+                System.out.println("样条函数插值报错：" + ex.getMessage());
             }
-        } catch (Exception ex) {
-            System.out.println("样条函数插值报错：" + ex.getMessage());
         }
         return num;
     }
@@ -572,13 +590,16 @@ public class ES_TIDALFORECASTController {
                         LocalDateTime truncatedToHour = now.truncatedTo(java.time.temporal.ChronoUnit.HOURS);
                         // 格式化输出
                         String maxYBTMString = truncatedToHour.format(formatter);// 计算依据时间
-                        String jydatatype = "temperatezone@shanghaiyb";
-                        String gcdatatype = "fangjiangliang";
-                        String scwdatatype = "temperatezone";
-                        int resultRows = huishuiApiService.startHuishuiJisuan(maxYBTMString, 24, jydatatype, gcdatatype,
-                                scwdatatype, "");
-                        if (resultRows > 0) {
-                            new javalog().writelog(maxYBTMString + "模型计算成功", filePathName);
+                        List<DD_SOLUTIONPojo> listDD = dd_solutionData.selectListByDD_IDandDD_status(null, null, null, maxYBTMString);
+                        if(listDD.size() ==0){//算过了就不算了                        
+                            String jydatatype = "temperatezone@shanghaiyb";
+                            String gcdatatype = "fangjiangliang";
+                            String scwdatatype = "temperatezone";
+                            int resultRows = huishuiApiService.startHuishuiJisuan(maxYBTMString, 24, jydatatype, gcdatatype,
+                                    scwdatatype, "");
+                            if (resultRows > 0) {
+                                new javalog().writelog(maxYBTMString + "模型计算成功", filePathName);
+                            }
                         }
                     }
                 } catch (Exception e) {

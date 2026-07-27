@@ -193,9 +193,14 @@ public class TideDataValidator {
         double peakScore = computePeakPeriodicityScore(values, timeHours);
         result.setPeakPeriodScore(peakScore);
 
+        // ---- 维度5: 余弦插值检测（惩罚项） ----
+        double cosinePenalty = computeCosineInterpolationPenalty(values, timeHours);
+        // 如果检测到余弦插值特征，施加惩罚：confidence *= (1 - 0.7 * cosinePenalty)
+        double cosineFactor = 1.0 - 0.7 * cosinePenalty;
+
         // ---- 综合评分 ----
-        double confidence = 0.15 * rangeScore + 0.15 * smoothScore
-                          + 0.40 * acResult.score + 0.30 * peakScore;
+        double confidence = (0.15 * rangeScore + 0.15 * smoothScore
+                          + 0.40 * acResult.score + 0.30 * peakScore) * cosineFactor;
         confidence = clamp(confidence, 0, 1);
         result.setConfidence(round(confidence));
 
@@ -203,10 +208,12 @@ public class TideDataValidator {
         result.setTideData(confidence >= CONFIDENCE_THRESHOLD);
 
         // ---- 汇总理由 ----
-        summarizeReasons(result, acResult);
+        summarizeReasons(result, acResult, cosinePenalty);
 
         // ---- 综合评语 ----
-        if (confidence >= 0.85) {
+        if (cosinePenalty > 0.5) {
+            result.setQualityAssessment("排除：数据疑似余弦插值生成，非真实潮位观测数据");
+        } else if (confidence >= 0.85) {
             result.setQualityAssessment("高度可信：数据呈现典型的潮汐特征");
         } else if (confidence >= CONFIDENCE_THRESHOLD) {
             result.setQualityAssessment("基本可信：数据具有潮汐的主要特征");
@@ -344,8 +351,16 @@ public class TideDataValidator {
         // Step 2: 计算均值和方差
         double mean = computeMean(detrended);
         double variance = computeVariance(detrended);
+        // 原始数据方差
+        double originalVariance = computeVariance(values);
         if (variance < 1e-8) {
             return result; // 无波动，不是周期性数据
+        }
+        // 去趋势后方差占比：若趋势解释了绝大部分波动（如线性涨水），剩余波动不足以判定为潮汐
+        double varianceRatio = variance / Math.max(originalVariance, 1e-8);
+        if (varianceRatio < 0.15) {
+            result.score = 0.05;
+            return result; // 波动几乎全部来自趋势，非周期性潮汐信号
         }
 
         // Step 3: 计算自相关
@@ -368,8 +383,9 @@ public class TideDataValidator {
             autocorr[lag] = (count > 0) ? sum / (count * variance) : 0;
         }
 
-        // Step 4: 在 [10h, 26h] 范围内寻找自相关峰值
-        int lagStart = (int) Math.ceil(10.0 / dt);
+        // Step 4: 在 [5h, 26h] 范围内寻找自相关绝对值的峰值
+        // 使用绝对值：潮位数据的强负相关（半周期处）和强正相关（整周期处）都是有效信号
+        int lagStart = (int) Math.ceil(5.0 / dt);
         int lagEnd   = (int) Math.floor(26.0 / dt);
         lagStart = Math.max(1, lagStart);
         lagEnd   = Math.min(maxLag, lagEnd);
@@ -378,33 +394,37 @@ public class TideDataValidator {
             return result;
         }
 
-        // 寻找自相关函数在目标区间的最大值
-        double maxAc = -1;
+        // 寻找 |autocorr| 在目标区间的局部极大值
+        double maxAbsAc = -1;
         int bestLag = -1;
+        double bestAc = 0;
         for (int lag = lagStart; lag <= lagEnd; lag++) {
-            // 必须是局部极大值（高于左右邻点）
+            double absAc = Math.abs(autocorr[lag]);
             boolean isLocalPeak = (lag > 0 && lag < maxLag)
-                && autocorr[lag] > autocorr[lag - 1]
-                && autocorr[lag] > autocorr[lag + 1];
+                && absAc > Math.abs(autocorr[lag - 1])
+                && absAc > Math.abs(autocorr[lag + 1]);
 
-            if (isLocalPeak && autocorr[lag] > maxAc) {
-                maxAc = autocorr[lag];
+            if (isLocalPeak && absAc > maxAbsAc) {
+                maxAbsAc = absAc;
                 bestLag = lag;
+                bestAc = autocorr[lag];
             }
         }
 
-        // 如果没找到局部峰值，取区间内的最大值
+        // 如果没找到局部峰值，取区间内 |ac| 的最大值
         if (bestLag < 0) {
             for (int lag = lagStart; lag <= lagEnd; lag++) {
-                if (autocorr[lag] > maxAc) {
-                    maxAc = autocorr[lag];
+                double absAc = Math.abs(autocorr[lag]);
+                if (absAc > maxAbsAc) {
+                    maxAbsAc = absAc;
                     bestLag = lag;
+                    bestAc = autocorr[lag];
                 }
             }
         }
 
-        if (bestLag < 0 || maxAc < AUTOCORR_SIGNIFICANCE) {
-            result.score = maxAc > 0.1 ? 0.2 : 0.05;
+        if (bestLag < 0 || maxAbsAc < AUTOCORR_SIGNIFICANCE) {
+            result.score = maxAbsAc > 0.1 ? 0.2 : 0.05;
             return result;
         }
 
@@ -412,11 +432,17 @@ public class TideDataValidator {
         double detectedPeriod = bestLag * dt;
         result.detectedPeriod = round(detectedPeriod);
 
+        // 如果是负相关峰，实际周期可能是 detectedPeriod * 2（半周期→整周期）
+        double checkPeriod = detectedPeriod;
+        if (bestAc < 0 && detectedPeriod < 18.0) {
+            checkPeriod = detectedPeriod * 2; // 半周期翻倍
+        }
+
         // 检查是否匹配半日潮或全日潮周期
-        double diffSemi = Math.abs(detectedPeriod - SEMIDIURNAL_PERIOD_H);
-        double diffDiur = Math.abs(detectedPeriod - DIURNAL_PERIOD_H);
-        double diffSemiDouble = Math.abs(detectedPeriod - SEMIDIURNAL_PERIOD_H * 2);
-        double diffDiurHalf   = Math.abs(detectedPeriod - DIURNAL_PERIOD_H / 2);
+        double diffSemi = Math.abs(checkPeriod - SEMIDIURNAL_PERIOD_H);
+        double diffDiur = Math.abs(checkPeriod - DIURNAL_PERIOD_H);
+        double diffSemiDouble = Math.abs(checkPeriod - SEMIDIURNAL_PERIOD_H * 2);
+        double diffDiurHalf   = Math.abs(checkPeriod - DIURNAL_PERIOD_H / 2);
 
         boolean matchesTidalPeriod = diffSemi <= PERIOD_TOLERANCE_H
                                   || diffDiur <= PERIOD_TOLERANCE_H
@@ -424,12 +450,10 @@ public class TideDataValidator {
                                   || diffDiurHalf <= PERIOD_TOLERANCE_H;
 
         if (matchesTidalPeriod) {
-            // 自相关值越高，周期越接近标准潮汐周期，得分越高
             double periodMatch = 1.0 - Math.min(diffSemi, Math.min(diffDiur,
                 Math.min(diffSemiDouble, diffDiurHalf))) / PERIOD_TOLERANCE_H;
-            result.score = clamp(0.6 + 0.4 * maxAc * periodMatch, 0, 1);
+            result.score = clamp(0.6 + 0.4 * maxAbsAc * periodMatch, 0, 1);
         } else {
-            // 有周期性但不匹配潮汐周期 — 可能是其他周期信号
             result.score = 0.25;
         }
 
@@ -452,13 +476,53 @@ public class TideDataValidator {
         int n = values.length;
         if (n < 6) return 0;
 
-        // 检测极值点（局部极大值 = 高潮，局部极小值 = 低潮）
+        // Step 1: 压缩平台 — 将相邻等值（差值 < 0.005）合并，消除潮位峰谷平台
+        // 保留每个平台的中点索引，以便后续周期计算
+        List<Integer> cIdx = new ArrayList<>(); // 压缩后的索引映射
+        cIdx.add(0);
+        for (int i = 1; i < n; i++) {
+            int last = cIdx.get(cIdx.size() - 1);
+            if (Math.abs(values[i] - values[last]) > 0.005) {
+                cIdx.add(i);
+            }
+        }
+        // 确保最后一个点也被包含
+        if (cIdx.get(cIdx.size() - 1) != n - 1) {
+            cIdx.set(cIdx.size() - 1, n - 1);
+        }
+
+        // Step 2: 在压缩后的序列上检测极值（严格不等比较，平台已被移除）
         List<Extremum> extrema = new ArrayList<>();
-        for (int i = 1; i < n - 1; i++) {
-            if (values[i] > values[i - 1] && values[i] > values[i + 1]) {
+        int m = cIdx.size();
+
+        // 检测边界极值：数据起点/终点也需检查
+        if (m >= 2) {
+            int i0 = cIdx.get(0), i1 = cIdx.get(1);
+            if (values[i0] > values[i1]) {
+                extrema.add(new Extremum(i0, timeHours[i0], values[i0], true));
+            } else if (values[i0] < values[i1]) {
+                extrema.add(new Extremum(i0, timeHours[i0], values[i0], false));
+            }
+        }
+
+        for (int k = 1; k < m - 1; k++) {
+            int i = cIdx.get(k);
+            int iPrev = cIdx.get(k - 1);
+            int iNext = cIdx.get(k + 1);
+            if (values[i] > values[iPrev] && values[i] > values[iNext]) {
                 extrema.add(new Extremum(i, timeHours[i], values[i], true));
-            } else if (values[i] < values[i - 1] && values[i] < values[i + 1]) {
+            } else if (values[i] < values[iPrev] && values[i] < values[iNext]) {
                 extrema.add(new Extremum(i, timeHours[i], values[i], false));
+            }
+        }
+
+        // 检测末尾极值
+        if (m >= 2) {
+            int iLast = cIdx.get(m - 1), iSecondLast = cIdx.get(m - 2);
+            if (values[iLast] > values[iSecondLast]) {
+                extrema.add(new Extremum(iLast, timeHours[iLast], values[iLast], true));
+            } else if (values[iLast] < values[iSecondLast]) {
+                extrema.add(new Extremum(iLast, timeHours[iLast], values[iLast], false));
             }
         }
 
@@ -511,6 +575,169 @@ public class TideDataValidator {
         }
 
         return clamp(0.5 * alternationScore + 0.5 * periodScore, 0, 1);
+    }
+
+    // ============================================================
+    //  维度5: 余弦插值检测（惩罚项）
+    // ============================================================
+
+    /**
+     * 检测数据是否由余弦插值生成。
+     *
+     * <p>原理：项目中的 {@code tideinterpolation.interpolateTideData()} 在两个极值点之间
+     * 使用余弦曲线插值。这种插值曲线与真实潮位数据的关键区别在于：
+     * <ul>
+     *   <li>余弦插值的谷值恰好位于两峰时间中点（完美对称）</li>
+     *   <li>余弦插值曲线与理想余弦的拟合度 R² 极高（> 0.999）</li>
+     *   <li>真实潮位存在涨落潮不对称性、谐波分量和观测噪声</li>
+     * </ul>
+     *
+     * <p>检测方法：
+     * <ol>
+     *   <li>找到所有极值点</li>
+     *   <li>逐段检查极值之间的曲线是否完美匹配余弦插值公式</li>
+     *   <li>如果各段余弦拟合残差极小 → 判定为余弦插值生成</li>
+     * </ol>
+     *
+     * @param values    潮位值序列
+     * @param timeHours 时间轴（小时）
+     * @return [0, 1] 惩罚系数，越高越可能是余弦插值数据
+     */
+    public static double computeCosineInterpolationPenalty(double[] values, double[] timeHours) {
+        int n = values.length;
+        if (n < 6) return 0;
+
+        // Step 1: 用与维度4相同的方式检测极值点（压缩平台后）
+        List<Integer> cIdx = new ArrayList<>();
+        cIdx.add(0);
+        for (int i = 1; i < n; i++) {
+            int last = cIdx.get(cIdx.size() - 1);
+            if (Math.abs(values[i] - values[last]) > 0.005) {
+                cIdx.add(i);
+            }
+        }
+        if (cIdx.get(cIdx.size() - 1) != n - 1) {
+            cIdx.set(cIdx.size() - 1, n - 1);
+        }
+
+        List<Extremum> extrema = new ArrayList<>();
+        int m = cIdx.size();
+
+        // 边界检测
+        if (m >= 2) {
+            int i0 = cIdx.get(0), i1 = cIdx.get(1);
+            if (values[i0] > values[i1]) {
+                extrema.add(new Extremum(i0, timeHours[i0], values[i0], true));
+            } else if (values[i0] < values[i1]) {
+                extrema.add(new Extremum(i0, timeHours[i0], values[i0], false));
+            }
+        }
+
+        for (int k = 1; k < m - 1; k++) {
+            int i = cIdx.get(k);
+            int iPrev = cIdx.get(k - 1);
+            int iNext = cIdx.get(k + 1);
+            if (values[i] > values[iPrev] && values[i] > values[iNext]) {
+                extrema.add(new Extremum(i, timeHours[i], values[i], true));
+            } else if (values[i] < values[iPrev] && values[i] < values[iNext]) {
+                extrema.add(new Extremum(i, timeHours[i], values[i], false));
+            }
+        }
+
+        if (m >= 2) {
+            int iLast = cIdx.get(m - 1), iSecondLast = cIdx.get(m - 2);
+            if (values[iLast] > values[iSecondLast]) {
+                extrema.add(new Extremum(iLast, timeHours[iLast], values[iLast], true));
+            } else if (values[iLast] < values[iSecondLast]) {
+                extrema.add(new Extremum(iLast, timeHours[iLast], values[iLast], false));
+            }
+        }
+
+        if (extrema.size() < 3) return 0;
+
+        // Step 2: 逐段检查余弦拟合质量
+        int segmentCount = 0;
+        double totalR2 = 0;
+        int perfectSegments = 0;
+
+        for (int e = 0; e < extrema.size() - 1; e++) {
+            Extremum start = extrema.get(e);
+            Extremum end = extrema.get(e + 1);
+            int iStart = start.index;
+            int iEnd = end.index;
+
+            if (iEnd - iStart < 3) continue; // 段太短，跳过
+
+            // 计算余弦插值的预测值
+            // 公式来自 tideinterpolation.interpolateTideData():
+            //   涨潮(z2>z1): level = z1 + (z2-z1) * (1 - cos(π*ratio)) / 2
+            //                     = (z1+z2)/2 - (z2-z1)/2 * cos(π*ratio)
+            //                     = mid - A * cos(π*ratio)
+            //   落潮(z1>z2): level = z2 + (z1-z2) * (1 + cos(π*ratio)) / 2
+            //                     = (z1+z2)/2 + (z1-z2)/2 * cos(π*ratio)
+            //                     = mid + B * cos(π*ratio)  其中 B=(z1-z2)/2 = -A
+            //                     = mid - A * cos(π*ratio)
+            // 统一公式: predicted = mid - A * cos(π * ratio)
+
+            double z1 = start.value;
+            double z2 = end.value;
+            double t1 = start.timeHours;
+            double t2 = end.timeHours;
+            double mid = (z1 + z2) / 2.0;
+            double A = (z2 - z1) / 2.0;
+
+            // 计算实际值与余弦预测之间的 R²
+            double ssRes = 0; // 残差平方和
+            double ssTot = 0; // 总平方和
+            double meanActual = 0;
+            int count = 0;
+
+            // 先算均值
+            for (int i = iStart; i <= iEnd; i++) {
+                meanActual += values[i];
+                count++;
+            }
+            meanActual /= count;
+
+            // 再算残差
+            for (int i = iStart; i <= iEnd; i++) {
+                double ratio = (timeHours[i] - t1) / (t2 - t1);
+                if (ratio < 0) ratio = 0;
+                if (ratio > 1) ratio = 1;
+                double predicted = mid - A * Math.cos(Math.PI * ratio);
+                double residual = values[i] - predicted;
+                ssRes += residual * residual;
+                ssTot += (values[i] - meanActual) * (values[i] - meanActual);
+            }
+
+            double r2 = ssTot > 1e-10 ? 1.0 - ssRes / ssTot : 1.0;
+            totalR2 += r2;
+            segmentCount++;
+
+            // R² > 0.997 → 高度匹配余弦插值曲线（真实潮位受谐波/噪声/不对称影响，很难超过此值）
+            if (r2 > 0.997) {
+                perfectSegments++;
+            }
+        }
+
+        if (segmentCount == 0) return 0;
+
+        double avgR2 = totalR2 / segmentCount;
+        double perfectRatio = (double) perfectSegments / segmentCount;
+
+        // Step 3: 综合判定——任一段完美匹配即高度可疑
+        double penalty;
+        if (perfectSegments >= 2 || (perfectSegments >= 1 && perfectRatio >= 0.5 && avgR2 > 0.99)) {
+            penalty = 1.0; // 多段或核心段完美匹配余弦 → 确定是余弦插值
+        } else if (perfectSegments >= 1 || (avgR2 > 0.99 && segmentCount >= 3)) {
+            penalty = 0.7; // 至少一段完美匹配或整体高度匹配
+        } else if (avgR2 > 0.98 && segmentCount >= 3) {
+            penalty = 0.4;
+        } else {
+            penalty = 0;
+        }
+
+        return penalty;
     }
 
     // ============================================================
@@ -588,7 +815,8 @@ public class TideDataValidator {
     //  结果汇总
     // ============================================================
 
-    private static void summarizeReasons(TideValidationResult result, AutocorrResult acResult) {
+    private static void summarizeReasons(TideValidationResult result, AutocorrResult acResult,
+                                          double cosinePenalty) {
         List<String> reasons = result.getReasons();
 
         if (result.getRangeScore() < 0.3) {
@@ -619,6 +847,12 @@ public class TideDataValidator {
             reasons.add("极值周期分析一般：极值点交替但周期不够稳定");
         } else {
             reasons.add("极值周期分析未通过：未检测到规律的高低潮交替");
+        }
+
+        if (cosinePenalty > 0.5) {
+            reasons.add("余弦插值检测：数据各段与余弦曲线完美匹配，疑似插值生成而非真实潮位观测");
+        } else if (cosinePenalty > 0.2) {
+            reasons.add("余弦插值检测：数据部分段与余弦曲线匹配度较高，可能含有插值段");
         }
     }
 

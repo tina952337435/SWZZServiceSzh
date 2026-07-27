@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -102,9 +103,21 @@ public class TongbuServer {
     @Value("${file.path.templatefilepath}")
     private String filePathName;
 
+    // 按 mtype+type 细粒度并发防护：同一数据源+同一数据类型不重复执行
+    private final ConcurrentHashMap<String, AtomicBoolean> syncRunningMap = new ConcurrentHashMap<>();
+
     // 同步总接口
     public Integer SyncData(String mtype, String type) {
+        // 组合键：数据源 + 数据类型，确保同一种同步任务不会重复执行
+        String lockKey = mtype + ":" + type;
+        AtomicBoolean running = syncRunningMap.computeIfAbsent(lockKey, k -> new AtomicBoolean(false));
+        if (!running.compareAndSet(false, true)) {
+            new javalog().writelog("SyncData 正在执行中，跳过本次调用: " + lockKey, filePathName);
+            System.out.println("SyncData 正在执行中，跳过本次调用: " + lockKey);
+            return 0;
+        }
         int rows = 0;
+        try {
         List<V_ST_STBPRP_BTZDto> listItemData = new ArrayList<>();
         List<String> typeList = Arrays.asList(type.split(","));
         switch (mtype) {
@@ -141,6 +154,9 @@ public class TongbuServer {
                 updateSt_gate_rNewAll();// 更新最新表
             default:
                 break;
+        }
+        } finally {
+            running.set(false);
         }
         return rows;
     }
@@ -210,7 +226,8 @@ public class TongbuServer {
                 }
 
                 new javalog().writelog(model.getStnm() + "站入库水位数据长度：" + rows, filePathName);
-            } else if (model.getType().equals("2"))// 雨量
+            } 
+            else if (model.getType().equals("2"))// 雨量
             {
                 new javalog().writelog("进入主服务SyncRealData接口，开始同步雨量数据：" + stcd, filePathName, "SWZZServiceYL");
                 List<ST_PPTN_RPojo> listPptn = new ArrayList<>();
@@ -728,7 +745,7 @@ public class TongbuServer {
     }
 
     // 遥测库5分钟雨量数据：修正后的
-    private List<ST_PPTN_RPojo> getRTSQ_5MINXZYL(List<String> stcdList, String stime, String etime, String stcd) {
+    public List<ST_PPTN_RPojo> getRTSQ_5MINXZYL(List<String> stcdList, String stime, String etime, String stcd) {
         List<ST_PPTN_RPojo> list = new ArrayList<>();
         // 取时间的整点
         // 1. 定义输入输出的格式
@@ -1085,45 +1102,82 @@ public class TongbuServer {
         return list;
     }
 
-    // 应急响应
+    // 应急响应：市级、区级都有
     public Integer SyncDataYJXY() {
         int count = 0;
         try {
+            //市级**************************************
             List<EmergencyResponseInfoPojo> list = new ArrayList<>();
-            List<EmergencyResponseInfoPojo> listNew = emergencyResponseInfoData.selectByTMNew(null, null);
-            String tm = tongbutm;
-            if (listNew != null && listNew.size() > 0) {
-                tm = listNew.get(0).getSTART_TIME();
-            }
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            LocalDateTime dateTime = LocalDateTime.parse(tm, formatter);
-            LocalDateTime newDateTime = dateTime.plusSeconds(30);// 加上30秒钟
-            String stime = newDateTime.format(outputFormatter);
-            String etime = newDateTime.plusDays(180).format(outputFormatter);// 加180天
-            List<Map<String, Object>> listMap = shuiwupingServer.getSJYJXY(1, 100000, stime, etime);
+            new javalog().writelog("【市级响应】开始并行同步**********",filePathName, "SWZZServiceResponse");
+            List<Map<String, Object>> listMap = shuiwupingServer.getSJYJXY_CURRENT();
+            new javalog().writelog("【市级响应】listMap长度：" + listMap.size(),filePathName, "SWZZServiceResponse");
             if (listMap.size() > 0) {
                 for (Map<String, Object> pojo : listMap) {
                     EmergencyResponseInfoPojo info = new EmergencyResponseInfoPojo();
                     info.setID(pojo.get("ID") == null ? null : pojo.get("ID").toString());
-                    info.setSTART_TIME(pojo.get("START_TIME") == null ? null : pojo.get("START_TIME").toString());
-                    info.setYJD_NUMBER(pojo.get("YJD_NUMBER") == null ? null : pojo.get("YJD_NUMBER").toString());
-                    info.setSIGNAL_STAGE(pojo.get("SIGNAL_STAGE") == null ? null : pojo.get("SIGNAL_STAGE").toString());
-                    info.setSIGNAL_LEVEL(pojo.get("SIGNAL_LEVEL") == null ? null : pojo.get("SIGNAL_LEVEL").toString());
-                    info.setSIGNAL_CATEGORY(
-                            pojo.get("SIGNAL_CATEGORY") == null ? null : pojo.get("SIGNAL_CATEGORY").toString());
-                    info.setEARLY_WARNING_NUM(pojo.get("EARLY_WARNING_NUM") == null ? null
-                            : Integer.valueOf(pojo.get("EARLY_WARNING_NUM").toString()));
-                    info.setTITLE(pojo.get("TITLE") == null ? null : pojo.get("TITLE").toString());
-                    info.setCONTENT(pojo.get("CONTENT") == null ? null : pojo.get("CONTENT").toString());
-                    info.setQXTYJ_DATE(pojo.get("QXTYJ_DATE") == null ? null : pojo.get("QXTYJ_DATE").toString());
-                    list.add(info);
+                    List<EmergencyResponseInfoPojo> listNew = emergencyResponseInfoData.selectList(info.getID(), null, null, null, null, null, null);
+                    if (listNew.size() == 0) {   // 不存在才加入
+                        info.setSTART_TIME(pojo.get("START_TIME") == null ? null : pojo.get("START_TIME").toString());
+                        info.setYJD_NUMBER(pojo.get("YJD_NUMBER") == null ? null : pojo.get("YJD_NUMBER").toString());
+                        info.setSIGNAL_STAGE(pojo.get("SIGNAL_STAGE") == null ? null : pojo.get("SIGNAL_STAGE").toString());
+                        info.setSIGNAL_LEVEL(pojo.get("SIGNAL_LEVEL") == null ? null : pojo.get("SIGNAL_LEVEL").toString());
+                        info.setSIGNAL_CATEGORY(
+                                pojo.get("SIGNAL_CATEGORY") == null ? null : pojo.get("SIGNAL_CATEGORY").toString());
+                        info.setEARLY_WARNING_NUM(pojo.get("EARLY_WARNING_NUM") == null ? null
+                                : Integer.valueOf(pojo.get("EARLY_WARNING_NUM").toString()));
+                        info.setTITLE(pojo.get("TITLE") == null ? null : pojo.get("TITLE").toString());
+                        info.setCONTENT(pojo.get("CONTENT") == null ? null : pojo.get("CONTENT").toString());
+                        info.setQXTYJ_DATE(pojo.get("QXTYJ_DATE") == null ? null : pojo.get("QXTYJ_DATE").toString());
+                        info.setDEPTWX("市级");
+                        info.setXY_DW("市防汛办");
+                        list.add(info);
+                    }
                 }
-                count = emergencyResponseInfoData.insertAll(list);
+                if(list.size()>0){
+                    count = emergencyResponseInfoData.insertAll(list);
+                    new javalog().writelog("【市级响应】入库长度：" + count,filePathName, "SWZZServiceResponse");
+                }
             }
-
+            //市级**************************************
         } catch (Exception e) {
-            // TODO: handle exception
+            new javalog().writelog("【市级响应】同步报错：" + e.getMessage(),filePathName, "SWZZServiceResponse");
+        }
+        try
+        {
+            //区级**************************************
+            List<EmergencyResponseInfoPojo> list = new ArrayList<>();
+            new javalog().writelog("【区级响应】开始并行同步**********",filePathName, "SWZZServiceResponse");
+            List<Map<String, Object>> listMapQU = shuiwupingServer.getQJYJXY_CURRENT();
+            new javalog().writelog("【区级响应】listMap长度：" + listMapQU.size(),filePathName, "SWZZServiceResponse");
+            if (listMapQU.size() > 0) {
+                for (Map<String, Object> pojo : listMapQU) {
+                    EmergencyResponseInfoPojo info = new EmergencyResponseInfoPojo();
+                    info.setID(pojo.get("ID") == null ? null : pojo.get("ID").toString());
+                    List<EmergencyResponseInfoPojo> listNew = emergencyResponseInfoData.selectList(info.getID(), null, null, null, null, null, null);
+                    if (listNew.size() == 0) {   // 不存在才加入
+                        info.setSTART_TIME(pojo.get("RESPONSETIME") == null ? null : pojo.get("RESPONSETIME").toString());
+                        info.setYJD_NUMBER(pojo.get("SYJ_NUMBER") == null ? null : pojo.get("SYJ_NUMBER").toString());
+                        info.setSIGNAL_STAGE(pojo.get("XY_TYPE") == null ? null : pojo.get("XY_TYPE").toString());
+                        info.setSIGNAL_LEVEL(pojo.get("SIGNAL_LEVEL") == null ? null : pojo.get("SIGNAL_LEVEL").toString());
+                        info.setSIGNAL_CATEGORY(pojo.get("SIGNAL_CATEGORY") == null ? null : pojo.get("SIGNAL_CATEGORY").toString());
+                        info.setEARLY_WARNING_NUM(pojo.get("EARLY_WARNING_NUM") == null ? null
+                                : Integer.valueOf(pojo.get("EARLY_WARNING_NUM").toString()));
+                        info.setTITLE(pojo.get("QYJ_NUMBER") == null ? null : pojo.get("QYJ_NUMBER").toString());
+                        info.setCONTENT(pojo.get("FB_DETAIL") == null ? null : pojo.get("FB_DETAIL").toString());
+                        info.setQXTYJ_DATE(pojo.get("FBSJ") == null ? null : pojo.get("FBSJ").toString());
+                        info.setDEPTWX(pojo.get("DEPTWX") == null ? null : pojo.get("DEPTWX").toString());
+                        info.setXY_DW(pojo.get("XY_DW") == null ? null : pojo.get("XY_DW").toString());
+                        list.add(info);
+                    }
+                }
+                if(list.size()>0){
+                    count =emergencyResponseInfoData.insertAll(list);
+                    new javalog().writelog("【区级响应】入库长度：" + count,filePathName, "SWZZServiceResponse");
+                }
+            }
+            //区级**************************************
+        } catch (Exception e) {
+            new javalog().writelog("【区级响应】同步报错：" + e.getMessage(),filePathName, "SWZZServiceResponse");
         }
         return count;
     }

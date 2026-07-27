@@ -2224,4 +2224,109 @@ public class ST_PPTN_RController {
                 (Integer) result.get("affectedCount"), result);
     }
 
+    @RequestMapping("/selectListSL323NoLimit")
+    public ResultUtils selectListSL323NoLimit(@RequestBody ColumnName param) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+
+        String stime = param.getStime();
+        String etime = param.getEtime();
+        List<String> stcdList = new ArrayList<>();
+        if (param.getStcd() != null && !param.getStcd().isEmpty()) {
+            stcdList = Arrays.asList(param.getStcd().split(","));
+        }        
+        List<ST_PPTN_RPojo> result = data.selectListSL323NoLimit(stcdList,stime, etime);
+        watch.stop();
+        if (result.size() > 0) {
+            return new ResultUtils<>(result, "操作成功", true, result.size(), watch.getTime());
+        } else {
+            return new ResultUtils<>(result, "操作成功", false, result.size(), watch.getTime());
+        }
+    }
+
+    /**
+     * 多时段最大滑动雨量统计
+     * 统计各站点 60min/3h/6h/12h/24h 滑动窗口最大累计雨量
+     */
+    @RequestMapping("/queryMaxSlidingRainfall")
+    public ResultUtils queryMaxSlidingRainfall(@RequestBody ColumnName param) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+
+        String stime = "", etime = "", PID = "";
+        List<String> pidList = new ArrayList<>();
+
+        if (null != param.getStime()) {
+            stime = param.getStime();
+        }
+        if (null != param.getEtime()) {
+            etime = param.getEtime();
+        }
+        if (null != param.getPid()) {
+            PID = param.getPid();
+            pidList = Arrays.asList(PID.split(","));
+        }
+
+        if (CommonUtills.isEmpty(stime) || CommonUtills.isEmpty(etime)) {
+            watch.stop();
+            return new ResultUtils<>(null, "时间范围无效", false, 0, watch.getTime());
+        }
+        if (stime.compareTo(etime) >= 0) {
+            watch.stop();
+            return new ResultUtils<>(null, "时间范围无效", false, 0, watch.getTime());
+        }
+
+        if (CommonUtills.isEmpty(PID)) {
+            watch.stop();
+            return new ResultUtils<>(null, "PID不能为空", false, 0, watch.getTime());
+        }
+
+        // 1. PID → STCD 列表
+        List<ST_STBPRP_B_QUPojo> quList = quData.queryList(null, null, null, pidList);
+        if (quList == null || quList.isEmpty()) {
+            watch.stop();
+            return new ResultUtils<>(null, "未找到对应站点", false, 0, watch.getTime());
+        }
+
+        List<String> stcdList = new ArrayList<>();
+        for (ST_STBPRP_B_QUPojo quPojo : quList) {
+            if (null != quPojo.getSTCD()) {
+                stcdList.add(quPojo.getSTCD());
+            }
+        }
+
+        if (stcdList.isEmpty()) {
+            watch.stop();
+            return new ResultUtils<>(null, "未找到对应站点", false, 0, watch.getTime());
+        }
+
+        System.out.println("=== queryMaxSlidingRainfall 开始 ===");
+        System.out.println("stime=" + stime + ", etime=" + etime + ", pid=" + PID);
+        System.out.println("解析到站点数: " + stcdList.size());
+
+        // 2. 查询 5 分钟级雨量数据（只取有雨的，Java侧重建完整时间网格）
+        long dbStart = System.currentTimeMillis();
+        List<ST_PPTN_RPojo> rainData = data.selectListByTimeNull(stcdList, stime, etime, null);
+        long dbEnd = System.currentTimeMillis();
+        System.out.println("selectListByTimeNull 耗时: " + (dbEnd - dbStart) + "ms, 返回记录数: "
+                + (rainData != null ? rainData.size() : 0));
+
+        // 3. 查询站点基础信息
+        List<ST_STBPRP_BPojo> stationInfoList = stbprpBData.selectList(stcdList, null);
+
+        // 4. 执行滑动窗口计算（传入stime/etime用于重建5分钟网格）
+        long calcStart = System.currentTimeMillis();
+        MaxRainResultPojo result = pptnServer.calculateMaxSlidingRain(rainData, stationInfoList, stime, etime);
+        long calcEnd = System.currentTimeMillis();
+        System.out.println("滑动窗口计算 耗时: " + (calcEnd - calcStart) + "ms");
+
+        System.out.println("=== queryMaxSlidingRainfall 结束, 总耗时: " + watch.getTime() + "ms ===");
+
+        watch.stop();
+        if (result != null) {
+            return new ResultUtils<>(result, "操作成功", true, 0, watch.getTime());
+        } else {
+            return new ResultUtils<>(null, "操作成功", false, 0, watch.getTime());
+        }
+    }
 }

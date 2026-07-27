@@ -11,4 +11,6 @@ public class ES_ZHANDIANDATA_YUANPojo {
     private String SOLUTIONID;
     private String DD_FOR;
     private Double YJZ;
+    private String NEWFA_NAME;
+    private String FA_NAME;
 }

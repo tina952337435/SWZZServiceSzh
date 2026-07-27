@@ -322,8 +322,8 @@
             <if test="MTYPE != null and MTYPE != ''">
                 and MTYPE = #{MTYPE}
             </if>
-            group by MTYPE,stcd
-        </where>
+        </where>        
+        group by MTYPE,stcd
     </select>
     <select id="queryMAXHOURDRPList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">
         select stcd,max(stnm) stnm,mtype,to_char(TM,'yyyy-MM-dd HH24')||':00:00' as TM,sum(drp) as drp from GETWATERVIEWPPTNR

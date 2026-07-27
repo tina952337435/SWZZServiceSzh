@@ -152,4 +152,26 @@ public class ST_STBPRP_B_STCDController {
             return new ResultUtils<>(num, "操作成功",false, num,watch.getTime());
         }
     }
+    @RequestMapping("/modifydan")
+    public ResultUtils upDateOneDan(@RequestBody ST_STBPRP_B_STCDPojo param){
+        StopWatch watch = new StopWatch();
+        watch.start();
+        String ztm = "",stcd="1111",type="1111";
+        if(null != param.getZTM()){
+            ztm = param.getZTM();
+        }
+        if(null != param.getSTCD()){
+            stcd = param.getSTCD();
+        }
+        if(null != param.getTYPE()){
+            type = param.getTYPE();
+        }
+        Integer num = data.UpdateWaterDataGate(type,stcd,ztm);
+        watch.stop();
+        if(num > 0){
+            return new ResultUtils<>(num, "操作成功",true, num,watch.getTime());
+        }else {
+            return new ResultUtils<>(num, "操作成功",false, num,watch.getTime());
+        }
+    }
 }

@@ -247,6 +247,60 @@ public class shuiwupingServer {
         return resultList;
     }
 
+    // 当前分区响应
+    public List<Map<String, Object>> getQJYJXY_CURRENT(){
+        List<Map<String, Object>> resultList=new ArrayList<>();
+        try {
+            String access_token=getSwptToken();
+            HashMap<String, Object> header=new HashMap<>();
+            header.put("Content-Type","application/json;charset=UTF-8");            
+            String url = UriComponentsBuilder.fromHttpUrl(shuiwupingtaiApi + "/service/api/swic/getQJYJXY_CURRENT")
+                    .queryParam("client_id", client_id)
+                    .queryParam("access_token", access_token)
+                    .toUriString();
+            String result= apihelper.apigethttps(url,header);
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                // 使用 objectMapper.readValue 进行解析
+               resultList = objectMapper.readValue(result, new TypeReference<List<Map<String, Object>>>() {});
+                // 你的后续逻辑...
+            } catch (Exception e) {
+            }
+
+        } catch (Exception e) {
+        }
+        return resultList;
+    }
+
+    //历史区级响应
+    public List<Map<String, Object>> getQJYJXY(int pageSize, int pageNumber,String QUYU){
+        List<Map<String, Object>> resultList=new ArrayList<>();
+        try {
+            String access_token=getSwptToken();
+            HashMap<String, Object> header=new HashMap<>();
+            header.put("Content-Type","application/json;charset=UTF-8");            
+            String url = UriComponentsBuilder.fromHttpUrl(shuiwupingtaiApi + "/service/api/swic/getQJYJXY")
+                    .queryParam("client_id", client_id)
+                    .queryParam("access_token", access_token)
+                    .queryParam("pageSize", pageSize)
+                    .queryParam("pageNumber", pageNumber)
+                    .queryParam("QUYU", QUYU) // 区域(全区填:区.;单一区填对应区域)
+                    .toUriString();
+            String result= apihelper.apigethttps(url,header);
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                Map<String,Object> mapList=new HashMap<>();
+                mapList = objectMapper.readValue(result, new TypeReference<Map<String, Object>>() {});
+                int totalRows=(int)mapList.get("totalRows");
+                if(totalRows>0){
+                    resultList = (List<Map<String, Object>>) mapList.get("result");
+                }
+            } catch (Exception e) {
+            }
+        } catch (Exception e) {
+        }
+        return resultList;
+    }
 
     //天文潮位
     public List<Map<String, Object>> getTianWenChaoWei(String stationid,String startTime,String endTime){

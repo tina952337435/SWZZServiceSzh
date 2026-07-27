@@ -12,8 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 import swzzmodeserver.tools.*;
 import swzzmodeserver.workserver.data.swzzmode.*;
 import swzzmodeserver.workserver.pojo.Huishui.GetAreaXSLPojo;
+import swzzmodeserver.workserver.pojo.swzzflood.ST_WAS_RPojo;
+import swzzmodeserver.workserver.service.swzzmode.ES_ZHANDIANDATAServiceImpl;
 import swzzmodeserver.workserver.pojo.Huishui.GetPlansRiverHPJPojo;
 import swzzmodeserver.workserver.pojo.swzzdata.EmployeeGetTokenPojo;
+import swzzmodeserver.workserver.pojo.swzzmode.LatestPredictDtoPojo;
 import swzzmodeserver.workserver.pojo.swzzmode.*;
 import swzzmodeserver.workserver.pojo.swzzrtsq.ST_STBPRP_B_QUPojo;
 import swzzmodeserver.workserver.service.swzzmode.HuishuiApiService;
@@ -60,6 +63,9 @@ public class DD_SOLUTIONController {
 
     @Autowired
     private ST_STBPRP_B_QUData stbprpB_QUData;
+
+    @Autowired
+    private ES_ZHANDIANDATAServiceImpl dataService;
 
     @Autowired
     private ES_JISUANZHANData esJisuanzhanData;
@@ -911,6 +917,76 @@ public class DD_SOLUTIONController {
         } catch (IOException e) {
             System.out.println("读取本地文件失败：" + filePath + "，错误：" + e.getMessage());
             return new HashMap<>();
+        }
+    }
+
+    /**
+     * 根据站点和时间范围查询最新方案的预报值（含实测水位对比）
+     * 每个预报时间点取发布时间(DD_CARRYTM)最晚方案的预报值
+     * @param bpPojo stcd=站码, startdate=开始时间, enddate=结束时间, pattem=DATA_TYPE(默认"1")
+     * @return 预报值列表，每条包含预报值、实测水位、方案编号
+     */
+    @RequestMapping("/findLatestPredictByStation")
+    public ResultUtils findLatestPredictByStation(@RequestBody ParamField bpPojo) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        if (CommonUtills.isEmpty(FieldIsValid.getColumnName(bpPojo, ParamField.class))) {
+            watch.stop();
+            return new ResultUtils<>(null, "存在非法字符", false, -1, watch.getTime());
+        }
+        String stcd = bpPojo.getStcd();
+        String stime = bpPojo.getStartdate();
+        String etime = bpPojo.getEnddate();
+        String dataType = bpPojo.getPattem() != null ? bpPojo.getPattem() : "1";
+        if (stcd == null || stime == null || etime == null) {
+            watch.stop();
+            return new ResultUtils<>(null, "参数不能为空", false, -1, watch.getTime());
+        }
+        // 1. 查询方案列表，按发布时间倒序：仅保留DD_TM小时为8/10/15/20的方案
+        String solStime = DateUtil.addDay(stime, -3, "yyyy-MM-dd HH:mm:ss");
+        String solEtime = DateUtil.addDay(etime, 1, "yyyy-MM-dd HH:mm:ss");
+        List<DD_SOLUTIONPojo> allSolutions = ddSolutionData.selectList(null, null, null, null, solStime, solEtime, null, null);
+        Set<String> validHours = new HashSet<>(Arrays.asList("08", "10", "15", "20"));
+        allSolutions = allSolutions.stream()
+                .filter(s -> s.getDD_TM() != null && s.getDD_TM().length() >= 14
+                        && validHours.contains(s.getDD_TM().substring(11, 13)))
+                .collect(Collectors.toList());
+        if (allSolutions.isEmpty()) {
+            watch.stop();
+            return new ResultUtils<>(new ArrayList<>(), "无可用方案", false, 0, watch.getTime());
+        }
+        // 2. 所有方案的DD_ID作为PLAN_N列表，一次查询BDMS_PREDICT
+        List<String> planNListAll = allSolutions.stream().map(DD_SOLUTIONPojo::getDD_ID).collect(Collectors.toList());
+        List<LatestPredictDtoPojo> allPredict = ddSolutionData.selectLatestPredictByStation(planNListAll, stcd, stime, etime, dataType);
+        if (allPredict.isEmpty()) {
+            watch.stop();
+            return new ResultUtils<>(allPredict, "操作成功", false, 0, watch.getTime());
+        }
+        // 3. 构建方案DD_CARRYTM映射，按YMDHM分组取DD_CARRYTM最新的记录
+        Map<String, DD_SOLUTIONPojo> solutionMap = allSolutions.stream()
+                .collect(Collectors.toMap(DD_SOLUTIONPojo::getDD_ID, s -> s, (a, b) -> a));
+        List<LatestPredictDtoPojo> result = allPredict.stream()
+                .collect(Collectors.groupingBy(LatestPredictDtoPojo::getYMDHM))
+                .values().stream()
+                .map(list -> list.stream().max((a, b) -> {
+                    DD_SOLUTIONPojo sa = solutionMap.get(a.getPLAN_N());
+                    DD_SOLUTIONPojo sb = solutionMap.get(b.getPLAN_N());
+                    if (sa == null || sb == null) return sa == null ? -1 : 1;
+                    int cmp = sa.getDD_CARRYTM().compareTo(sb.getDD_CARRYTM());
+                    return cmp != 0 ? cmp : sa.getDD_ID().compareTo(sb.getDD_ID());
+                }).get())
+                .sorted(Comparator.comparing(LatestPredictDtoPojo::getYMDHM))
+                .collect(Collectors.toList());
+        // 4. 查询实测水位并匹配
+        List<ST_WAS_RPojo> measuredList = dataService.getSCSW(stime, etime, Collections.singletonList(stcd), null);
+        Map<String, String> measuredMap = measuredList.stream()
+                .collect(Collectors.toMap(ST_WAS_RPojo::getTM, ST_WAS_RPojo::getUPZ, (a, b) -> a));
+        result.forEach(r -> r.setUPZ(measuredMap.get(r.getYMDHM())));
+        watch.stop();
+        if (result.size() > 0) {
+            return new ResultUtils<>(result, "操作成功", true, result.size(), watch.getTime());
+        } else {
+            return new ResultUtils<>(result, "操作成功", false, result.size(), watch.getTime());
         }
     }
 

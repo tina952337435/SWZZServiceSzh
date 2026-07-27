@@ -4,6 +4,7 @@ import swzzmodeserver.tools.ResultUtils;
 import swzzmodeserver.workserver.data.swzzrtsq.*;
 import swzzmodeserver.workserver.pojo.swzzrtsq.*;
 import swzzmodeserver.workserver.server.swzzrtsq.GetWaterViewNewServer;
+import swzzmodeserver.workserver.server.swzzrtsq.shuizhaServer;
 import swzzmodeserver.tools.ColumnName;
 import swzzmodeserver.tools.CommonUtills;
 import swzzmodeserver.tools.DateUtil;
@@ -42,6 +43,10 @@ public class ST_GATE_RNEWController {
 
     @Autowired
     private RTSQST_GATE_RData rtsqstGateRData;
+
+    @Autowired
+    private shuizhaServer shuiwupingServer;
+    
 
     @RequestMapping("/selectGQList")
     public List<ST_STBPRP_FCCHPojo> selectGQList(@RequestBody ColumnName param) {
@@ -312,4 +317,14 @@ public class ST_GATE_RNEWController {
             return new ResultUtils<>(userList, "操作成功", false, userList.size(), watch.getTime());
         }
     }
+
+    @RequestMapping("/getShuiZhaToken")
+    public ResultUtils getShuiZhaToken(@RequestBody ColumnName param) throws Exception {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        String token = shuiwupingServer.getShuiZhaToken();
+        watch.stop();
+        return new ResultUtils<>(null, token, true, 0, watch.getTime());
+    }
+    
 }

@@ -314,4 +314,17 @@
     </select>
 
 
+    <select id="selectLatestPredictByStation" resultType="swzzmodeserver.workserver.pojo.swzzmode.LatestPredictDtoPojo">
+        SELECT b.YMDHM, b.DATA, b.PLAN_N, b.DATA_TYPE, null AS UPZ
+        FROM BDMS_PREDICT b
+        WHERE b.PLAN_N IN
+            <foreach collection="planNList" open="(" close=")" item="plan" separator=",">
+                #{plan,jdbcType=VARCHAR}
+            </foreach>
+          AND b.STCD = #{STCD}
+          <![CDATA[ AND b.YMDHM >= #{stime} ]]>
+          <![CDATA[ AND b.YMDHM <= #{etime} ]]>
+          AND b.DATA_TYPE = #{dataType}
+    </select>
+
 </mapper>

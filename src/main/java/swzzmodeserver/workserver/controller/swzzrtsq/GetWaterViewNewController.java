@@ -1898,4 +1898,31 @@ public class GetWaterViewNewController {
             return new ResultUtils<>(listNew, "操作成功", false, listNew.size(), watch.getTime());
         }
     }
+
+
+    @RequestMapping("/SynchronizeDataTsdb5min")
+    public ResultUtils SynchronizeDataTsdb5min(@RequestBody ColumnName param) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        List<String> stcdList = new ArrayList<>();
+        Date date = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+        String stime = DateUtil.dateFormat(date, "yyyy-MM-dd HH:mm:ss"), etime = "";
+        if (param.getStcd() != null) {
+            stcdList = Arrays.asList(param.getStcd().split(","));
+        }
+        if (param.getStime() != null) {
+            stime = param.getStime();
+        }
+        if (param.getEtime() != null) {
+            etime = param.getEtime();
+        } 
+        List<ST_PPTN_RPojo> listNew = tongbuServer.getRTSQ_5MINXZYL(stcdList, stime, etime,null);
+        watch.stop();
+        if (listNew.size() > 0) {
+            return new ResultUtils<>(listNew, "操作成功", true, listNew.size(), watch.getTime());
+        } else {
+            return new ResultUtils<>(listNew, "操作成功", false, listNew.size(), watch.getTime());
+        }
+    }
+
 }

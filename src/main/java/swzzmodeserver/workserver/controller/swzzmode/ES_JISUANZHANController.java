@@ -298,7 +298,7 @@ public class ES_JISUANZHANController {
         }
         maps.sort((a, b) -> {
             if (a.containsKey("px") && a.get("px") != null && b.containsKey("px") && b.get("px") != null) {
-                return Integer.parseInt(a.get("px")) - Integer.parseInt(b.get("px"));
+                return Double.compare(Double.parseDouble(a.get("px")), Double.parseDouble(b.get("px")));
             }
             return 0;
         });

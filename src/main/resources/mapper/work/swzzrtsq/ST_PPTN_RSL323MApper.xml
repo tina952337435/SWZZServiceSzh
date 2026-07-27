@@ -25,7 +25,7 @@
     select * from SL323.ST_PPTN_QX_R
     <where>
         <if test="stime != null and stime != ''">
-            <![CDATA[ and TM >#{stime} ]]>
+            <![CDATA[ and TM >=#{stime} ]]>
         </if>
         <if test="etime != null and etime != ''">
             <![CDATA[ and TM <=#{etime} ]]>

@@ -54,10 +54,9 @@ public interface ES_ZHANDIANDATAService {
 
         Integer ModifyGCSSLLAREAGCGZ_SZHFJL(String solutionid, String stime);
 
-        Integer MODIFY_MODEZHANDDataNew(String startdate, String enddate, String solutionid, String jydatatype,
-                        String gcdatatype, String scwdatatype, String username);
-
         Integer FH_modify_batchJYQuanJY(String dd_id, List<String> ZhanID, String DayHour, String ZhanData);
 
         Integer modify_byTMJY(String TM, String dd_id, List<String> ZhanID, String DayHour, String ZhanData);
+
+        Integer BigModeLineardifference(String solutionid,String stcd,String startDate, String endDate);
 }

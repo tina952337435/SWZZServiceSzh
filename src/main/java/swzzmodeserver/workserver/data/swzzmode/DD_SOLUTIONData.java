@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import swzzmodeserver.workserver.pojo.swzzmode.BDMS_PREDICTPojo;
 import swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTIONPojo;
 import swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTION_YSPojo;
+import swzzmodeserver.workserver.pojo.swzzmode.LatestPredictDtoPojo;
 
 import java.util.List;
 
@@ -47,4 +48,10 @@ public interface DD_SOLUTIONData {
                                      @Param(value = "stime") String stime,
                                      @Param(value = "etime") String etime,
                                      @Param(value = "startindex") Integer startindex,@Param(value = "pagesize") Integer pagesize);
+
+    List<LatestPredictDtoPojo> selectLatestPredictByStation(@Param(value = "planNList") List<String> planNList,
+                                                             @Param(value = "STCD") String STCD,
+                                                             @Param(value = "stime") String stime,
+                                                             @Param(value = "etime") String etime,
+                                                             @Param(value = "dataType") String dataType);
 }
