@@ -17,7 +17,7 @@ import java.net.URL;
  */
 public class PdfUtil {
 
-    private static boolean getLicense() {
+    public static boolean getLicense() {
         boolean result = false;
         try {
             InputStream is = PdfUtil.class.getClassLoader().getResourceAsStream("license.xml");

@@ -21,4 +21,40 @@
             and a.STCD = #{STCD}
         </if>
     </update>
+
+    <!-- 按站点+时间范围查询河道水位时序数据 -->
+    <select id="selectListByTime" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RIVER_RPojo">
+        SELECT STCD, TM, Z, Q, XSA, XSAVV, XSMXV, FLWCHRCD, WPTN, MSQMT, MSAMT, MSVMT
+        FROM ST_RIVER_R
+        <where>
+            <if test="stcdList != null and stcdList.size() > 0">
+                AND STCD IN
+                <foreach collection="stcdList" item="stcd" open="(" separator="," close=")">
+                    #{stcd}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ AND TM >= to_date(#{stime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ AND TM <= to_date(#{etime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        ORDER BY STCD, TM
+    </select>
+
+    <!-- 按时间范围查询有水位数据的所有站点（去重） -->
+    <select id="selectDistinctStcd" resultType="java.lang.String">
+        SELECT DISTINCT STCD
+        FROM ST_RIVER_R
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ AND TM >= to_date(#{stime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ AND TM <= to_date(#{etime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        ORDER BY STCD
+    </select>
 </mapper>

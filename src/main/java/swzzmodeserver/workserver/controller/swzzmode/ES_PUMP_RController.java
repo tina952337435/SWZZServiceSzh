@@ -11,6 +11,7 @@ import swzzmodeserver.tools.ParamField;
 import swzzmodeserver.tools.ResultUtils;
 import swzzmodeserver.workserver.data.swzzmode.ES_PUMP_RData;
 import swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RPojo;
+import swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_STAVPojo;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -135,6 +136,69 @@ public class ES_PUMP_RController {
             return new ResultUtils<>(num, "操作成功",true, num,watch.getTime());
         }else {
             return new ResultUtils<>(num, "操作成功",false, num,watch.getTime());
+        }
+    }
+
+    /**
+     * 按模型预报时间(RLSTM)联查ES_PUMP_B，求每个泵站的平均流量和最大流量
+     * @param bpPojo startdate: 模型预报时间(RLSTM)
+     * @return 站点编码、站名、经纬度、平均流量、最大流量
+     */
+    @RequestMapping("/findStAvByRlstm")
+    public ResultUtils findStAvByRlstm(@RequestBody ParamField bpPojo){
+        StopWatch watch = new StopWatch();
+        watch.start();
+        if(CommonUtills.isEmpty(FieldIsValid.getColumnName(bpPojo,ParamField.class))){
+            watch.stop();
+            return new ResultUtils<>(null,"存在非法字符",false,-1,watch.getTime());
+        }
+        String rlstm = "";
+        if(null != bpPojo.getStartdate()){
+            rlstm = bpPojo.getStartdate();
+        }
+        if("".equals(rlstm)){
+            watch.stop();
+            return new ResultUtils<>(null,"模型预报时间不能为空",false,0,watch.getTime());
+        }
+        List<ES_PUMP_STAVPojo> result = data.selectStAvByRlstm(rlstm);
+        watch.stop();
+        if(result != null && result.size() > 0){
+            return new ResultUtils<>(result, "操作成功",true, result.size(), watch.getTime());
+        }else {
+            return new ResultUtils<>(result, "未查到数据",false, 0, watch.getTime());
+        }
+    }
+
+    /**
+     * 按模型计算时间(RLSTM)和站点(STCD)查询ES_PUMP_R数据
+     * @param bpPojo startdate: 模型计算时间(RLSTM), stcd: 站点编码(可选)
+     */
+    @RequestMapping("/findByRlstmAndStcd")
+    public ResultUtils findByRlstmAndStcd(@RequestBody ParamField bpPojo){
+        StopWatch watch = new StopWatch();
+        watch.start();
+        if(CommonUtills.isEmpty(FieldIsValid.getColumnName(bpPojo,ParamField.class))){
+            watch.stop();
+            return new ResultUtils<>(null,"存在非法字符",false,-1,watch.getTime());
+        }
+        String rlstm = "";
+        String stcd = "";
+        if(null != bpPojo.getStartdate()){
+            rlstm = bpPojo.getStartdate();
+        }
+        if(null != bpPojo.getStcd()){
+            stcd = bpPojo.getStcd();
+        }
+        if("".equals(rlstm)){
+            watch.stop();
+            return new ResultUtils<>(null,"模型计算时间不能为空",false,0,watch.getTime());
+        }
+        List<ES_PUMP_RPojo> result = data.selectByRlstmAndStcd(rlstm, stcd);
+        watch.stop();
+        if(result != null && result.size() > 0){
+            return new ResultUtils<>(result, "操作成功",true, result.size(), watch.getTime());
+        }else {
+            return new ResultUtils<>(result, "未查到数据",false, 0, watch.getTime());
         }
     }
 }

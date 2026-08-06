@@ -107,7 +107,7 @@ public class TongbuServer {
     private final ConcurrentHashMap<String, AtomicBoolean> syncRunningMap = new ConcurrentHashMap<>();
 
     // 同步总接口
-    public Integer SyncData(String mtype, String type) {
+    public Integer SyncData(String mtype, String type, List<String> listStcd) {
         // 组合键：数据源 + 数据类型，确保同一种同步任务不会重复执行
         String lockKey = mtype + ":" + type;
         AtomicBoolean running = syncRunningMap.computeIfAbsent(lockKey, k -> new AtomicBoolean(false));
@@ -118,43 +118,44 @@ public class TongbuServer {
         }
         int rows = 0;
         try {
-        List<V_ST_STBPRP_BTZDto> listItemData = new ArrayList<>();
-        List<String> typeList = Arrays.asList(type.split(","));
-        switch (mtype) {
-            case "上海水文总站":
-            case "市气象局":
-                listItemData = rtsqstStbprpBData.GetSyncSTCD(null, typeList, "1", Arrays.asList(mtype));
-                rows = SyncRealData(listItemData);
-                break;
-            case "水利部太湖局":
-            case "水利部报汛":
-            case "水利部":
-            case "自然资源部东海局":
-            case "上海海事局":
-                List<String> sourceList = Arrays.asList("水利部太湖局,水利部报汛,上海海事局,自然资源部东海局".split(","));
-                listItemData = rtsqstStbprpBData.GetSyncSTCD(null, typeList, "1", sourceList);
-                rows = SyncRealDataSWPT(listItemData);// 水务平台接数据
-                break;
-            case "水利中心":
-                new javalog().writelog("进入主服务SynchronizeData接口：" + mtype, filePathName, "SWZZServiceGate");
-                listItemData = rtsqstStbprpBData.GetSyncSTCD(null, typeList, "1", Arrays.asList(mtype));
-                new javalog().writelog("【水闸】listItemData的长度是：" + listItemData.size(), filePathName, "SWZZServiceGate");
-                System.out.println("【水闸】listItemData的长度是：" + listItemData.size());
-                rows = SyncRealDataGate(listItemData);
-                new javalog().writelog("SyncRealDataGate的返回值是：" + rows, filePathName, "SWZZServiceGate");
-                updateSt_gate_rNewAll();// 更新最新表
-                break;
-            case "市排水中心":
-                new javalog().writelog("进入主服务SyncRealDataGateBeng接口：" + mtype, filePathName, "SWZZServiceGate");
-                listItemData = rtsqstStbprpBData.GetSyncSTCD(null, typeList, "1", Arrays.asList(mtype));
-                new javalog().writelog("【市政泵站】listItemData的长度是：" + listItemData.size(), filePathName,
-                        "SWZZServiceGate");
-                rows = SyncRealDataGateBeng(listItemData);
-                new javalog().writelog("SyncRealDataGateBeng的返回值是：" + rows, filePathName, "SWZZServiceGate");
-                updateSt_gate_rNewAll();// 更新最新表
-            default:
-                break;
-        }
+            List<V_ST_STBPRP_BTZDto> listItemData = new ArrayList<>();
+            List<String> typeList = Arrays.asList(type.split(","));
+            switch (mtype) {
+                case "上海水文总站":
+                case "市气象局":
+                    listItemData = rtsqstStbprpBData.GetSyncSTCD(listStcd, typeList, "1", Arrays.asList(mtype));
+                    rows = SyncRealData(listItemData);
+                    break;
+                case "水利部太湖局":
+                case "水利部报汛":
+                case "水利部":
+                case "自然资源部东海局":
+                case "上海海事局":
+                    List<String> sourceList = Arrays.asList("水利部太湖局,水利部报汛,上海海事局,自然资源部东海局".split(","));
+                    listItemData = rtsqstStbprpBData.GetSyncSTCD(listStcd, typeList, "1", sourceList);
+                    rows = SyncRealDataSWPT(listItemData);// 水务平台接数据
+                    break;
+                case "水利中心":
+                    new javalog().writelog("进入主服务SynchronizeData接口：" + mtype, filePathName, "SWZZServiceGate");
+                    listItemData = rtsqstStbprpBData.GetSyncSTCD(listStcd, typeList, "1", Arrays.asList(mtype));
+                    new javalog().writelog("【水闸】listItemData的长度是：" + listItemData.size(), filePathName,
+                            "SWZZServiceGate");
+                    System.out.println("【水闸】listItemData的长度是：" + listItemData.size());
+                    rows = SyncRealDataGate(listItemData);
+                    new javalog().writelog("SyncRealDataGate的返回值是：" + rows, filePathName, "SWZZServiceGate");
+                    updateSt_gate_rNewAll();// 更新最新表
+                    break;
+                case "市排水中心":
+                    new javalog().writelog("进入主服务SyncRealDataGateBeng接口：" + mtype, filePathName, "SWZZServiceGate");
+                    listItemData = rtsqstStbprpBData.GetSyncSTCD(listStcd, typeList, "1", Arrays.asList(mtype));
+                    new javalog().writelog("【市政泵站】listItemData的长度是：" + listItemData.size(), filePathName,
+                            "SWZZServiceGate");
+                    rows = SyncRealDataGateBeng(listItemData);
+                    new javalog().writelog("SyncRealDataGateBeng的返回值是：" + rows, filePathName, "SWZZServiceGate");
+                    updateSt_gate_rNewAll();// 更新最新表
+                default:
+                    break;
+            }
         } finally {
             running.set(false);
         }
@@ -226,8 +227,7 @@ public class TongbuServer {
                 }
 
                 new javalog().writelog(model.getStnm() + "站入库水位数据长度：" + rows, filePathName);
-            } 
-            else if (model.getType().equals("2"))// 雨量
+            } else if (model.getType().equals("2"))// 雨量
             {
                 new javalog().writelog("进入主服务SyncRealData接口，开始同步雨量数据：" + stcd, filePathName, "SWZZServiceYL");
                 List<ST_PPTN_RPojo> listPptn = new ArrayList<>();
@@ -1072,26 +1072,21 @@ public class TongbuServer {
                             try {
                                 double temp = Double.parseDouble(qStr);
                                 qValue = Double.parseDouble(String.format("%.2f", temp));
+                                wasInfo.setQ(qValue);
                             } catch (NumberFormatException e) {
-                                qValue = 0.0;
                             }
                         }
-                        if (!qValue.equals(0)) {
-                            wasInfo.setQ(qValue);
-                        }
-
                         if (upzStr != null && !upzStr.trim().isEmpty()) {
                             try {
                                 double temp = Double.parseDouble(upzStr);
                                 upzValue = Double.parseDouble(String.format("%.2f", temp));
+                                wasInfo.setZ(upzValue);
                             } catch (NumberFormatException e) {
-                                upzValue = 0.0;
                             }
                         }
-                        if (!upzValue.equals(0)) {
-                            wasInfo.setZ(upzValue);
+                        if (qStr != null && !qStr.trim().isEmpty()) {
+                            list.add(wasInfo);
                         }
-                        list.add(wasInfo);
                         strLastTM = strTM;
                     }
                 }
@@ -1106,21 +1101,24 @@ public class TongbuServer {
     public Integer SyncDataYJXY() {
         int count = 0;
         try {
-            //市级**************************************
+            // 市级**************************************
             List<EmergencyResponseInfoPojo> list = new ArrayList<>();
-            new javalog().writelog("【市级响应】开始并行同步**********",filePathName, "SWZZServiceResponse");
+            new javalog().writelog("【市级响应】开始并行同步**********", filePathName, "SWZZServiceResponse");
             List<Map<String, Object>> listMap = shuiwupingServer.getSJYJXY_CURRENT();
-            new javalog().writelog("【市级响应】listMap长度：" + listMap.size(),filePathName, "SWZZServiceResponse");
+            new javalog().writelog("【市级响应】listMap长度：" + listMap.size(), filePathName, "SWZZServiceResponse");
             if (listMap.size() > 0) {
                 for (Map<String, Object> pojo : listMap) {
                     EmergencyResponseInfoPojo info = new EmergencyResponseInfoPojo();
                     info.setID(pojo.get("ID") == null ? null : pojo.get("ID").toString());
-                    List<EmergencyResponseInfoPojo> listNew = emergencyResponseInfoData.selectList(info.getID(), null, null, null, null, null, null);
-                    if (listNew.size() == 0) {   // 不存在才加入
+                    List<EmergencyResponseInfoPojo> listNew = emergencyResponseInfoData.selectList(info.getID(), null,
+                            null, null, null, null, null);
+                    if (listNew.size() == 0) { // 不存在才加入
                         info.setSTART_TIME(pojo.get("START_TIME") == null ? null : pojo.get("START_TIME").toString());
                         info.setYJD_NUMBER(pojo.get("YJD_NUMBER") == null ? null : pojo.get("YJD_NUMBER").toString());
-                        info.setSIGNAL_STAGE(pojo.get("SIGNAL_STAGE") == null ? null : pojo.get("SIGNAL_STAGE").toString());
-                        info.setSIGNAL_LEVEL(pojo.get("SIGNAL_LEVEL") == null ? null : pojo.get("SIGNAL_LEVEL").toString());
+                        info.setSIGNAL_STAGE(
+                                pojo.get("SIGNAL_STAGE") == null ? null : pojo.get("SIGNAL_STAGE").toString());
+                        info.setSIGNAL_LEVEL(
+                                pojo.get("SIGNAL_LEVEL") == null ? null : pojo.get("SIGNAL_LEVEL").toString());
                         info.setSIGNAL_CATEGORY(
                                 pojo.get("SIGNAL_CATEGORY") == null ? null : pojo.get("SIGNAL_CATEGORY").toString());
                         info.setEARLY_WARNING_NUM(pojo.get("EARLY_WARNING_NUM") == null ? null
@@ -1133,33 +1131,36 @@ public class TongbuServer {
                         list.add(info);
                     }
                 }
-                if(list.size()>0){
+                if (list.size() > 0) {
                     count = emergencyResponseInfoData.insertAll(list);
-                    new javalog().writelog("【市级响应】入库长度：" + count,filePathName, "SWZZServiceResponse");
+                    new javalog().writelog("【市级响应】入库长度：" + count, filePathName, "SWZZServiceResponse");
                 }
             }
-            //市级**************************************
+            // 市级**************************************
         } catch (Exception e) {
-            new javalog().writelog("【市级响应】同步报错：" + e.getMessage(),filePathName, "SWZZServiceResponse");
+            new javalog().writelog("【市级响应】同步报错：" + e.getMessage(), filePathName, "SWZZServiceResponse");
         }
-        try
-        {
-            //区级**************************************
+        try {
+            // 区级**************************************
             List<EmergencyResponseInfoPojo> list = new ArrayList<>();
-            new javalog().writelog("【区级响应】开始并行同步**********",filePathName, "SWZZServiceResponse");
+            new javalog().writelog("【区级响应】开始并行同步**********", filePathName, "SWZZServiceResponse");
             List<Map<String, Object>> listMapQU = shuiwupingServer.getQJYJXY_CURRENT();
-            new javalog().writelog("【区级响应】listMap长度：" + listMapQU.size(),filePathName, "SWZZServiceResponse");
+            new javalog().writelog("【区级响应】listMap长度：" + listMapQU.size(), filePathName, "SWZZServiceResponse");
             if (listMapQU.size() > 0) {
                 for (Map<String, Object> pojo : listMapQU) {
                     EmergencyResponseInfoPojo info = new EmergencyResponseInfoPojo();
                     info.setID(pojo.get("ID") == null ? null : pojo.get("ID").toString());
-                    List<EmergencyResponseInfoPojo> listNew = emergencyResponseInfoData.selectList(info.getID(), null, null, null, null, null, null);
-                    if (listNew.size() == 0) {   // 不存在才加入
-                        info.setSTART_TIME(pojo.get("RESPONSETIME") == null ? null : pojo.get("RESPONSETIME").toString());
+                    List<EmergencyResponseInfoPojo> listNew = emergencyResponseInfoData.selectList(info.getID(), null,
+                            null, null, null, null, null);
+                    if (listNew.size() == 0) { // 不存在才加入
+                        info.setSTART_TIME(
+                                pojo.get("RESPONSETIME") == null ? null : pojo.get("RESPONSETIME").toString());
                         info.setYJD_NUMBER(pojo.get("SYJ_NUMBER") == null ? null : pojo.get("SYJ_NUMBER").toString());
                         info.setSIGNAL_STAGE(pojo.get("XY_TYPE") == null ? null : pojo.get("XY_TYPE").toString());
-                        info.setSIGNAL_LEVEL(pojo.get("SIGNAL_LEVEL") == null ? null : pojo.get("SIGNAL_LEVEL").toString());
-                        info.setSIGNAL_CATEGORY(pojo.get("SIGNAL_CATEGORY") == null ? null : pojo.get("SIGNAL_CATEGORY").toString());
+                        info.setSIGNAL_LEVEL(
+                                pojo.get("SIGNAL_LEVEL") == null ? null : pojo.get("SIGNAL_LEVEL").toString());
+                        info.setSIGNAL_CATEGORY(
+                                pojo.get("SIGNAL_CATEGORY") == null ? null : pojo.get("SIGNAL_CATEGORY").toString());
                         info.setEARLY_WARNING_NUM(pojo.get("EARLY_WARNING_NUM") == null ? null
                                 : Integer.valueOf(pojo.get("EARLY_WARNING_NUM").toString()));
                         info.setTITLE(pojo.get("QYJ_NUMBER") == null ? null : pojo.get("QYJ_NUMBER").toString());
@@ -1170,14 +1171,14 @@ public class TongbuServer {
                         list.add(info);
                     }
                 }
-                if(list.size()>0){
-                    count =emergencyResponseInfoData.insertAll(list);
-                    new javalog().writelog("【区级响应】入库长度：" + count,filePathName, "SWZZServiceResponse");
+                if (list.size() > 0) {
+                    count = emergencyResponseInfoData.insertAll(list);
+                    new javalog().writelog("【区级响应】入库长度：" + count, filePathName, "SWZZServiceResponse");
                 }
             }
-            //区级**************************************
+            // 区级**************************************
         } catch (Exception e) {
-            new javalog().writelog("【区级响应】同步报错：" + e.getMessage(),filePathName, "SWZZServiceResponse");
+            new javalog().writelog("【区级响应】同步报错：" + e.getMessage(), filePathName, "SWZZServiceResponse");
         }
         return count;
     }
@@ -1545,10 +1546,13 @@ public class TongbuServer {
                     ST_GATE_RPojo pojoGate = new ST_GATE_RPojo();
                     pojoGate.setSTCD(obj.getSTATIONID());
                     pojoGate.setTM(obj.getDATETIME());
-                    pojoGate.setEXKEY("1");
+                    pojoGate.setEXKEY("1");// 不知道几台泵，先按1台
                     pojoGate.setEQPTP("泵站状态");
                     pojoGate.setEQPNO("2");
-                    pojoGate.setGTQ(obj.getFLOW());
+                    double GTOPNUM = obj.getRPUMP_R() != null ? Double.valueOf(obj.getRPUMP_R()) : 0;// 雨水泵运行数量
+                    double danQ = obj.getRPUMP_F() != null ? Double.valueOf(obj.getRPUMP_F()) : 0; // 雨水泵流量
+                    pojoGate.setGTQ(GTOPNUM * danQ);
+                    pojoGate.setGTOPNUM(GTOPNUM);
                     st_gate_r.add(pojoGate);
 
                     swzzmodeserver.workserver.pojo.swzzrtsq.ST_WAS_RPojo pojoWas = new swzzmodeserver.workserver.pojo.swzzrtsq.ST_WAS_RPojo();

@@ -20,4 +20,7 @@ public interface XQKB_LISTData {
     Integer upDateOne(XQKB_LISTPojo pojo);
 
     Integer deleteOne(@Param(value = "XQKB_ID") String XQKB_ID);
+
+    Integer selectMaxQihao(@Param(value = "type") String type,
+                           @Param(value = "stime") String stime);
 }

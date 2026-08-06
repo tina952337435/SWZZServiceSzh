@@ -77,6 +77,20 @@
         </set>
         where ID = #{ID}
     </update>
+    <select id="selectLatest" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RNEWPojo">
+        SELECT * FROM ES_PUMP_RNEW
+        <where>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ AND "CALC_TIME" >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ AND "CALC_TIME" <= #{etime} ]]>
+            </if>
+        </where>
+        ORDER BY "CALC_TIME" DESC
+        LIMIT 1
+    </select>
+
     <delete id="deleteOne">
         delete from ES_PUMP_RNEW where ID = #{id}
     </delete>

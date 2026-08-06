@@ -327,4 +327,24 @@
           AND b.DATA_TYPE = #{dataType}
     </select>
 
+
+    <select id="selectListByDDID" resultType="swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTIONPojo">
+        select a.* from DD_SOLUTION a
+        <where>
+            <if test="ddidList != null and ddidList.size() > 0">
+                and dd_id in
+                <foreach collection="ddidList" open="(" close=")" item="ddid" separator=",">
+                    #{ddid}
+                </foreach>
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and DD_CARRYTM >= #{stime} ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and DD_CARRYTM <= #{etime} ]]>
+            </if>
+
+        </where>
+    </select>
+
 </mapper>

@@ -552,7 +552,7 @@
 
 
     <select id="queryByRiver" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
-        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT from getWaterViewRiver as A
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT,A.SLP,A.ADDVNM from getWaterViewRiver as A
         <where>
             <if test="DAYHOUR!='' and DAYHOUR!=null">
                 <if test="DAYHOUR=='DAY'">
@@ -581,7 +581,7 @@
         order by tm desc
     </select>
     <select id="queryByWas" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
-        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT from getWaterViewWas as A
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT,A.SLP,A.ADDVNM from getWaterViewWas as A
         <where>
             <if test="DAYHOUR!='' and DAYHOUR!=null">
                 <if test="DAYHOUR=='DAY'">
@@ -610,7 +610,7 @@
         order by tm desc
     </select>
     <select id="queryByTide" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
-        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT from getWaterViewTide as A
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT,A.SLP,A.ADDVNM from getWaterViewTide as A
         <where>
             <if test="DAYHOUR!='' and DAYHOUR!=null">
                 <if test="DAYHOUR=='DAY'">
@@ -639,7 +639,7 @@
         order by tm desc
     </select>
     <select id="queryByPump" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.GetWaterViewNewPojo">
-        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT from getWaterViewPump as A
+        select A.STCD,A.TM,STNM,RVNM,STLC,HNNM,STTP,LGTD,LTTD,LGTD84,LTTD84,UPZ,Q,DWZ,WRZ,GRZ,DKEL,WPTN,CJ,IVHZ,IVHZTM,LAZ,MTYPE,A.ATCUNIT,A.SLP,A.ADDVNM from getWaterViewPump as A
         <where>
             <if test="DAYHOUR!='' and DAYHOUR!=null">
                 <if test="DAYHOUR=='DAY'">

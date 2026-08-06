@@ -13,12 +13,18 @@ import java.util.List;
 public interface DD_SOLUTIONData {
 
     List<DD_SOLUTIONPojo> selectList(@Param(value = "ID") String ID,
-                                     @Param(value = "key") String key,
-                                     @Param("mindList")List<String> mindList,
-                                     @Param(value = "DD_DISTRIBY") String DD_DISTRIBY,
-                                     @Param(value = "stime") String stime,
-                                     @Param(value = "etime") String etime,
-                                     @Param(value = "startindex") Integer startindex,@Param(value = "pagesize") Integer pagesize);
+            @Param(value = "key") String key,
+            @Param("mindList") List<String> mindList,
+            @Param(value = "DD_DISTRIBY") String DD_DISTRIBY,
+            @Param(value = "stime") String stime,
+            @Param(value = "etime") String etime,
+            @Param(value = "startindex") Integer startindex,
+            @Param(value = "pagesize") Integer pagesize);
+
+    List<DD_SOLUTIONPojo> selectListByDDID(
+            @Param("ddidList") List<String> ddidList,
+            @Param(value = "stime") String stime,
+            @Param(value = "etime") String etime);
 
     Integer updateOne(DD_SOLUTIONPojo ddSolutionPojo);
 
@@ -29,29 +35,30 @@ public interface DD_SOLUTIONData {
     Integer insertALL(@Param(value = "objList") List<DD_SOLUTIONPojo> objList);
 
     Integer selectCount(@Param(value = "ID") String ID,
-                        @Param(value = "key") String key,
-                        @Param("mindList")List<String> mindList,
-                        @Param(value = "stime") String stime,
-                        @Param(value = "etime") String etime);
+            @Param(value = "key") String key,
+            @Param("mindList") List<String> mindList,
+            @Param(value = "stime") String stime,
+            @Param(value = "etime") String etime);
 
     List<DD_SOLUTIONPojo> selectListByDD_IDandDD_status(@Param(value = "DD_ID") String ID,
-                                     @Param(value = "DD_status") String key,@Param(value = "DD_DISTRIBY") String DD_DISTRIBY,@Param(value = "DD_TM") String DD_TM
-                                     );
-    List<DD_SOLUTIONPojo> selectListNew(@Param("pathnameList")List<String> pathnameList,
-                                     @Param(value = "stime") String stime,
-                                     @Param(value = "etime") String etime);
+            @Param(value = "DD_status") String key, @Param(value = "DD_DISTRIBY") String DD_DISTRIBY,
+            @Param(value = "DD_TM") String DD_TM);
+
+    List<DD_SOLUTIONPojo> selectListNew(@Param("pathnameList") List<String> pathnameList,
+            @Param(value = "stime") String stime,
+            @Param(value = "etime") String etime);
 
     List<DD_SOLUTIONPojo> selectListDuo(@Param(value = "ID") String ID,
-                                     @Param(value = "key") String key,
-                                     @Param("mindList")List<String> mindList,
-                                     @Param(value = "DD_DISTRIBY") String DD_DISTRIBY,
-                                     @Param(value = "stime") String stime,
-                                     @Param(value = "etime") String etime,
-                                     @Param(value = "startindex") Integer startindex,@Param(value = "pagesize") Integer pagesize);
+            @Param(value = "key") String key,
+            @Param("mindList") List<String> mindList,
+            @Param(value = "DD_DISTRIBY") String DD_DISTRIBY,
+            @Param(value = "stime") String stime,
+            @Param(value = "etime") String etime,
+            @Param(value = "startindex") Integer startindex, @Param(value = "pagesize") Integer pagesize);
 
     List<LatestPredictDtoPojo> selectLatestPredictByStation(@Param(value = "planNList") List<String> planNList,
-                                                             @Param(value = "STCD") String STCD,
-                                                             @Param(value = "stime") String stime,
-                                                             @Param(value = "etime") String etime,
-                                                             @Param(value = "dataType") String dataType);
+            @Param(value = "STCD") String STCD,
+            @Param(value = "stime") String stime,
+            @Param(value = "etime") String etime,
+            @Param(value = "dataType") String dataType);
 }

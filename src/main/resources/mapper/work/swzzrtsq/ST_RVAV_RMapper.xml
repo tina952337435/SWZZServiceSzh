@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.ST_RVAV_RData">
+
+    <resultMap id="BaseResultMap" type="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RVAV_RPojo">
+        <result column="STCD" property="STCD"/>
+        <result column="IDTM" property="IDTM"/>
+        <result column="STTDRCD" property="STTDRCD"/>
+        <result column="AVZ" property="AVZ"/>
+        <result column="AVQ" property="AVQ"/>
+    </resultMap>
+
+    <select id="selectListByStcdAndPeriod" resultMap="BaseResultMap">
+        SELECT STCD, IDTM, STTDRCD, AVZ, AVQ
+        FROM ST_RVAV_R
+        WHERE STTDRCD = #{sttdrcd}
+        <if test="stcdList != null and stcdList.size() > 0">
+            AND STCD IN
+            <foreach collection="stcdList" item="stcd" open="(" separator="," close=")">
+                #{stcd}
+            </foreach>
+        </if>
+        ORDER BY IDTM DESC
+    </select>
+
+    <select id="selectListByStcdAndPeriodAndTime" resultMap="BaseResultMap">
+        SELECT STCD, IDTM, STTDRCD, AVZ, AVQ
+        FROM ST_RVAV_R
+        WHERE STTDRCD = #{sttdrcd}
+        AND IDTM &gt;= #{stime}
+        AND IDTM &lt;= #{etime}
+        <if test="stcdList != null and stcdList.size() > 0">
+            AND STCD IN
+            <foreach collection="stcdList" item="stcd" open="(" separator="," close=")">
+                #{stcd}
+            </foreach>
+        </if>
+        ORDER BY IDTM DESC
+    </select>
+
+    <insert id="upsertAll">
+        MERGE INTO ST_RVAV_R t
+        USING (
+            <foreach collection="quPojo" item="pojo" separator=" UNION ALL ">
+                SELECT
+                    #{pojo.STCD, jdbcType=VARCHAR} AS STCD,
+                    #{pojo.IDTM, jdbcType=VARCHAR} AS IDTM,
+                    #{pojo.STTDRCD, jdbcType=VARCHAR} AS STTDRCD,
+                    #{pojo.AVZ, jdbcType=DOUBLE} AS AVZ,
+                    #{pojo.AVQ, jdbcType=DOUBLE} AS AVQ
+                FROM DUAL
+            </foreach>
+        ) s ON (t.STCD = s.STCD AND t.IDTM = s.IDTM AND t.STTDRCD = s.STTDRCD)
+        WHEN MATCHED THEN UPDATE SET
+            AVZ = s.AVZ, AVQ = s.AVQ
+        WHEN NOT MATCHED THEN INSERT
+            (STCD, IDTM, STTDRCD, AVZ, AVQ)
+            VALUES (s.STCD, s.IDTM, s.STTDRCD, s.AVZ, s.AVQ)
+    </insert>
+
+</mapper>

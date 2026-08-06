@@ -3,6 +3,7 @@ package swzzmodeserver.workserver.data.swzzmode;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RPojo;
+import swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_STAVPojo;
 
 import java.util.List;
 
@@ -28,5 +29,10 @@ public interface ES_PUMP_RData {
     List<ES_PUMP_RPojo> selectListNew(@Param(value = "stcd") String stcd,
                                   @Param(value = "stime") String stime,
                                   @Param(value = "etime") String etime);
-    
+
+    List<ES_PUMP_STAVPojo> selectStAvByRlstm(@Param(value = "rlstm") String rlstm);
+
+    List<ES_PUMP_RPojo> selectByRlstmAndStcd(@Param(value = "rlstm") String rlstm,
+                                              @Param(value = "stcd") String stcd);
+
 }

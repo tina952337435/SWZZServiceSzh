@@ -110,6 +110,8 @@ public class SqkbReportPojo {
         private String minTm;       // 最低水位出现时间
         private String slp;         // 所属水利片
         private Double wrz;         // 警戒水位
+        private String chartPath;   // 水位过程线图文件名
+        private String chartTitle;  // 水位过程线图标题
     }
 
     private String docDate; // 日期

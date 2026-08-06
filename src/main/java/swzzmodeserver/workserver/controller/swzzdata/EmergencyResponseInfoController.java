@@ -214,17 +214,48 @@ public class EmergencyResponseInfoController {
         }
     }
 
+    // 历史市级响应
+    @RequestMapping("/getSJYJXY")
+    public ResultUtils getSJYJXY(@RequestBody ParamField bpPojo) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        String stime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date().getTime() - 24 * 60 * 60 * 1000);
+        String etime = stime;
+        int pageindex = 1, pagesize = 100000000;
+        if (bpPojo.getStartdate() == null) {
+            return new ResultUtils<>(null, "startdate参数必传", false, -1, watch.getTime());
+        }
+        if (bpPojo.getEnddate() == null) {
+            return new ResultUtils<>(null, "enddate参数必传", false, -1, watch.getTime());
+        }
+        stime = bpPojo.getStartdate();
+        etime = bpPojo.getEnddate();
+        if (bpPojo.getPageindex() != null) {
+            pageindex = Integer.valueOf(bpPojo.getPageindex());
+        }
+        if (bpPojo.getPagesize() != null) {
+            pagesize = Integer.valueOf(bpPojo.getPagesize());
+        }
+        List<Map<String, Object>> list = shuiwupingServer.getSJYJXY(pagesize, pageindex, stime, etime);
+        watch.stop();
+        if (list.size() > 0) {
+            return new ResultUtils<>(list, "操作成功", true, list.size(), watch.getTime());
+        } else {
+            return new ResultUtils<>(list, "操作成功", false, list.size(), watch.getTime());
+        }
+    }
+
     @RequestMapping("/SyncDataYJXY")
     public ResultUtils SyncDataYJXY(@RequestBody ColumnName param) {
         StopWatch watch = new StopWatch();
         watch.start();
-        new   javalog().writelog("进入主服务SyncDataYJXY接口：",filePathName);
-        int num= tongbuServer.SyncDataYJXY();
+        new javalog().writelog("进入主服务SyncDataYJXY接口：", filePathName);
+        int num = tongbuServer.SyncDataYJXY();
         watch.stop();
-        if(num > 0){
-            return new ResultUtils<>(num, "操作成功",true, num,watch.getTime());
-        }else {
-            return new ResultUtils<>(num, "操作成功",false, num,watch.getTime());
+        if (num > 0) {
+            return new ResultUtils<>(num, "操作成功", true, num, watch.getTime());
+        } else {
+            return new ResultUtils<>(num, "操作成功", false, num, watch.getTime());
         }
     }
-} 
+}

@@ -951,6 +951,7 @@ public class ST_PPTN_RController {
                     emptyEntry.setHNNM(baseInfo.getHNNM());
                     emptyEntry.setSTLC(baseInfo.getSTLC());
                     emptyEntry.setATCUNIT(baseInfo.getATCUNIT());
+                    emptyEntry.setSLP(baseInfo.getSLP());
                     // emptyEntry.setDRP(0.0);
                     // emptyEntry.setTM(stime);
                     mList.add(emptyEntry);
@@ -963,10 +964,15 @@ public class ST_PPTN_RController {
             mList.forEach(u -> {
                 ST_STBPRP_BPojo matched = baseInfoMap.get(u.getSTCD());
                 if (matched != null) {
+                    new javalog().writelog("matched的值：" + matched, templatefilepath, "ylTest");
+
+                    // System.out.print("matched的值：" + matched);
                     u.setRVNM(matched.getRVNM());
                     u.setHNNM(matched.getHNNM());
                     u.setBSNM(matched.getBSNM());
                     u.setATCUNIT(matched.getATCUNIT());
+                    u.setSLP(matched.getSLP());
+                    u.setADDVNM(matched.getADDVNM());
                 }
             });
         }
@@ -2115,8 +2121,8 @@ public class ST_PPTN_RController {
                 .sum();
         // 使用 HALF_UP 模式四舍五入保留1位小数
         totalDrp = new BigDecimal(totalDrp)
-        .setScale(1, RoundingMode.HALF_UP)
-        .doubleValue(); 
+                .setScale(1, RoundingMode.HALF_UP)
+                .doubleValue();
         return totalDrp;
     }
 
@@ -2188,16 +2194,16 @@ public class ST_PPTN_RController {
      * 传入开始和结束时间，对 st_pptn_r 表中缺失的数据插入，已存在的数据更新雨量值
      *
      * 请求参数：
-     *   stime: 开始时间 yyyy-MM-dd HH:mm:ss (必填)
-     *   etime: 结束时间 yyyy-MM-dd HH:mm:ss (必填)
-     *   stcd:  站点列表，逗号分隔 (选填，不传则补全部雨量站)
+     * stime: 开始时间 yyyy-MM-dd HH:mm:ss (必填)
+     * etime: 结束时间 yyyy-MM-dd HH:mm:ss (必填)
+     * stcd: 站点列表，逗号分隔 (选填，不传则补全部雨量站)
      *
      * 返回：
-     *   fetchedCount:  从源系统拉取的总记录数
-     *   affectedCount: 实际写入的记录数
-     *   stationCount:  处理的站点数
-     *   errors:        错误列表
-     *   elapsedMs:     耗时毫秒
+     * fetchedCount: 从源系统拉取的总记录数
+     * affectedCount: 实际写入的记录数
+     * stationCount: 处理的站点数
+     * errors: 错误列表
+     * elapsedMs: 耗时毫秒
      */
     @RequestMapping("/repairHistoryPptn")
     public Map<String, Object> repairHistoryPptn(@RequestBody ColumnName param) {
@@ -2234,8 +2240,8 @@ public class ST_PPTN_RController {
         List<String> stcdList = new ArrayList<>();
         if (param.getStcd() != null && !param.getStcd().isEmpty()) {
             stcdList = Arrays.asList(param.getStcd().split(","));
-        }        
-        List<ST_PPTN_RPojo> result = data.selectListSL323NoLimit(stcdList,stime, etime);
+        }
+        List<ST_PPTN_RPojo> result = data.selectListSL323NoLimit(stcdList, stime, etime);
         watch.stop();
         if (result.size() > 0) {
             return new ResultUtils<>(result, "操作成功", true, result.size(), watch.getTime());

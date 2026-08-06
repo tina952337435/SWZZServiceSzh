@@ -96,4 +96,28 @@ public class SqkbController {
         result.setElapseTime(watch.getTime());
         return result;
     }
+
+    /**
+     * 校核流程：更新已有Word和PDF文件中的校核人及校核状态
+     * @param param 包含 xqkbId（报告ID）、reviewer（新校核人姓名）、checkStatus（校核状态）
+     */
+    @RequestMapping("/updateReviewer")
+    public ResultUtils<Map<String, String>> updateReviewer(@RequestBody Map<String, String> param) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+
+        String xqkbId = param.get("xqkbId");
+        String reviewer = param.get("reviewer");
+        String checkStatus = param.get("checkStatus");
+
+        if (xqkbId == null || xqkbId.isEmpty() || reviewer == null || reviewer.isEmpty()) {
+            return new ResultUtils<>(null, "参数必传: xqkbId, reviewer", false, 0, 0);
+        }
+
+        ResultUtils<Map<String, String>> result = sqkbServer.updateReviewer(xqkbId, reviewer, checkStatus);
+
+        watch.stop();
+        result.setElapseTime(watch.getTime());
+        return result;
+    }
 }

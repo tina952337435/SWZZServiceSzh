@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ST_RNFL_RMODEData">
+
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_RNFL_RMODEPojo">
+        select * from ST_RNFL_RMODE
+        <where>
+            <if test="STCD != null and STCD != ''">
+                and STCD = #{STCD}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        ORDER BY TM ASC
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM ST_RNFL_RMODE
+        <where>
+            <if test="STCD != null and STCD != ''">
+                and STCD = #{STCD}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_RNFL_RMODEPojo">
+        insert into ST_RNFL_RMODE(STCD, YBTM, TM, DRP, INTV, TEMP, HUMIDITY, WINDDIR, WINDSPEED, WEATHERCODE, AIRPRESSURE, TYPE, FPDR)
+        values(#{STCD}, #{YBTM}, #{TM}, #{DRP}, #{INTV}, #{TEMP}, #{HUMIDITY}, #{WINDDIR}, #{WINDSPEED}, #{WEATHERCODE}, #{AIRPRESSURE}, #{TYPE}, #{FPDR})
+    </insert>
+
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_RNFL_RMODEPojo">
+        insert into ST_RNFL_RMODE(STCD, YBTM, TM, DRP, INTV, TEMP, HUMIDITY, WINDDIR, WINDSPEED, WEATHERCODE, AIRPRESSURE, TYPE, FPDR) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.STCD}, #{obj.YBTM}, #{obj.TM}, #{obj.DRP}, #{obj.INTV}, #{obj.TEMP}, #{obj.HUMIDITY},
+             #{obj.WINDDIR}, #{obj.WINDSPEED}, #{obj.WEATHERCODE}, #{obj.AIRPRESSURE}, #{obj.TYPE}, #{obj.FPDR})
+        </foreach>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_RNFL_RMODEPojo">
+        update ST_RNFL_RMODE
+        <set>
+            <if test="DRP != null">DRP = #{DRP},</if>
+            <if test="INTV != null">INTV = #{INTV},</if>
+            <if test="TEMP != null">TEMP = #{TEMP},</if>
+            <if test="HUMIDITY != null">HUMIDITY = #{HUMIDITY},</if>
+            <if test="WINDDIR != null">WINDDIR = #{WINDDIR},</if>
+            <if test="WINDSPEED != null">WINDSPEED = #{WINDSPEED},</if>
+            <if test="WEATHERCODE != null">WEATHERCODE = #{WEATHERCODE},</if>
+            <if test="AIRPRESSURE != null">AIRPRESSURE = #{AIRPRESSURE},</if>
+            <if test="TYPE != null">TYPE = #{TYPE},</if>
+        </set>
+        where STCD = #{STCD} AND YBTM = #{YBTM} AND TM = #{TM} AND FPDR = #{FPDR}
+    </update>
+
+    <delete id="deleteOne">
+        delete from ST_RNFL_RMODE
+        where STCD = #{STCD} AND YBTM = #{YBTM} AND TM = #{TM} AND FPDR = #{FPDR}
+    </delete>
+
+    <!-- 按站点+时间范围查询最新预报：每个 (STCD, TM) 取 YBTM 最新的那条 -->
+    <select id="selectListLastBySTCD" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_RNFL_RMODEPojo">
+        SELECT STCD, YBTM, TM, DRP, INTV, TEMP, HUMIDITY, WINDDIR, WINDSPEED, WEATHERCODE, AIRPRESSURE, TYPE, FPDR
+        FROM (
+            SELECT STCD, YBTM, TM, DRP, INTV, TEMP, HUMIDITY, WINDDIR, WINDSPEED, WEATHERCODE, AIRPRESSURE, TYPE, FPDR,
+                ROW_NUMBER() OVER(PARTITION BY STCD, TM ORDER BY YBTM DESC) as rn
+            FROM ST_RNFL_RMODE
+            <where>
+                <if test="stcdList != null and stcdList.size() > 0">
+                    and STCD in
+                    <foreach collection="stcdList" open="(" close=")" item="item" separator=",">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="stime != null and stime != ''">
+                    <![CDATA[ and TM >= to_date(#{stime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+                </if>
+                <if test="etime != null and etime != ''">
+                    <![CDATA[ and TM <= to_date(#{etime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+                </if>
+                <if test="fpdr != null and fpdr.size() > 0">
+                    and FPDR in
+                    <foreach collection="fpdr" open="(" close=")" item="item" separator=",">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="type != null and type != ''">
+                    and TYPE = #{type}
+                </if>
+            </where>
+        ) t
+        WHERE t.rn = 1
+        ORDER BY t.TM
+    </select>
+
+</mapper>

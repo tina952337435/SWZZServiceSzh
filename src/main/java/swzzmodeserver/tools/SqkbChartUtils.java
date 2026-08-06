@@ -51,6 +51,23 @@ import java.util.Date;
 
 public class SqkbChartUtils {
 
+    static {
+        try {
+            java.net.URL fontsUrl = SqkbChartUtils.class.getClassLoader().getResource("fonts");
+            if (fontsUrl != null) {
+                java.io.File fontsDir = new java.io.File(fontsUrl.getPath());
+                for (java.io.File f : fontsDir.listFiles()) {
+                    if (f.getName().endsWith(".ttf") || f.getName().endsWith(".ttc")) {
+                        java.awt.Font font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, f);
+                        java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static String generateRainfallChart(List<Map<String, Object>> hourlyData, String stationName, String savePath) {
         try {
             // 设置中文字体
@@ -616,18 +633,8 @@ public class SqkbChartUtils {
 
             // 3. 创建时间序列图表
             JFreeChart chart = ChartFactory.createTimeSeriesChart(
-                    stationName + "水位过程线",
-                    "", // X轴标签
-                    "水位(m)",
-                    dataset,
-                    true,
-                    true,
-                    false
-            );
-
-            // 设置副标题
-            String subtitle = "开始时间：" + stime + " - 结束时间：" + etime;
-            chart.addSubtitle(new TextTitle(subtitle, new Font("宋体", Font.PLAIN, 14)));
+                    "", "", "水位(m)", dataset, true, true, false);
+            chart.addSubtitle(new TextTitle(stime + " ~ " + etime, new Font("宋体", Font.PLAIN, 14)));
 
             // 4. 获取 XYPlot 进行高级设置
             XYPlot plot = chart.getXYPlot();
@@ -716,6 +723,57 @@ public class SqkbChartUtils {
 
             return file.getAbsolutePath();
 
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 生成多站水位过程线图（7站合一）
+     */
+    public static String generateMultiWaterLevelChart(Map<String, List<Map<String, Object>>> stationDataMap,
+            String stime, String etime, String saveDir) {
+        try {
+            StandardChartTheme theme = new StandardChartTheme("CN");
+            theme.setLargeFont(new Font("宋体", Font.BOLD, 14));
+            theme.setRegularFont(new Font("宋体", Font.PLAIN, 12));
+            ChartFactory.setChartTheme(theme);
+
+            TimeSeriesCollection dataset = new TimeSeriesCollection();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            for (Map.Entry<String, List<Map<String, Object>>> entry : stationDataMap.entrySet()) {
+                TimeSeries series = new TimeSeries(entry.getKey());
+                for (Map<String, Object> record : entry.getValue()) {
+                    String tmStr = record.get("tm") != null ? record.get("tm").toString() : "";
+                    Double upz = record.get("upz") != null ? ((Number) record.get("upz")).doubleValue() : 0;
+                    if (!tmStr.isEmpty()) {
+                        series.add(new Millisecond(sdf.parse(tmStr)), upz);
+                    }
+                }
+                dataset.addSeries(series);
+            }
+
+            JFreeChart chart = ChartFactory.createTimeSeriesChart(
+                    "", "", "水位(m)", dataset, true, true, false);
+            chart.addSubtitle(new TextTitle(stime + " ~ " + etime, new Font("宋体", Font.PLAIN, 12)));
+
+            XYPlot plot = chart.getXYPlot();
+            plot.setBackgroundPaint(Color.WHITE);
+            plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
+            plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
+            DateAxis xAxis = (DateAxis) plot.getDomainAxis();
+            xAxis.setDateFormatOverride(new SimpleDateFormat("dd HH:mm"));
+            xAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 11));
+            plot.getRangeAxis().setTickLabelFont(new Font("宋体", Font.PLAIN, 11));
+
+            BufferedImage image = chart.createBufferedImage(900, 500);
+            String fileName = "water_multi_" + System.currentTimeMillis() + ".png";
+            File file = new File(saveDir, fileName);
+            if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
+            ImageIO.write(image, "png", file);
+            return file.getAbsolutePath();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

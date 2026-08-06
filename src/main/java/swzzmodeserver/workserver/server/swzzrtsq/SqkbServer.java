@@ -379,6 +379,64 @@ public class SqkbServer {
     }
 
     /**
+     * 校核流程：更新已有Word和PDF文件中的校核人，并记录到数据库
+     * 
+     * @param xqkbId   报告ID
+     * @param reviewer 新校核人姓名
+     */
+    public ResultUtils<Map<String, String>> updateReviewer(String xqkbId, String reviewer, String checkStatus) {
+        try {
+            // 1. 查记录
+            XQKB_LISTPojo record = xqkbListData.selectOne(xqkbId);
+            if (record == null) {
+                return new ResultUtils<>(null, "报告不存在", false);
+            }
+
+            String fileName = record.getXQKB_FILE();
+            if (fileName == null || fileName.isEmpty()) {
+                return new ResultUtils<>(null, "文件名不存在", false);
+            }
+
+            // 2. 文件路径
+            String savePath = templateFilePath + File.separator + "sqkb" + File.separator;
+            String docxPath = savePath + fileName;
+            String pdfPath = docxPath.replace(".docx", ".pdf");
+
+            File docxFile = new File(docxPath);
+            if (!docxFile.exists()) {
+                return new ResultUtils<>(null, "Word文件不存在: " + fileName, false);
+            }
+
+            // 3. 用Aspose修改Word：正则匹配"校核：XXX" → "校核：新名字"
+            com.aspose.words.Document doc = new com.aspose.words.Document(docxPath);
+            doc.getRange().replace(java.util.regex.Pattern.compile("校核：[^ ]+"), "校核：" + reviewer);
+            doc.save(docxPath);
+
+            // 5. 重新生成PDF
+            doc.save(pdfPath, com.aspose.words.SaveFormat.PDF);
+
+            // 6. 更新数据库记录
+            XQKB_LISTPojo update = new XQKB_LISTPojo();
+            update.setXQKB_ID(xqkbId);
+            update.setXQKB_JIAOHE(reviewer);
+            update.setXQKB_JIAOHETM(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            if (checkStatus != null && !checkStatus.isEmpty()) {
+                update.setXQKB_CHECK_STATUS(checkStatus);
+            }
+            xqkbListData.upDateOne(update);
+
+            Map<String, String> result = new HashMap<>();
+            result.put("reviewer", reviewer);
+            result.put("fileName", fileName);
+            return new ResultUtils<>(result, "校核人更新成功！", true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResultUtils<>(null, "更新校核人失败：" + e.getMessage(), false);
+        }
+    }
+
+    /**
      * 根据前端编辑的数据生成Word文档并下载（保留原有方法供下载使用）
      */
     public void generateWordDownload(SqkbReportPojo reportData, HttpServletResponse response) {
@@ -581,7 +639,7 @@ public class SqkbServer {
                 String chartPath = generateAndGetChartPath(reportData.getImage5Path(), "image5", reportData,
                         chartSavePath);
                 replaceImagePlaceholder(paragraph, "$image5Path$", chartPath,
-                        "图5  " + reportData.getMaxChangeStationNameSlp() + "水位过程线");
+                        "图5  " + reportData.getImage5PathTitle());
             }
         }
     }
@@ -733,9 +791,9 @@ public class SqkbServer {
                 picRun.addPicture(new java.io.ByteArrayInputStream(imageBytes), 6,
                         new File(imagePath).getName(), maxWidthEMU, heightEMU);
 
-                // 添加换行和图片说明（使用\r\n换行）
+                // 添加换行和图片说明（使用标准 br 元素，兼容Aspose）
                 XWPFRun breakRun = paragraph.createRun();
-                breakRun.setText("\r\n");
+                breakRun.addBreak();
 
                 XWPFRun captionRun = paragraph.createRun();
                 captionRun.setText(caption);
@@ -813,12 +871,11 @@ public class SqkbServer {
         String currentYear = yearFormat.format(new Date());
         report.setYear(currentYear);
 
-        // 查询XQKB_LIST表获取期号（XQKB_TYPE='水情快报' and XQKB_STM >= 当年1月1日）
+        // 查询XQKB_LIST表获取期号：取当前年最大期号 + 1
         try {
-            List<XQKB_LISTPojo> existList = xqkbListData.selectList(Collections.singletonList("水情快报"),
-                    currentYear + "-01-01 00:00:00", null);
-            // 期号 = 已有条数 + 1
-            int nextQihao = (existList != null ? existList.size() : 0) + 1;
+            Integer maxQihao = xqkbListData.selectMaxQihao("水情快报",
+                    currentYear + "-01-01 00:00:00");
+            int nextQihao = (maxQihao != null ? maxQihao : 0) + 1;
             report.setQihao(nextQihao);
         } catch (Exception e) {
             e.printStackTrace();
@@ -1205,8 +1262,6 @@ public class SqkbServer {
             String maxChangeStationName = "";
             String maxChangeStationNameSlp = "";
             double maxChangeValue = 0;
-            List<GetWaterViewNewPojo> maxChangeStationWaterList = null;
-            Double maxChangeWrz = null;
 
             List<SqkbReportPojo.WaterLevelStationPojo> waterStationList = new ArrayList<>();
 
@@ -1232,7 +1287,8 @@ public class SqkbServer {
                 boolean hasOverWarn = false;
                 for (int i = 0; i < waterList.size(); i++) {
                     String upzStr = waterList.get(i).getUPZ();
-                    if (upzStr == null) continue;
+                    if (upzStr == null)
+                        continue;
                     double upz = Double.parseDouble(upzStr);
                     if (upz > maxWaterLevel) {
                         maxWaterLevel = upz;
@@ -1254,14 +1310,15 @@ public class SqkbServer {
                 int minIndex = 0;
                 for (int i = 0; i < maxIndex; i++) {
                     String upzStr = waterList.get(i).getUPZ();
-                    if (upzStr == null) continue;
+                    if (upzStr == null)
+                        continue;
                     double upz = Double.parseDouble(upzStr);
                     if (upz < minBeforeMax) {
                         minBeforeMax = upz;
                         minIndex = i;
                     }
                 }
-                double change = maxWaterLevel - minBeforeMax;               
+                double change = maxWaterLevel - minBeforeMax;
 
                 if (change > 0) {
 
@@ -1278,8 +1335,27 @@ public class SqkbServer {
                         String slpForRec = waterList.get(0).getSLP();
                         ws.setSlp(slpForRec);
                         ws.setWrz(wrz);
+                        // 为每个站生成水位过程线图
+                        try {
+                            List<Map<String, Object>> chartDataForStation = new ArrayList<>();
+                            for (GetWaterViewNewPojo w : waterList) {
+                                Map<String, Object> item = new HashMap<>();
+                                item.put("tm", w.getTM());
+                                item.put("upz", w.getUPZ() != null ? Double.parseDouble(w.getUPZ()) : 0);
+                                chartDataForStation.add(item);
+                            }
+                            String waterTempDir = templateFilePath + File.separator + "sqkb" + File.separator + "temp";
+                            String stationChartPath = SqkbChartUtils.generateWaterLevelChart(
+                                    chartDataForStation, ws.getStnm(), stime, etime, wrz, waterTempDir);
+                            if (stationChartPath != null) {
+                                ws.setChartPath("temp" + File.separator + new File(stationChartPath).getName());
+                                String chartTitle = (slpForRec != null ? slpForRec : "") + ws.getStnm() + "水位过程线";
+                                ws.setChartTitle(chartTitle);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         waterStationList.add(ws);
-
 
                         String slp = waterList.get(0).getSLP(); // 使用STLC作为水利片字段
                         if (slp == null || slp.isEmpty()) {
@@ -1292,8 +1368,6 @@ public class SqkbServer {
                             maxChangeStationStcd = entry.getKey();
                             maxChangeStationName = waterList.get(0).getSTNM();
                             maxChangeStationNameSlp = slp + maxChangeStationName;
-                            maxChangeStationWaterList = new ArrayList<>(waterList);
-                            maxChangeWrz = wrz;
                         }
                     }
                 }
@@ -1327,25 +1401,14 @@ public class SqkbServer {
                 report.setMaxChangeStationNameSlp(maxChangeStationNameSlp);
             }
             report.setWaterLevelStationList(waterStationList);
-            // 生成水位过程线图
-            if (maxChangeStationWaterList != null && !maxChangeStationWaterList.isEmpty()) {
-                try {
-                    List<Map<String, Object>> chartDataList = new ArrayList<>();
-                    for (GetWaterViewNewPojo water : maxChangeStationWaterList) {
-                        Map<String, Object> item = new HashMap<>();
-                        item.put("tm", water.getTM());
-                        item.put("upz", water.getUPZ() != null ? Double.parseDouble(water.getUPZ()) : 0);
-                        chartDataList.add(item);
-                    }
-                    String waterChartPath = SqkbChartUtils.generateWaterLevelChart(
-                            chartDataList, maxChangeStationName, stime, etime, maxChangeWrz,
-                            templateFilePath + File.separator + "sqkb");
-                    if (waterChartPath != null) {
-                        report.setImage5PathTitle(report.getMaxChangeStationNameSlp() + "水位过程线");
-                        report.setImage5Path(new File(waterChartPath).getName());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+            // image5Path/image5PathTitle 取自涨幅最大站的图表（各站图表已在上面生成）
+            if (!waterStationList.isEmpty()) {
+                SqkbReportPojo.WaterLevelStationPojo maxStation = waterStationList.stream()
+                        .max(Comparator.comparing(SqkbReportPojo.WaterLevelStationPojo::getChange))
+                        .orElse(null);
+                if (maxStation != null && maxStation.getChartPath() != null) {
+                    report.setImage5Path(maxStation.getChartPath());
+                    report.setImage5PathTitle(maxStation.getChartTitle());
                 }
             }
 
@@ -1359,7 +1422,7 @@ public class SqkbServer {
 
     /**
      * 计算最大60分钟降雨量及其时间范围
-     * 使用滑动窗口算法
+     * 使用与 queryMaxSlidingRainfall 一致的滑动窗口算法
      */
     private Map<String, Object> calculateMax60Rainfall(List<ST_PPTN_RPojo> stationData) {
         Map<String, Object> result = new HashMap<>();
@@ -1374,51 +1437,58 @@ public class SqkbServer {
         List<ST_PPTN_RPojo> sortedData = new ArrayList<>(stationData);
         sortedData.sort(Comparator.comparing(ST_PPTN_RPojo::getTM));
 
-        // 转换为时间戳降雨量列表
-        List<Map.Entry<Long, Double>> timeRainList = new ArrayList<>();
+        // 构建 (epoch → drp) 映射
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Map<Long, Double> rainMap = new HashMap<>();
+        long stEpoch = 0, etEpoch = 0;
+        try {
+            stEpoch = sdf.parse(sortedData.get(0).getTM()).getTime();
+            etEpoch = sdf.parse(sortedData.get(sortedData.size() - 1).getTM()).getTime();
+        } catch (Exception e) {
+            return result;
+        }
         for (ST_PPTN_RPojo pojo : sortedData) {
             try {
                 long tm = sdf.parse(pojo.getTM()).getTime();
                 double drp = pojo.getDRP() != null ? pojo.getDRP() : 0;
-                timeRainList.add(new AbstractMap.SimpleEntry<>(tm, drp));
+                rainMap.put(tm, drp);
             } catch (Exception e) {
                 // ignore
             }
         }
 
-        if (timeRainList.isEmpty()) {
-            return result;
+        // 重建完整 5 分钟时间网格 + 前缀和（与 ST_PPTN_RServer 一致）
+        long gridStep = 5 * 60 * 1000L;
+        int gridSize = (int) ((etEpoch - stEpoch) / gridStep) + 1;
+        long[] times = new long[gridSize];
+        double[] prefix = new double[gridSize + 1];
+        for (int i = 0; i < gridSize; i++) {
+            times[i] = stEpoch + i * gridStep;
+            Double v = rainMap.get(times[i]);
+            double drp = (v != null) ? v : 0.0;
+            prefix[i + 1] = prefix[i] + drp;
         }
 
-        // 滑动窗口计算60分钟内的最大降雨量
+        // 滑动窗口：窗口 [left, right]，时间跨度严格 < 60min，与参考实现一致
+        long windowMs = 60L * 60 * 1000;
         double maxSum = 0;
-        long windowStart = 0;
-        long windowEnd = 0;
-        long oneHour = 60 * 60 * 1000; // 1小时毫秒数
+        int maxLeft = 0, maxRight = 0;
+        int left = 0;
 
-        for (int i = 0; i < timeRainList.size(); i++) {
-            long startTime = timeRainList.get(i).getKey();
-            long endTime = startTime + oneHour;
-
-            double sum = 0;
-            for (int j = i; j < timeRainList.size(); j++) {
-                if (timeRainList.get(j).getKey() <= endTime) {
-                    sum += timeRainList.get(j).getValue();
-                } else {
-                    break;
-                }
+        for (int right = 0; right < gridSize; right++) {
+            while (left < right && times[right] - times[left] >= windowMs) {
+                left++;
             }
-
+            double sum = prefix[right + 1] - prefix[left];
             if (sum > maxSum) {
                 maxSum = sum;
-                windowStart = startTime;
-                windowEnd = endTime;
+                maxLeft = left;
+                maxRight = right;
             }
         }
 
         result.put("maxDrp", maxSum);
-        result.put("timeRange", formatMax60TimeRange(windowStart, windowEnd));
+        result.put("timeRange", formatMax60TimeRange(times[maxLeft], times[maxRight]));
 
         return result;
     }

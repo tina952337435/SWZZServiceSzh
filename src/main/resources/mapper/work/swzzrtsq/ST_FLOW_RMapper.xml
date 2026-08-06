@@ -119,4 +119,29 @@
     ORDER BY
     F.TM asc;
 </select>
+
+<select id="selectHisDayAvg" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_FLOW_RPojo">
+    SELECT F.STCD,
+           MIN(F.TM) AS TM,
+           ROUND(AVG(F.Q), 3) AS Q,
+           ROUND(AVG(V.VEL), 3) AS V
+    FROM ST_FLOW_R F
+    LEFT JOIN ST_VEL_R V ON F.STCD = V.STCD AND F.TM = V.TM
+    <where>
+        <if test="stcdList != null and stcdList.size() > 0">
+            and F.STCD in
+            <foreach collection="stcdList" open="(" close=")" item="stcd" separator=",">
+                #{stcd}
+            </foreach>
+        </if>
+        <if test="stime != null and stime != ''">
+            <![CDATA[ and F.TM >= to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+        </if>
+        <if test="etime != null and etime != ''">
+            <![CDATA[ and F.TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>
+        </if>
+    </where>
+    GROUP BY F.STCD, TO_CHAR(F.TM, 'YYYY-MM-DD')
+    ORDER BY MIN(F.TM) ASC
+</select>
 </mapper>

@@ -182,10 +182,23 @@
             <if test="XQKB_YAOSU != null and XQKB_YAOSU != ''">
                 XQKB_YAOSU = #{XQKB_YAOSU},
             </if>
+            <if test="XQKB_JIAOHE != null and XQKB_JIAOHE != ''">
+                XQKB_JIAOHE = #{XQKB_JIAOHE},
+            </if>
+            <if test="XQKB_JIAOHETM != null and XQKB_JIAOHETM != ''">
+                XQKB_JIAOHETM = #{XQKB_JIAOHETM},
+            </if>
+            <if test="XQKB_CHECK_STATUS != null and XQKB_CHECK_STATUS != ''">
+                XQKB_CHECK_STATUS = #{XQKB_CHECK_STATUS},
+            </if>
         </set>
         where XQKB_ID = #{XQKB_ID}
     </update>
     <delete id="deleteOne">
         delete from XQKB_LIST where XQKB_ID = #{XQKB_ID}
     </delete>
+    <select id="selectMaxQihao" resultType="java.lang.Integer">
+        select MAX(XQKB_QIHAO) from XQKB_LIST
+        where XQKB_TYPE = #{type} and XQKB_TM >= #{stime}
+    </select>
 </mapper>

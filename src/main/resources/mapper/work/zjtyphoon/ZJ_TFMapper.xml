@@ -39,7 +39,7 @@
 
 
     <select id="selectListandzhuanti" resultType="swzzmodeserver.workserver.pojo.zjtyphoon.ZJ_TFZTPojo">
-        select A.*,B.ID as ZT_ID,B.STM,B.ETM from ZJ_TF A left join  (select * from SWZZ_FLOODTIDEDATA.zhuanti where DDWJ='提供2023') B
+        select A.*,B.ID as ZT_ID,B.STM,B.ETM from ZJ_TF A left join  (select * from SWZZ_FLOODTIDEDATA."zhuanti" where DDWJ='提供2023') B
         on A.ZJ_TFBH=B.STATUS
         <where>
             <if test="ID != null and ID != ''">

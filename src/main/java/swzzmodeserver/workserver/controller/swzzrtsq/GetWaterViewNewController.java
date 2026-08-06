@@ -21,9 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import swzzmodeserver.workserver.server.swzzrtsq.TongbuServer;
+import swzzmodeserver.workserver.server.swzzrtsq.ST_RVEVS_RServer;
+import swzzmodeserver.workserver.server.swzzrtsq.ST_RVAV_RServer;
+
+import java.util.concurrent.Executor;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -62,6 +67,15 @@ public class GetWaterViewNewController {
     private TongbuServer tongbuServer;
 
     @Autowired
+    private ST_RVEVS_RServer stRvevsRServer;
+
+    @Autowired
+    private ST_RVAV_RServer stRvavRServer;
+
+    @Autowired
+    private Executor syncTaskExecutor;
+
+    @Autowired
     private DD_SOLUTIONData ddSolutionData;
 
     @Autowired
@@ -69,6 +83,9 @@ public class GetWaterViewNewController {
 
     @Autowired
     private RTSQST_STBPRP_B_STCDData stbprpBStcdData;
+
+    @Autowired
+    private ST_FLOW_RData stFlowRData;
 
     // 文件存储路径
     @Value("${file.path.templatefilepath}")
@@ -218,6 +235,45 @@ public class GetWaterViewNewController {
             list = server.selectListByHisIsDay(stcdList, stime, etime, mtype);
         } else {
             list = server.selectListByHisIsTime(stcdList, stime, etime, mtype);
+        }
+        watch.stop();
+        if (list.size() > 0) {
+            return new ResultUtils<>(list, "操作成功", true, list.size(), watch.getTime());
+        } else {
+            return new ResultUtils<>(list, "操作成功", false, list.size(), watch.getTime());
+        }
+    }
+
+    // 流量查询：Minute=实时5分钟数据，DAY=日均流量
+    @RequestMapping("/queryByLL")
+    public ResultUtils queryByLL(@RequestBody ColumnName param) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        Date date = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+        String stime = DateUtil.dateFormat(date, "yyyy-MM-dd HH:mm:ss"),
+                etime = DateUtil.dateFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), id = "Minute";
+        List<String> stcdList = new ArrayList<>();
+        String mtype = "";
+        if (null != param.getPathname()) {
+            id = param.getPathname();
+        }
+        if (null != param.getStcd()) {
+            stcdList = Arrays.asList(param.getStcd().split(","));
+        }
+        if (null != param.getStime()) {
+            stime = param.getStime();
+        }
+        if (null != param.getEtime()) {
+            etime = param.getEtime();
+        }
+        if (null != param.getDatasource()) {
+            mtype = param.getDatasource();
+        }
+        List<ST_FLOW_RPojo> list = new ArrayList<>();
+        if ("DAY".equals(id)) {
+            list = stFlowRData.selectHisDayAvg(stcdList, stime, etime);
+        } else {
+            list = stFlowRData.selectHisAll(stcdList, stime, etime, null, null);
         }
         watch.stop();
         if (list.size() > 0) {
@@ -1695,6 +1751,83 @@ public class GetWaterViewNewController {
 
     }
 
+    // 多站流量
+    @RequestMapping("/queryByLLDuoZhan")
+    public ResultUtils queryByLLDuoZhan(@RequestBody ColumnName param) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        Date date = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+        String stime = DateUtil.dateFormat(date, "yyyy-MM-dd HH:mm:ss"),
+                etime = DateUtil.dateFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), id = "Minute";
+        List<String> stcdList = new ArrayList<>();
+        String mtype = "";
+        if (null != param.getPathname()) {
+            id = param.getPathname();
+        }
+        if (null != param.getStcd()) {
+            stcdList = Arrays.asList(param.getStcd().split(","));
+        }
+        if (null != param.getStime()) {
+            stime = param.getStime();
+        }
+        if (null != param.getEtime()) {
+            etime = param.getEtime();
+        }
+        if (null != param.getDatasource()) {
+            mtype = param.getDatasource();
+        }
+        List<ST_STBPRP_BPojo> stStbprpBList = stbprpBData.selectList(stcdList, null);
+        List<ST_FLOW_RPojo> list = stFlowRData.selectHis(stcdList, stime, etime);
+
+        Map<String, Object> map = new HashMap<>();
+        List<String> stcdListnm = new ArrayList<>();
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        if (stStbprpBList.size() > 0) {
+            for (int numII = 0; numII < stStbprpBList.size(); numII++) {
+                String stcdStnm = stStbprpBList.get(numII).getSTCD() + ":" + stStbprpBList.get(numII).getSTNM();
+                stcdListnm.add(stcdStnm);
+            }
+        }
+
+        if (null != list && list.size() > 0) {
+            // 按时间分组
+            LinkedHashMap<String, List<ST_FLOW_RPojo>> groupedByTm = list.stream()
+                    .sorted(Comparator.comparing(ST_FLOW_RPojo::getTM))
+                    .collect(Collectors.groupingBy(ST_FLOW_RPojo::getTM, LinkedHashMap::new, Collectors.toList()));
+
+            List<String> finalStcdList = stcdList;
+            groupedByTm.forEach((finaTime, mFlowList) -> {
+                Map<String, Object> strWhere = new HashMap<>();
+                strWhere.put("tm", finaTime);
+                // 从当前时间组的记录中构建 STCD->Q 快速查找表，避免每次扫描全量 list
+                Map<String, Double> stcdQMap = new HashMap<>();
+                for (ST_FLOW_RPojo pojo : mFlowList) {
+                    if (null != pojo.getQ()) {
+                        stcdQMap.put(pojo.getSTCD(), pojo.getQ());
+                    }
+                }
+                for (int numII = 0; numII < finalStcdList.size(); numII++) {
+                    String _stcd = finalStcdList.get(numII);
+                    if (stcdQMap.containsKey(_stcd)) {
+                        strWhere.put(_stcd + "q", stcdQMap.get(_stcd));
+                    } else {
+                        strWhere.put(_stcd + "q", null);
+                    }
+                }
+                mapList.add(strWhere);
+            });
+        }
+        map.put("listSTCD", stcdListnm);
+        map.put("list", mapList);
+        JSONObject json = new JSONObject(map);
+        watch.stop();
+        if (json.size() > 0) {
+            return new ResultUtils<>(json, "操作成功", true, json.size(), watch.getTime());
+        } else {
+            return new ResultUtils<>(json, "操作成功", false, json.size(), watch.getTime());
+        }
+    }
+
     /*
      * 数据同步接口
      */
@@ -1703,14 +1836,18 @@ public class GetWaterViewNewController {
         StopWatch watch = new StopWatch();
         watch.start();
         String mtype = "上海水文总站", type = "1,2,3,4,5,6,7,8,9,10,11,12";
+        List<String> listStcd = new ArrayList();
         if (param.getDatasource() != null) {
             mtype = param.getDatasource();
         }
         if (param.getPathname() != null) {
             type = param.getPathname();
         }
+        if (param.getStcd() != null) {
+            listStcd = Arrays.asList(param.getStcd().split(","));
+        }
         new javalog().writelog("进入主服务SynchronizeData接口：", templatefilepath);
-        int num = tongbuServer.SyncData(mtype, type);
+        int num = tongbuServer.SyncData(mtype, type, listStcd);
         watch.stop();
         if (num > 0) {
             return new ResultUtils<>(num, "操作成功", true, num, watch.getTime());
@@ -1899,7 +2036,6 @@ public class GetWaterViewNewController {
         }
     }
 
-
     @RequestMapping("/SynchronizeDataTsdb5min")
     public ResultUtils SynchronizeDataTsdb5min(@RequestBody ColumnName param) {
         StopWatch watch = new StopWatch();
@@ -1915,14 +2051,177 @@ public class GetWaterViewNewController {
         }
         if (param.getEtime() != null) {
             etime = param.getEtime();
-        } 
-        List<ST_PPTN_RPojo> listNew = tongbuServer.getRTSQ_5MINXZYL(stcdList, stime, etime,null);
+        }
+        List<ST_PPTN_RPojo> listNew = tongbuServer.getRTSQ_5MINXZYL(stcdList, stime, etime, null);
         watch.stop();
         if (listNew.size() > 0) {
             return new ResultUtils<>(listNew, "操作成功", true, listNew.size(), watch.getTime());
         } else {
             return new ResultUtils<>(listNew, "操作成功", false, listNew.size(), watch.getTime());
         }
+    }
+
+    /**
+     * 河道水情极值整理接口（由外部定时器调用）
+     *
+     * <p>
+     * 时段链路：
+     * <ul>
+     * <li>日(1) ：直接从原始表计算</li>
+     * <li>月(5) ：日 → 月（先批量算日极值，再取日极值的 max/min 得月极值）</li>
+     * <li>年(6) ：月 → 年（从已有月极值取 max/min 得年极值）</li>
+     * </ul>
+     *
+     * <p>
+     * 参数说明（ColumnName）：
+     * <ul>
+     * <li>stime 查询开始时间，不传默认昨日00:00:00</li>
+     * <li>etime 查询结束时间，不传默认昨日23:59:59</li>
+     * <li>pathname 统计时段标志，默认1（1=一日,2=三日,3=一侯,4=一旬,5=一月,6=一年）</li>
+     * <li>datasource 水位数据来源类型，不传不做筛选</li>
+     * </ul>
+     */
+    @RequestMapping("/syncRiverExtreme")
+    public ResultUtils syncRiverExtreme(@RequestBody ColumnName param) {
+        String stime = param.getStime();
+        String etime = param.getEtime();
+        String sttdrcd = param.getPathname() != null ? param.getPathname() : "1";
+        String mtype = param.getDatasource();
+        // stcd: 逗号分隔，不传=全部站点
+        List<String> stcdList = (param.getStcd() != null && !param.getStcd().isEmpty())
+                ? Arrays.asList(param.getStcd().split(","))
+                : null;
+
+        // 默认整理昨日
+        if (stime == null || stime.isEmpty()) {
+            Date yesterday = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+            stime = DateUtil.dateFormat(yesterday, "yyyy-MM-dd") + " 00:00:00";
+        }
+        if (etime == null || etime.isEmpty()) {
+            Date yesterday = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+            etime = DateUtil.dateFormat(yesterday, "yyyy-MM-dd") + " 23:59:59";
+        }
+        // 标志时间：统计时段截止后的次日零点（SL323-2011 定义）
+        // 日→次日00:00 月→次月首日00:00 年→次年首日00:00
+        Date idtmDate = DateUtil.addTimeToDate(
+                DateUtil.strToDate(etime.substring(0, 10) + " 00:00:00", DateUtil.YMDHMS), "d", 1);
+        String idtm = DateUtil.dateFormat(idtmDate, "yyyy-MM-dd") + " 00:00:00";
+
+        final String finalStime = stime;
+        final String finalEtime = etime;
+        final List<String> finalStcdList = stcdList;
+
+        // 上级极值查询需 +1 天：因为日极值 IDTM=次日零点，月极值 IDTM=次月首日零点
+        Date upperStime = DateUtil.addTimeToDate(
+                DateUtil.strToDate(stime.substring(0, 10) + " 00:00:00", DateUtil.YMDHMS), "d", 1);
+        Date upperEtime = DateUtil.addTimeToDate(
+                DateUtil.strToDate(etime.substring(0, 10) + " 00:00:00", DateUtil.YMDHMS), "d", 1);
+        final String fUpperStime = DateUtil.dateFormat(upperStime, "yyyy-MM-dd") + " 00:00:00";
+        final String fUpperEtime = DateUtil.dateFormat(upperEtime, "yyyy-MM-dd") + " 23:59:59";
+
+        // 丢到异步线程池执行，HTTP 立即返回
+        syncTaskExecutor.execute(() -> {
+            if ("6".equals(sttdrcd)) {
+                // 年：基于月极值
+                new javalog().writelog("年极值整理：月→年 stime=" + finalStime, templatefilepath);
+                Map<String, Object> r = stRvevsRServer.syncUpperExtreme(
+                        fUpperStime, fUpperEtime, idtm, "5", "6", finalStcdList);
+                new javalog().writelog("年极值整理完成：" + r.get("stationCount") + "站, 入库" + r.get("insertedCount"),
+                        templatefilepath);
+            } else if ("5".equals(sttdrcd)) {
+                // 月：先批量算日极值，再基于日极值算月极值
+                new javalog().writelog("月极值整理：原始→日→月 stime=" + finalStime, templatefilepath);
+                int dailyCount = stRvevsRServer.syncDailyBatch(finalStime, finalEtime, mtype, finalStcdList);
+                new javalog().writelog("日极值批量入库：" + dailyCount + " 条", templatefilepath);
+                Map<String, Object> r = stRvevsRServer.syncUpperExtreme(
+                        fUpperStime, fUpperEtime, idtm, "1", "5", finalStcdList);
+                new javalog().writelog("月极值整理完成：" + r.get("stationCount") + "站, 入库" + r.get("insertedCount"),
+                        templatefilepath);
+            } else {
+                // 日/三日/一侯/一旬：直接从原始表计算
+                new javalog().writelog("极值整理：原始→" + sttdrcd + " stime=" + finalStime, templatefilepath);
+                Map<String, Object> r = stRvevsRServer.syncDailyExtreme(
+                        finalStime, finalEtime, idtm, sttdrcd, mtype, finalStcdList);
+                new javalog().writelog("极值整理完成：" + r.get("stationCount") + "站, 入库" + r.get("insertedCount"),
+                        templatefilepath);
+            }
+        });
+
+        return new ResultUtils<>(null, "极值整理已提交后台执行", true, 0, 0);
+    }
+
+    /**
+     * 河道水情多日均值整理接口
+     *
+     * <p>
+     * 时段链路与极值表一致：
+     * <ul>
+     * <li>日(1) ：直接从原始表计算</li>
+     * <li>月(5) ：日 → 月（先批量算日均值，再取日均值的平均得月均值）</li>
+     * <li>年(6) ：月 → 年（从已有月均值取平均得年均值）</li>
+     * </ul>
+     */
+    @RequestMapping("/syncRiverAverage")
+    public ResultUtils syncRiverAverage(@RequestBody ColumnName param) {
+        String stime = param.getStime();
+        String etime = param.getEtime();
+        String sttdrcd = param.getPathname() != null ? param.getPathname() : "1";
+        String mtype = param.getDatasource();
+        List<String> stcdList = (param.getStcd() != null && !param.getStcd().isEmpty())
+                ? Arrays.asList(param.getStcd().split(","))
+                : null;
+
+        if (stime == null || stime.isEmpty()) {
+            Date yesterday = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+            stime = DateUtil.dateFormat(yesterday, "yyyy-MM-dd") + " 00:00:00";
+        }
+        if (etime == null || etime.isEmpty()) {
+            Date yesterday = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+            etime = DateUtil.dateFormat(yesterday, "yyyy-MM-dd") + " 23:59:59";
+        }
+
+        // 标志时间：截止后的次日零点
+        Date idtmDate = DateUtil.addTimeToDate(
+                DateUtil.strToDate(etime.substring(0, 10) + " 00:00:00", DateUtil.YMDHMS), "d", 1);
+        String idtm = DateUtil.dateFormat(idtmDate, "yyyy-MM-dd") + " 00:00:00";
+
+        final String finalStime = stime;
+        final String finalEtime = etime;
+        final List<String> finalStcdList = stcdList;
+
+        // 上级均值查询需 +1 天（日均值 IDTM=次日零点，月均值 IDTM=次月首日零点）
+        Date upperStime = DateUtil.addTimeToDate(
+                DateUtil.strToDate(stime.substring(0, 10) + " 00:00:00", DateUtil.YMDHMS), "d", 1);
+        Date upperEtime = DateUtil.addTimeToDate(
+                DateUtil.strToDate(etime.substring(0, 10) + " 00:00:00", DateUtil.YMDHMS), "d", 1);
+        final String fUpperStime = DateUtil.dateFormat(upperStime, "yyyy-MM-dd") + " 00:00:00";
+        final String fUpperEtime = DateUtil.dateFormat(upperEtime, "yyyy-MM-dd") + " 23:59:59";
+
+        syncTaskExecutor.execute(() -> {
+            if ("6".equals(sttdrcd)) {
+                new javalog().writelog("年均值整理：月→年 stime=" + finalStime, templatefilepath);
+                Map<String, Object> r = stRvavRServer.syncUpperAverage(fUpperStime, fUpperEtime, idtm, "5", "6",
+                        finalStcdList);
+                new javalog().writelog("年均值整理完成：" + r.get("stationCount") + "站, 入库" + r.get("insertedCount"),
+                        templatefilepath);
+            } else if ("5".equals(sttdrcd)) {
+                new javalog().writelog("月均值整理：原始→日→月 stime=" + finalStime, templatefilepath);
+                int dailyCount = stRvavRServer.syncDailyBatchAvg(finalStime, finalEtime, mtype, finalStcdList);
+                new javalog().writelog("日均值批量入库：" + dailyCount + " 条", templatefilepath);
+                Map<String, Object> r = stRvavRServer.syncUpperAverage(fUpperStime, fUpperEtime, idtm, "1", "5",
+                        finalStcdList);
+                new javalog().writelog("月均值整理完成：" + r.get("stationCount") + "站, 入库" + r.get("insertedCount"),
+                        templatefilepath);
+            } else {
+                new javalog().writelog("均值整理：原始→" + sttdrcd + " stime=" + finalStime, templatefilepath);
+                Map<String, Object> r = stRvavRServer.syncDailyAverage(finalStime, finalEtime, idtm, sttdrcd, mtype,
+                        finalStcdList);
+                new javalog().writelog("均值整理完成：" + r.get("stationCount") + "站, 入库" + r.get("insertedCount"),
+                        templatefilepath);
+            }
+        });
+
+        return new ResultUtils<>(null, "均值整理已提交后台执行", true, 0, 0);
     }
 
 }

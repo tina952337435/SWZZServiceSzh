@@ -25,4 +25,7 @@ public interface ES_PUMP_RNEWData {
     Integer insertALL(@Param(value = "objList") List<ES_PUMP_RNEWPojo> objList);
 
     Integer selectCount(@Param(value = "id") String ID);
+
+    ES_PUMP_RNEWPojo selectLatest(@Param(value = "stime") String stime,
+                                   @Param(value = "etime") String etime);
 }

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzrtsq.ST_RVEVS_RData">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RVEVS_RPojo">
+        <result column="STCD" property="STCD"/>
+        <result column="IDTM" property="IDTM"/>
+        <result column="STTDRCD" property="STTDRCD"/>
+        <result column="HTZ" property="HTZ"/>
+        <result column="LTZ" property="LTZ"/>
+        <result column="MXQ" property="MXQ"/>
+        <result column="MNQ" property="MNQ"/>
+        <result column="HTZTM" property="HTZTM"/>
+        <result column="LTZTM" property="LTZTM"/>
+        <result column="MXQTM" property="MXQTM"/>
+        <result column="MNQTM" property="MNQTM"/>
+    </resultMap>
+
+    <!-- 按站点+统计时段标志查询极值列表 -->
+    <select id="selectListByStcdAndPeriod" resultMap="BaseResultMap">
+        SELECT STCD, IDTM, STTDRCD, HTZ, LTZ, MXQ, MNQ, HTZTM, LTZTM, MXQTM, MNQTM
+        FROM ST_RVEVS_R
+        WHERE STTDRCD = #{sttdrcd}
+        <if test="stcdList != null and stcdList.size() > 0">
+            AND STCD IN
+            <foreach collection="stcdList" item="stcd" open="(" separator="," close=")">
+                #{stcd}
+            </foreach>
+        </if>
+        ORDER BY IDTM DESC
+    </select>
+
+    <!-- 按站点+时段+时间范围查询极值列表 -->
+    <select id="selectListByStcdAndPeriodAndTime" resultMap="BaseResultMap">
+        SELECT STCD, IDTM, STTDRCD, HTZ, LTZ, MXQ, MNQ, HTZTM, LTZTM, MXQTM, MNQTM
+        FROM ST_RVEVS_R
+        WHERE STTDRCD = #{sttdrcd}
+        AND IDTM &gt;= #{stime}
+        AND IDTM &lt;= #{etime}
+        <if test="stcdList != null and stcdList.size() > 0">
+            AND STCD IN
+            <foreach collection="stcdList" item="stcd" open="(" separator="," close=")">
+                #{stcd}
+            </foreach>
+        </if>
+        ORDER BY IDTM DESC
+    </select>
+
+    <!-- 按时间范围查询极值列表 -->
+    <select id="selectListByTimeRange" resultMap="BaseResultMap">
+        SELECT STCD, IDTM, STTDRCD, HTZ, LTZ, MXQ, MNQ, HTZTM, LTZTM, MXQTM, MNQTM
+        FROM ST_RVEVS_R
+        WHERE IDTM &gt;= #{stime}
+        AND IDTM &lt;= #{etime}
+        ORDER BY STCD, IDTM DESC
+    </select>
+
+    <!-- 批量插入 -->
+    <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_RVEVS_RPojo">
+        INSERT INTO ST_RVEVS_R(STCD, IDTM, STTDRCD, HTZ, LTZ, MXQ, MNQ, HTZTM, LTZTM, MXQTM, MNQTM) VALUES
+        <foreach collection="quPojo" item="pojo" separator=",">
+            (#{pojo.STCD}, #{pojo.IDTM}, #{pojo.STTDRCD},
+             #{pojo.HTZ}, #{pojo.LTZ}, #{pojo.MXQ}, #{pojo.MNQ},
+             #{pojo.HTZTM}, #{pojo.LTZTM}, #{pojo.MXQTM}, #{pojo.MNQTM})
+        </foreach>
+    </insert>
+
+    <!-- 按联合主键查询单条记录 -->
+    <select id="selectOne" resultMap="BaseResultMap">
+        SELECT STCD, IDTM, STTDRCD, HTZ, LTZ, MXQ, MNQ, HTZTM, LTZTM, MXQTM, MNQTM
+        FROM ST_RVEVS_R
+        WHERE STCD = #{stcd}
+        AND IDTM = #{idtm}
+        AND STTDRCD = #{sttdrcd}
+    </select>
+
+    <!-- 批量 MERGE：原子 upsert，零空档期 -->
+    <insert id="upsertAll">
+        MERGE INTO ST_RVEVS_R t
+        USING (
+            <foreach collection="quPojo" item="pojo" separator=" UNION ALL ">
+                SELECT
+                    #{pojo.STCD, jdbcType=VARCHAR} AS STCD,
+                    #{pojo.IDTM, jdbcType=VARCHAR} AS IDTM,
+                    #{pojo.STTDRCD, jdbcType=VARCHAR} AS STTDRCD,
+                    #{pojo.HTZ, jdbcType=DOUBLE} AS HTZ,
+                    #{pojo.LTZ, jdbcType=DOUBLE} AS LTZ,
+                    #{pojo.MXQ, jdbcType=DOUBLE} AS MXQ,
+                    #{pojo.MNQ, jdbcType=DOUBLE} AS MNQ,
+                    #{pojo.HTZTM, jdbcType=VARCHAR} AS HTZTM,
+                    #{pojo.LTZTM, jdbcType=VARCHAR} AS LTZTM,
+                    #{pojo.MXQTM, jdbcType=VARCHAR} AS MXQTM,
+                    #{pojo.MNQTM, jdbcType=VARCHAR} AS MNQTM
+                FROM DUAL
+            </foreach>
+        ) s ON (t.STCD = s.STCD AND t.IDTM = s.IDTM AND t.STTDRCD = s.STTDRCD)
+        WHEN MATCHED THEN UPDATE SET
+            HTZ = s.HTZ, HTZTM = s.HTZTM, LTZ = s.LTZ, LTZTM = s.LTZTM,
+            MXQ = s.MXQ, MXQTM = s.MXQTM, MNQ = s.MNQ, MNQTM = s.MNQTM
+        WHEN NOT MATCHED THEN INSERT
+            (STCD, IDTM, STTDRCD, HTZ, HTZTM, LTZ, LTZTM, MXQ, MXQTM, MNQ, MNQTM)
+            VALUES (s.STCD, s.IDTM, s.STTDRCD, s.HTZ, s.HTZTM, s.LTZ, s.LTZTM, s.MXQ, s.MXQTM, s.MNQ, s.MNQTM)
+    </insert>
+
+</mapper>

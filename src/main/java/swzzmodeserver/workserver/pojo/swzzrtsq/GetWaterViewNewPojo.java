@@ -48,8 +48,8 @@ public class GetWaterViewNewPojo {
 
     private String YBZ;
     private Double DRP;
-    private String SLP;
-
+    private String SLP;// 水利片
+    private String ADDVNM;// 行政区
 
     /**
      * 风速

@@ -137,4 +137,33 @@ public class ES_PUMP_RNEWController {
             return new ResultUtils<>(num, "操作成功",false, num,watch.getTime());
         }
     }
+
+    /**
+     * 查询时间段内最新的模型预报数据
+     * @param bpPojo startdate: 开始时间, enddate: 结束时间
+     */
+    @RequestMapping("/findLatest")
+    public ResultUtils findLatest(@RequestBody ParamField bpPojo){
+        StopWatch watch = new StopWatch();
+        watch.start();
+        if(CommonUtills.isEmpty(FieldIsValid.getColumnName(bpPojo,ParamField.class))){
+            watch.stop();
+            return new ResultUtils<>(null,"存在非法字符",false,-1,watch.getTime());
+        }
+        String stime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date().getTime() - 24 * 60 * 60 * 1000);
+        String etime = "";
+        if(null != bpPojo.getStartdate()){
+            stime = bpPojo.getStartdate();
+        }
+        if(null != bpPojo.getEnddate()){
+            etime = bpPojo.getEnddate();
+        }
+        ES_PUMP_RNEWPojo result = data.selectLatest(stime, etime);
+        watch.stop();
+        if(result != null){
+            return new ResultUtils<>(result, "操作成功",true, 1, watch.getTime());
+        }else {
+            return new ResultUtils<>(null, "未查到数据",false, 0, watch.getTime());
+        }
+    }
 }

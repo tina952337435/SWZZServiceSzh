@@ -39,5 +39,11 @@ public interface ST_FLOW_RData {
         @Param(value = "etime") String etime
     );
 
+    List<ST_FLOW_RPojo> selectHisDayAvg(
+        @Param(value = "stcdList") List<String> stcdList,
+        @Param(value = "stime") String stime,
+        @Param(value = "etime") String etime
+    );
+
 
 }

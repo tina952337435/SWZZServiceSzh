@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ST_RNFL_RLISTData">
+
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_RNFL_RLISTPojo">
+        select * from ST_RNFL_RLIST
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+        ORDER BY TM ASC
+        <if test="startindex != null and pagesize != null">
+            limit #{startindex},#{pagesize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="integer">
+        SELECT count(1) FROM ST_RNFL_RLIST
+        <where>
+            <if test="ID != null and ID != ''">
+                and ID = #{ID}
+            </if>
+            <if test="stime != null and stime != ''">
+                <![CDATA[ and TM >= to_date(#{stime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+            <if test="etime != null and etime != ''">
+                <![CDATA[ and TM <= to_date(#{etime}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_RNFL_RLISTPojo">
+        insert into ST_RNFL_RLIST(ID, NCFILE, TM, FPDR)
+        values(#{ID}, #{NCFILE}, #{TM}, #{FPDR})
+    </insert>
+
+    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_RNFL_RLISTPojo">
+        insert into ST_RNFL_RLIST(ID, NCFILE, TM, FPDR) values
+        <foreach collection="objList" item="obj" separator=",">
+            (#{obj.ID}, #{obj.NCFILE}, #{obj.TM}, #{obj.FPDR})
+        </foreach>
+    </insert>
+
+    <update id="updateOne" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_RNFL_RLISTPojo">
+        update ST_RNFL_RLIST
+        <set>
+            <if test="NCFILE != null">NCFILE = #{NCFILE},</if>
+        </set>
+        where ID = #{ID} AND TM = #{TM} AND FPDR = #{FPDR}
+    </update>
+
+    <delete id="deleteOne">
+        delete from ST_RNFL_RLIST
+        where ID = #{ID} AND TM = #{TM} AND FPDR = #{FPDR}
+    </delete>
+
+</mapper>

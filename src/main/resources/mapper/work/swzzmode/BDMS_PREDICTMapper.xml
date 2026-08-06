@@ -19,9 +19,9 @@
                     #{plan,jdbcType=VARCHAR}
                 </foreach>
             </if>
-            <if test="STCD != null and STCD != ''">
+            <!-- <if test="STCD != null and STCD != ''">
                 and STCD = #{STCD}
-            </if>
+            </if> -->
 
             <if test="stcdlist != null and stcdlist.size() > 0">
                 and STCD in
@@ -61,8 +61,14 @@
                     #{plan,jdbcType=VARCHAR}
                 </foreach>
             </if>
-            <if test="STCD != null and STCD != ''">
+            <!-- <if test="STCD != null and STCD != ''">
                 and STCD = #{STCD}
+            </if> -->
+            <if test="stcdlist != null and stcdlist.size() > 0">
+                and STCD in
+                <foreach collection="stcdlist" open="(" close=")" item="stcd" separator=",">
+                    #{stcd,jdbcType=VARCHAR}
+                </foreach>
             </if>
             <if test="dataType != null and dataType != ''">
                 and DATA_TYPE = #{dataType}

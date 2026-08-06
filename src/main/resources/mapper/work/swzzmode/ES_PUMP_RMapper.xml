@@ -86,6 +86,40 @@
         </set>
         where stcd = #{STCD}
     </update>
+    <!-- 按模型预报时间(RLSTM)联查ES_PUMP_B，求每个站的平均流量和最大流量 -->
+    <select id="selectStAvByRlstm" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_STAVPojo">
+        SELECT
+            b.ZHANID AS STCD,
+            b.STNM,
+            b.LGTD,
+            b.LTTD,
+            AVG(r.PMPQ) AS AVG_PMPQ,
+            MAX(r.PMPQ) AS MAX_PMPQ
+        FROM ES_PUMP_R r
+        INNER JOIN ES_PUMP_B b ON r.STCD = b.ZHANID
+        <where>
+            <if test="rlstm != null and rlstm != ''">
+                AND r.RLSTM = #{rlstm}
+            </if>
+        </where>
+        GROUP BY b.ZHANID, b.STNM, b.LGTD, b.LTTD
+        ORDER BY b.ZHANID
+    </select>
+
+    <!-- 按模型计算时间(RLSTM)和站点(STCD)查询 -->
+    <select id="selectByRlstmAndStcd" resultType="swzzmodeserver.workserver.pojo.swzzmode.ES_PUMP_RPojo">
+        SELECT * FROM ES_PUMP_R
+        <where>
+            <if test="rlstm != null and rlstm != ''">
+                AND RLSTM = #{rlstm}
+            </if>
+            <if test="stcd != null and stcd != ''">
+                AND STCD = #{stcd}
+            </if>
+        </where>
+        ORDER BY STCD, TM
+    </select>
+
     <delete id="deleteOne">
         delete from ES_PUMP_R where stcd = #{id}
     </delete>
