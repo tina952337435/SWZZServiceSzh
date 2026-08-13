@@ -1,5 +1,6 @@
 package swzzmodeserver.workserver.controller.swzzmode;
 
+import org.apache.commons.lang.ObjectUtils.Null;
 import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -82,7 +83,7 @@ public class BDMS_PREDICTController {
         if (!"".equals(pageindex) && !"".equals(pagesize)) {
             startindex = (Integer.parseInt(pageindex) - 1) * Integer.parseInt(pagesize);
         }
-        List<BDMS_PREDICTPojo> fxList = data.selectList(ID, stime, etime, PLAN_N, stcdlist, type, startindex,
+        List<BDMS_PREDICTPojo> fxList = data.selectList(ID, stime, etime, PLAN_N, null, type, startindex,
                 Integer.valueOf(pagesize), "asc", stcdlist);
         Integer integer = data.selectCount(ID, stime, etime, null, stcdlist, "");
         Integer count = 1;

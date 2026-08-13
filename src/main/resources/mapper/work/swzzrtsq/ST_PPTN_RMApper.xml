@@ -259,7 +259,7 @@
             <if test="MTYPE != null and MTYPE != ''">
                 and MTYPE = #{MTYPE}
             </if>
-            order by tm desc
+            order by tm
         </where>
     </select>
     <select id="queryHOURDRPList" resultType="swzzmodeserver.workserver.pojo.swzzrtsq.ST_PPTN_RPojo">

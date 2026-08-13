@@ -36,11 +36,9 @@
                     AND START_TIME >= #{stime} 
                 ]]>
             </if>
-            
-            <!-- 气象预警时间范围 (QXTYJ_DATE) -->
             <if test="etime != null and etime != ''">
                 <![CDATA[ 
-                    AND QXTYJ_DATE <= #{etime} 
+                    AND START_TIME <= #{etime} 
                 ]]>
             </if>
         </where>
@@ -119,6 +117,12 @@
             <if test="QXTYJ_DATE != null and QXTYJ_DATE != ''">
                 QXTYJ_DATE,
             </if>
+            <if test="DEPTWX != null and DEPTWX != ''">
+                DEPTWX,
+            </if>
+            <if test="XY_DW != null and XY_DW != ''">
+                XY_DW,
+            </if>
         </trim>
         VALUES
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -151,6 +155,12 @@
             </if>
             <if test="QXTYJ_DATE != null and QXTYJ_DATE != ''">
                 #{QXTYJ_DATE},
+            </if>
+            <if test="DEPTWX != null and DEPTWX != ''">
+                #{DEPTWX},
+            </if>
+            <if test="XY_DW != null and XY_DW != ''">
+               #{XY_DW},
             </if>
         </trim>
     </insert>
@@ -186,6 +196,12 @@
             <if test="QXTYJ_DATE != null and QXTYJ_DATE != ''">
                 QXTYJ_DATE = #{QXTYJ_DATE},
             </if>
+            <if test="DEPTWX != null and DEPTWX != ''">
+                DEPTWX = #{DEPTWX},
+            </if>
+            <if test="XY_DW != null and XY_DW != ''">
+                XY_DW = #{XY_DW}
+            </if>
         </set>
         WHERE ID = #{ID}
     </update>
@@ -214,12 +230,28 @@
         </where>
     </select>
 
+    <!-- 按DEPTWX分组，查询每个区域最新的START_TIME记录（返回全部字段） -->
+    <!-- 性能依赖索引: CREATE INDEX idx_deptwx_starttime ON EMERGENCY_RESPONSE_INFO(DEPTWX, START_TIME DESC); -->
+    <select id="selectLatestByDeptwx" resultType="swzzmodeserver.workserver.pojo.swzzdata.EmergencyResponseInfoPojo">
+        SELECT
+            e.ID, e.YJD_NUMBER, e.START_TIME, e.SIGNAL_STAGE, e.SIGNAL_LEVEL,
+            e.SIGNAL_CATEGORY, e.EARLY_WARNING_NUM, e.TITLE, e.CONTENT,
+            e.QXTYJ_DATE, e.DEPTWX, e.XY_DW
+        FROM EMERGENCY_RESPONSE_INFO e
+        INNER JOIN (
+            SELECT DEPTWX, MAX(START_TIME) AS max_time
+            FROM EMERGENCY_RESPONSE_INFO
+            GROUP BY DEPTWX
+        ) t ON e.DEPTWX = t.DEPTWX AND e.START_TIME = t.max_time
+    </select>
+
       <insert id="insertAll" parameterType="swzzmodeserver.workserver.pojo.swzzdata.EmergencyResponseInfoPojo">
         insert into EMERGENCY_RESPONSE_INFO( ID, YJD_NUMBER, START_TIME, SIGNAL_STAGE, SIGNAL_LEVEL, 
-            SIGNAL_CATEGORY, EARLY_WARNING_NUM, TITLE, CONTENT, QXTYJ_DATE ) values
+            SIGNAL_CATEGORY, EARLY_WARNING_NUM, TITLE, CONTENT, QXTYJ_DATE,DEPTWX,XY_DW ) values
         <foreach collection="quPojo" item="pojo" separator=",">
             (#{pojo.ID},#{pojo.YJD_NUMBER},#{pojo.START_TIME},#{pojo.SIGNAL_STAGE},#{pojo.SIGNAL_LEVEL},
-            #{pojo.SIGNAL_CATEGORY},#{pojo.EARLY_WARNING_NUM},#{pojo.TITLE},#{pojo.CONTENT},#{pojo.QXTYJ_DATE})
+            #{pojo.SIGNAL_CATEGORY},#{pojo.EARLY_WARNING_NUM},#{pojo.TITLE},#{pojo.CONTENT},#{pojo.QXTYJ_DATE},
+            #{pojo.DEPTWX},#{pojo.XY_DW})
         </foreach>
     </insert>
 </mapper>

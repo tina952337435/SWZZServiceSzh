@@ -1141,6 +1141,188 @@ public class GetWaterViewNewController {
         }
     }
 
+    @RequestMapping("/queryBySWMax")
+    public ResultUtils queryBySWMax(@RequestBody ColumnName param) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        Date date = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+        String dayhour = "Minute", stime = DateUtil.dateFormat(date, "yyyy-MM-dd HH:mm:ss"), etime = "";
+        List<String> listSTCD = new ArrayList<>();
+        if (null != param.getPathname()) {
+            dayhour = param.getPathname();
+        }
+        if (null != param.getStime()) {
+            stime = param.getStime();
+        }
+        if (null != param.getEtime()) {
+            etime = param.getEtime();
+        }
+        String mtype = "";
+        if (null != param.getDatasource()) {
+            mtype = param.getDatasource();
+        }
+        String pid = "";
+        List<ST_STBPRP_B_QUPojo> quList = new ArrayList<>();
+        if (null != param.getPid()) {
+            List<String> idList = new ArrayList<>();
+            idList = Arrays.asList(param.getPid().split(","));
+            quList = quData.queryList("", "", null, idList);
+            listSTCD = quList.stream().map(s -> s.getSTCD()).distinct().collect(Collectors.toList());
+        }
+
+        // 使用数据库ROW_NUMBER窗口函数，每个站只返回UPZ最高的那一条记录
+        List<GetWaterViewNewPojo> userListRiver = data.queryByRiverMax(listSTCD, stime, etime, dayhour, mtype);
+        List<GetWaterViewNewPojo> userListWas = data.queryByWasMax(listSTCD, stime, etime, dayhour, mtype);
+        List<GetWaterViewNewPojo> userListTide = data.queryByTideMax(listSTCD, stime, etime, dayhour, mtype);
+        List<GetWaterViewNewPojo> userListPump = data.queryByPumpMax(listSTCD, stime, etime, dayhour, mtype);
+        List<GetWaterViewNewPojo> dataList = new ArrayList<>();
+        List<ST_STBPRP_BPojo> stStbprpBList = stbprpBData.selectStbprpBList(listSTCD, null, null);
+
+        if (quList.size() > 0) {
+            for (int num = 0; num < quList.size(); num++) {
+                ST_STBPRP_B_QUPojo onestbprpBQuList = quList.get(num);
+                String stcd = onestbprpBQuList.getSTCD().toString();
+                // SQL已按UPZ降序返回每个站唯一一条最高水位记录，只需匹配STCD+STTP
+                List<GetWaterViewNewPojo> oneRiverList = userListRiver.stream()
+                        .filter(u -> u.getSTCD().equals(stcd) && onestbprpBQuList.getSTTP().equals(u.getMTYPE()))
+                        .collect(Collectors.toList());
+                List<GetWaterViewNewPojo> oneWasList = userListWas.stream()
+                        .filter(u -> u.getSTCD().equals(stcd) && onestbprpBQuList.getSTTP().equals(u.getMTYPE()))
+                        .collect(Collectors.toList());
+                List<GetWaterViewNewPojo> oneTideList = userListTide.stream()
+                        .filter(u -> u.getSTCD().equals(stcd) && onestbprpBQuList.getSTTP().equals(u.getMTYPE()))
+                        .collect(Collectors.toList());
+                List<GetWaterViewNewPojo> onePumpList = userListPump.stream()
+                        .filter(u -> u.getSTCD().equals(stcd) && onestbprpBQuList.getSTTP().equals(u.getMTYPE()))
+                        .collect(Collectors.toList());
+                List<ST_STBPRP_BPojo> onestStbprpB = stStbprpBList.stream()
+                        .filter(u -> u.getSTCD().equals(stcd) && onestbprpBQuList.getSTTP().equals(u.getMTYPE()))
+                        .collect(Collectors.toList());
+                List<ST_STBPRP_B_QUPojo> tempquList = quList.stream().filter(u -> u.getSTCD().equals(stcd))
+                        .collect(Collectors.toList());
+
+                if (oneRiverList.size() > 0) {
+                    GetWaterViewNewPojo pojo = oneRiverList.get(0);
+                    if (tempquList.size() > 0) {
+                        pojo.setOrderbyid(tempquList.get(0).getORDERBYID());
+                        pojo.setSTNM(tempquList.get(0).getSTNM());
+                    }
+                    if (onestStbprpB.size() > 0) {
+                        pojo.setADMAUTH(onestStbprpB.get(0).getADMAUTH());
+                        pojo.setDTPR(onestStbprpB.get(0).getDTPR());
+                    }
+                    List<ST_STBPRP_B_QUPojo> onequstcd = quList.stream()
+                            .filter(o -> o.getSTCD().equals(pojo.getSTCD()) && o.getSTTP().equals(pojo.getMTYPE()))
+                            .collect(Collectors.toList());
+                    if (onequstcd.size() > 0) {
+                        pojo.setDIR(onequstcd.get(0).getDIR());
+                        pojo.setMAPSIZE(String.valueOf(onequstcd.get(0).getMAPSIZE()));
+                        pojo.setROTATE(onequstcd.get(0).getROTATE());
+                    }
+                    dataList.add(pojo);
+                } else if (oneWasList.size() > 0) {
+                    GetWaterViewNewPojo pojo = oneWasList.get(0);
+                    if (tempquList.size() > 0) {
+                        pojo.setOrderbyid(tempquList.get(0).getORDERBYID());
+                        pojo.setSTNM(tempquList.get(0).getSTNM());
+                    }
+                    if (onestStbprpB.size() > 0) {
+                        pojo.setADMAUTH(onestStbprpB.get(0).getADMAUTH());
+                        pojo.setDTPR(onestStbprpB.get(0).getDTPR());
+                    }
+                    List<ST_STBPRP_B_QUPojo> onequstcd = quList.stream()
+                            .filter(o -> o.getSTCD().equals(pojo.getSTCD()) && o.getSTTP().equals(pojo.getMTYPE()))
+                            .collect(Collectors.toList());
+                    if (onequstcd.size() > 0) {
+                        pojo.setDIR(onequstcd.get(0).getDIR());
+                        pojo.setMAPSIZE(String.valueOf(onequstcd.get(0).getMAPSIZE()));
+                        pojo.setROTATE(onequstcd.get(0).getROTATE());
+                    }
+                    dataList.add(pojo);
+                } else if (oneTideList.size() > 0) {
+                    GetWaterViewNewPojo pojo = oneTideList.get(0);
+                    if (tempquList.size() > 0) {
+                        pojo.setOrderbyid(tempquList.get(0).getORDERBYID());
+                        pojo.setSTNM(tempquList.get(0).getSTNM());
+                    }
+                    if (onestStbprpB.size() > 0) {
+                        pojo.setADMAUTH(onestStbprpB.get(0).getADMAUTH());
+                        pojo.setDTPR(onestStbprpB.get(0).getDTPR());
+                    }
+                    List<ST_STBPRP_B_QUPojo> onequstcd = quList.stream()
+                            .filter(o -> o.getSTCD().equals(pojo.getSTCD()) && o.getSTTP().equals(pojo.getMTYPE()))
+                            .collect(Collectors.toList());
+                    if (onequstcd.size() > 0) {
+                        pojo.setDIR(onequstcd.get(0).getDIR());
+                        pojo.setMAPSIZE(String.valueOf(onequstcd.get(0).getMAPSIZE()));
+                        pojo.setROTATE(onequstcd.get(0).getROTATE());
+                    }
+                    dataList.add(pojo);
+                } else if (onePumpList.size() > 0) {
+                    GetWaterViewNewPojo pojo = onePumpList.get(0);
+                    if (tempquList.size() > 0) {
+                        pojo.setOrderbyid(tempquList.get(0).getORDERBYID());
+                        pojo.setSTNM(tempquList.get(0).getSTNM());
+                    }
+                    if (onestStbprpB.size() > 0) {
+                        pojo.setADMAUTH(onestStbprpB.get(0).getADMAUTH());
+                        pojo.setDTPR(onestStbprpB.get(0).getDTPR());
+                    }
+                    List<ST_STBPRP_B_QUPojo> onequstcd = quList.stream()
+                            .filter(o -> o.getSTCD().equals(pojo.getSTCD()) && o.getSTTP().equals(pojo.getMTYPE()))
+                            .collect(Collectors.toList());
+                    if (onequstcd.size() > 0) {
+                        pojo.setDIR(onequstcd.get(0).getDIR());
+                        pojo.setMAPSIZE(String.valueOf(onequstcd.get(0).getMAPSIZE()));
+                        pojo.setROTATE(onequstcd.get(0).getROTATE());
+                    }
+                    dataList.add(pojo);
+                } else {
+                    if (onestStbprpB.size() > 0) {
+                        GetWaterViewNewPojo pojo = new GetWaterViewNewPojo();
+                        pojo.setSTCD(onestStbprpB.get(0).getSTCD());
+                        pojo.setSTNM(onestStbprpB.get(0).getSTNM());
+                        pojo.setHNNM(onestStbprpB.get(0).getHNNM());
+                        pojo.setRVNM(onestStbprpB.get(0).getRVNM());
+                        pojo.setLGTD(String.valueOf(onestStbprpB.get(0).getLGTD()));
+                        pojo.setLTTD(String.valueOf(onestStbprpB.get(0).getLTTD()));
+                        pojo.setOrderbyid(quList.get(num).getORDERBYID());
+                        pojo.setADMAUTH(onestStbprpB.get(0).getADMAUTH());
+                        pojo.setMTYPE(onestStbprpB.get(0).getMTYPE());
+                        pojo.setATCUNIT(onestStbprpB.get(0).getATCUNIT());
+
+                        if (onestStbprpB.get(0).getWRZ() != null) {
+                            pojo.setWRZ(onestStbprpB.get(0).getWRZ().toString());
+                        }
+                        if (onestStbprpB.get(0).getGRZ() != null) {
+                            pojo.setGRZ(onestStbprpB.get(0).getGRZ().toString());
+                        }
+
+                        List<ST_STBPRP_B_QUPojo> onequstcd = quList.stream()
+                                .filter(o -> o.getSTCD().equals(pojo.getSTCD()) && o.getSTTP().equals(pojo.getMTYPE()))
+                                .collect(Collectors.toList());
+                        if (onequstcd.size() > 0) {
+                            pojo.setDIR(onequstcd.get(0).getDIR());
+                            pojo.setMAPSIZE(String.valueOf(onequstcd.get(0).getMAPSIZE()));
+                            pojo.setROTATE(String.valueOf(onequstcd.get(0).getROTATE()));
+                        }
+                        if (tempquList.size() > 0) {
+                            pojo.setOrderbyid(tempquList.get(0).getORDERBYID());
+                            pojo.setSTNM(tempquList.get(0).getSTNM());
+                        }
+                        dataList.add(pojo);
+                    }
+                }
+            }
+        }
+        watch.stop();
+        if (dataList.size() > 0) {
+            return new ResultUtils<>(dataList, "操作成功", true, dataList.size(), watch.getTime());
+        } else {
+            return new ResultUtils<>(dataList, "操作成功", false, dataList.size(), watch.getTime());
+        }
+    }
+
     @RequestMapping("/queryBySWDanZhan")
     public List<GetWaterViewNewPojo> queryBySWDanZhan(@RequestBody ColumnName param) {
         Date date = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);

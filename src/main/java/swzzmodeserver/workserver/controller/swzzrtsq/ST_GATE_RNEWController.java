@@ -46,6 +46,9 @@ public class ST_GATE_RNEWController {
 
     @Autowired
     private shuizhaServer shuiwupingServer;
+
+    @Autowired
+    private RTSQST_WAS_RData rtsqstWasRData;
     
 
     @RequestMapping("/selectGQList")
@@ -175,6 +178,11 @@ public class ST_GATE_RNEWController {
         List<ST_STBPRP_FCCHPojo> userList = new ArrayList<>();
         List<ST_GATE_RNEWPojo> gateList = data.selectGateListNew(stcdList);
 
+        // 查询各站最新水位（闸上UPZ、闸下DWZ），限定最近24小时避免全表扫描
+        String wasStime = DateUtil.dateFormat(new Date(new Date().getTime() - 24 * 60 * 60 * 1000), "yyyy-MM-dd HH:mm:ss");
+        String wasEtime = DateUtil.dateFormat(new Date(), "yyyy-MM-dd HH:mm:ss");
+        List<ST_WAS_RPojo> wasList = rtsqstWasRData.selectNew(stcdList, wasStime, wasEtime);
+
         for (ST_STBPRP_FCCHPojo stStbprpFcchPojo : sfList) {
             List<ST_GATE_RNEWPojo> collect = gateList.stream()
                     .filter(i -> i.getSTCD().equals(stStbprpFcchPojo.getSTCD())).collect(Collectors.toList());
@@ -186,6 +194,15 @@ public class ST_GATE_RNEWController {
 
             stStbprpFcchPojo.setSTATUS(collectKai.size() > 0 ? "open" : "close");
             stStbprpFcchPojo.setGateList(collect);
+
+            // 填充闸上闸下水位
+            List<ST_WAS_RPojo> wasMatch = wasList.stream()
+                    .filter(w -> w.getStcd().equals(stStbprpFcchPojo.getSTCD()))
+                    .collect(Collectors.toList());
+            if (wasMatch.size() > 0) {
+                stStbprpFcchPojo.setUPZ(wasMatch.get(0).getUpz());
+                stStbprpFcchPojo.setDWZ(wasMatch.get(0).getDwz());
+            }
 
             List<ST_STBPRP_B_QUPojo> onequstcd = quList.stream()
                     .filter(o -> o.getSTCD().equals(stStbprpFcchPojo.getSTCD()))

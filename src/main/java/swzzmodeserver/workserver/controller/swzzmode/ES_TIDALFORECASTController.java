@@ -431,7 +431,7 @@ public class ES_TIDALFORECASTController {
                         values.add(u.getTDZ());
                     });
                     // 核心：只判断合法/非法
-                    if (Boolean.FALSE.equals(ComputeHL.validateTideValues(values))) {//不是两高两低潮位数据，等等再同步
+                    if (Boolean.FALSE.equals(ComputeHL.validateTideValues(values))) {// 不是两高两低潮位数据，等等再同步
                         isInsert = false;
                         // 数据异常，处理掉
                     } else {
@@ -590,13 +590,15 @@ public class ES_TIDALFORECASTController {
                         LocalDateTime truncatedToHour = now.truncatedTo(java.time.temporal.ChronoUnit.HOURS);
                         // 格式化输出
                         String maxYBTMString = truncatedToHour.format(formatter);// 计算依据时间
-                        List<DD_SOLUTIONPojo> listDD = dd_solutionData.selectListByDD_IDandDD_status(null, null, null, maxYBTMString);
-                        if(listDD.size() ==0){//算过了就不算了                        
+                        List<DD_SOLUTIONPojo> listDD = dd_solutionData.selectListByDD_IDandDD_status(null, null, null,
+                                maxYBTMString);
+                        if (listDD.size() == 0) {// 算过了就不算了
                             String jydatatype = "temperatezone@shanghaiyb";
                             String gcdatatype = "fangjiangliang";
                             String scwdatatype = "temperatezone";
-                            int resultRows = huishuiApiService.startHuishuiJisuan(maxYBTMString, 24, jydatatype, gcdatatype,
-                                    scwdatatype, "");
+                            int resultRows = huishuiApiService.startHuishuiJisuan(maxYBTMString, 24, jydatatype,
+                                    gcdatatype,
+                                    scwdatatype, "15");
                             if (resultRows > 0) {
                                 new javalog().writelog(maxYBTMString + "模型计算成功", filePathName);
                             }

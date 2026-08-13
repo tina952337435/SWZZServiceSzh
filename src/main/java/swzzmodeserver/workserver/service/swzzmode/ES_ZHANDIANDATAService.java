@@ -52,11 +52,11 @@ public interface ES_ZHANDIANDATAService {
 
         Integer ModifyGCSSLLAREAGCGZ_SZH(String solutionid, List<String> zhanid, List<String> yanid);
 
-        Integer ModifyGCSSLLAREAGCGZ_SZHFJL(String solutionid, String stime);
+        Integer ModifyGCSSLLAREAGCGZ_SZHFJL(String solutionid, String stime, String etime);
 
         Integer FH_modify_batchJYQuanJY(String dd_id, List<String> ZhanID, String DayHour, String ZhanData);
 
         Integer modify_byTMJY(String TM, String dd_id, List<String> ZhanID, String DayHour, String ZhanData);
 
-        Integer BigModeLineardifference(String solutionid,String stcd,String startDate, String endDate);
+        Integer BigModeLineardifference(String solutionid, String stcd, String startDate, String endDate);
 }

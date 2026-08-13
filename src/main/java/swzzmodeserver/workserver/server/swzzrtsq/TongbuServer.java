@@ -1013,7 +1013,10 @@ public class TongbuServer {
                         Double upzValue = 0.0;
                         if (upzStr != null && !upzStr.trim().isEmpty()) {
                             try {
-                                double temp = Double.parseDouble(upzStr) - 0.26;// 基面不一样
+                                double temp = Double.parseDouble(upzStr);
+                                if (model.getHIVZ() != null) {// 基面不一样
+                                    temp = Double.parseDouble(upzStr) + model.getHIVZ();
+                                }
                                 upzValue = Double.parseDouble(String.format("%.2f", temp));
                             } catch (NumberFormatException e) {
                                 upzValue = 0.0;
@@ -1021,12 +1024,14 @@ public class TongbuServer {
                         } else {
                             upzStr = pojo.get("INWATER") != null ? pojo.get("INWATER").toString() : "";
                             try {
-                                double temp = Double.parseDouble(upzStr) - 0.26;// 基面不一样
+                                double temp = Double.parseDouble(upzStr);
+                                if (model.getHIVZ() != null) {// 基面不一样
+                                    temp = Double.parseDouble(upzStr) + model.getHIVZ();
+                                }
                                 upzValue = Double.parseDouble(String.format("%.2f", temp));
                             } catch (Exception e) {
                                 // TODO: handle exception
                             }
-
                         }
                         if (!upzValue.equals(0)) {
                             wasInfo.setZ(upzValue);

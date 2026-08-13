@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Data
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ST_PPTN_RPojo {
@@ -55,6 +57,28 @@ public class ST_PPTN_RPojo {
      * 最大24小时雨量
      */
     private Double DRP24;
+    /** 片区最大1小时雨量站点 */
+    private String H1STNM;
+    /** 片区最大1小时雨量 */
+    private Double H1DRP;
+    /** 片区最大3小时雨量站点 */
+    private String H3STNM;
+    /** 片区最大3小时雨量 */
+    private Double H3DRP;
+    /** 片区最大6小时雨量站点 */
+    private String H6STNM;
+    /** 片区最大6小时雨量 */
+    private Double H6DRP;
+    /** 片区最大12小时雨量站点 */
+    private String H12STNM;
+    /** 片区最大12小时雨量 */
+    private Double H12DRP;
+    /** 片区最大24小时雨量站点 */
+    private String H24STNM;
+    /** 片区内站点数量 */
+    private Integer STATIONCOUNT;
+    /** 片区内各站点明细 */
+    private List<MaxRainResultPojo.StationItem> STATIONLIST;
     private Integer STORMTOTAL;// 暴雨场次
     /**
      * 数据来源

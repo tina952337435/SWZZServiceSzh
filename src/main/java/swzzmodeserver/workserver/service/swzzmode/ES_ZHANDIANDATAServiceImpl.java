@@ -34,6 +34,7 @@ import swzzmodeserver.workserver.pojo.swzzzjk.ST_TIDEHIGHParam;
 import swzzmodeserver.workserver.server.swzzrtsq.bigModeServer;
 import swzzmodeserver.workserver.pojo.swzzflood.ST_WAS_RPojo;
 
+import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -260,42 +261,44 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
             List<ES_ZHANDIANDATAPojo> zhandiandataList = data.selectList("", null, null, solutionid, zhanidList, null,
                     null);
             List<ES_ZHANDIANDATAPojo> newzhandiandataList = new ArrayList<>();
-            if ("day".equals(dayhour)) {
-                double value_s = Double.parseDouble(zhandata);
-                double dec_val = (double) Math.round(((value_s / 24) * 10) / 10);
-                if (value_s > 0 && dec_val < 0.1) {
-                    dec_val = 0.1;
-                }
-                int day = (int) Math.ceil((double) zhandiandataList.size() / 24);
-                for (int i = 0; i < day; i++) {
-                    for (int z = 0, j = 0; z < 24; z++, j++) {
-                        double value_d = value_s - (dec_val * i);
-                        double value_z = i < 23 ? dec_val : value_d;
-                        double mValue = value_d <= 0 ? 0 : Math.min(value_d, value_z);
-                        String zhantime = zhandiandataList.get(j).getZHANTIME();
-                        List<ES_ZHANDIANDATAPojo> filter = zhandiandataList.stream().filter(m -> {
-                            if (m.getZHANTIME() != null) {
-                                return m.getZHANTIME().equals(zhantime);
-                            }
-                            return false;
-                        }).collect(Collectors.toList());
-                        if (filter.size() > 0) {
-                            ES_ZHANDIANDATAPojo obj = new ES_ZHANDIANDATAPojo();
-                            obj.setID(filter.get(0).getID());
-                            obj.setZHANID(filter.get(0).getZHANID());
-                            obj.setZHANDATA(String.valueOf(mValue));
-                            obj.setSOLUTIONID(solutionid);
-                            obj.setZHANTIME(zhantime);
-                            newzhandiandataList.add(obj);
-                        }
-                    }
-                }
-            } else {
-                for (ES_ZHANDIANDATAPojo esobj : zhandiandataList) {
-                    esobj.setZHANDATA(zhandata);
-                    newzhandiandataList.add(esobj);
+            // if ("day".equals(dayhour)) {
+            // 均值模式：总雨量 / 总时段数，每个时段（所有站）分配相同均值
+            double value_s = Double.parseDouble(zhandata);
+            // 提取所有唯一时刻（保持顺序）
+            java.util.LinkedHashSet<String> timeSet = new java.util.LinkedHashSet<>();
+            for (ES_ZHANDIANDATAPojo pojo : zhandiandataList) {
+                if (pojo.getZHANTIME() != null) {
+                    timeSet.add(pojo.getZHANTIME());
                 }
             }
+            List<String> uniqueTimes = new ArrayList<>(timeSet);
+            int totalHours = uniqueTimes.size();
+            if (totalHours == 0) {
+                totalHours = 1;
+            }
+            // 均值保留一位小数
+            double avgValue = Math.round((value_s / totalHours) * 10) / 10.0;
+            if (value_s > 0 && avgValue < 0.1) {
+                avgValue = 0.1;
+            }
+            // 最后一个时段补足舍入误差，保证各时段之和等于输入总值
+            double lastValue = value_s - avgValue * (totalHours - 1);
+            if (lastValue < 0) {
+                lastValue = 0;
+            }
+            for (ES_ZHANDIANDATAPojo obj : zhandiandataList) {
+                String zhantime = obj.getZHANTIME();
+                boolean isLast = (zhantime != null && zhantime.equals(uniqueTimes.get(totalHours - 1)));
+                double mValue = isLast ? lastValue : avgValue;
+                obj.setZHANDATA(String.valueOf(mValue));
+                newzhandiandataList.add(obj);
+            }
+            // } else {
+            // for (ES_ZHANDIANDATAPojo esobj : zhandiandataList) {
+            // esobj.setZHANDATA(zhandata);
+            // newzhandiandataList.add(esobj);
+            // }
+            // }
             if (newzhandiandataList.size() > 0) {
                 int count = 200;
                 int number = newzhandiandataList.size() / count;
@@ -1202,17 +1205,26 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                         if (listFQT.size() > 0) {
                             zhanData = listFQT.get(0).getFA_NAME();
                         }
-                        for (int i = 1; i < hydroDtNo + 1; i++) {
-                            ES_ZHANDIANDATADto dto = new ES_ZHANDIANDATADto();
-                            dto.setID(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 16));
-                            dto.setZHANID(m.getZHANID());
-                            String tm = dateFormat.format(new Date(finalStimeLong + i * 5 * 60 * 1000));
-                            dto.setZHANTIME(tm);
-                            dto.setZHANDATA(zhanData);
-                            dto.setSOLUTIONID(solutionid);
-                            dto.setDD_FOR(username);
-                            listData.add(dto);
-                        }
+                        ES_ZHANDIANDATADto dto = new ES_ZHANDIANDATADto();
+                        dto.setID(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 16));
+                        dto.setZHANID(m.getZHANID());
+                        String tm = dateFormat.format(new Date(finalStimeLong + 1 * 5 * 60 * 1000));
+                        dto.setZHANTIME(tm);
+                        dto.setZHANDATA(zhanData);
+                        dto.setSOLUTIONID(solutionid);
+                        dto.setDD_FOR(username);
+                        listData.add(dto);
+                        // for (int i = 1; i < hydroDtNo + 1; i++) {
+                        // ES_ZHANDIANDATADto dto = new ES_ZHANDIANDATADto();
+                        // dto.setID(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 16));
+                        // dto.setZHANID(m.getZHANID());
+                        // String tm = dateFormat.format(new Date(finalStimeLong + i * 5 * 60 * 1000));
+                        // dto.setZHANTIME(tm);
+                        // dto.setZHANDATA(zhanData);
+                        // dto.setSOLUTIONID(solutionid);
+                        // dto.setDD_FOR(username);
+                        // listData.add(dto);
+                        // }
                     });
                     long _t11 = System.currentTimeMillis();
                     new javalog().writelog("⏱ DDFN循环(" + (listZHAN.size() * timeCount) + "次): " + (_t11 - _t10) + "ms",
@@ -1251,25 +1263,35 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                         if (listFQT.size() > 0) {
                             zhanData = listFQT.get(0).getFA_NAME();
                         }
-                    }
-                    // System.err.println(m.getZHANID()+"站放江量数据长度："+listPumpDataTemp.size());
-                    new javalog().writelog(m.getZHANID() + "站放江量数据长度：" + listPumpDataTemp.size(), filePathName);
-                    for (int i = 1; i < hydroDtNo + 1; i++) {
+                        String tm = dateFormat.format(new Date(finalStimeLong + 1 * 5 * 60 * 1000));
                         ES_ZHANDIANDATADto dto = new ES_ZHANDIANDATADto();
                         dto.setID(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 16));
                         dto.setZHANID(m.getZHANID());
-                        String tm = dateFormat.format(new Date(finalStimeLong + i * 5 * 60 * 1000));
-
-                        List<ES_PUMP_RPojo> listPumpDataTempT = listPumpDataTemp.stream()
-                                .filter(p -> p.getTM().equals(tm))
-                                .collect(Collectors.toList());
-                        zhanData = listPumpDataTempT.size() > 0 ? listPumpDataTempT.get(0).getPMPQ().toString()
-                                : zhanData;// 有放江量就用放江量
                         dto.setZHANTIME(tm);
                         dto.setZHANDATA(zhanData);
                         dto.setSOLUTIONID(solutionid);
                         dto.setDD_FOR(username);
                         listData.add(dto);
+                    } else {// 有放江量
+                        // System.err.println(m.getZHANID()+"站放江量数据长度："+listPumpDataTemp.size());
+                        new javalog().writelog(m.getZHANID() + "站放江量数据长度：" + listPumpDataTemp.size(), filePathName);
+                        for (int i = 1; i < hydroDtNo + 1; i++) {
+                            String tm = dateFormat.format(new Date(finalStimeLong + i * 5 * 60 * 1000));
+                            ES_ZHANDIANDATADto dto = new ES_ZHANDIANDATADto();
+                            List<ES_PUMP_RPojo> listPumpDataTempT = listPumpDataTemp.stream()
+                                    .filter(p -> p.getTM().equals(tm))
+                                    .collect(Collectors.toList());
+                            zhanData = listPumpDataTempT.size() > 0 ? listPumpDataTempT.get(0).getPMPQ().toString()
+                                    : zhanData;// 有放江量就用放江量
+
+                            dto.setID(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 16));
+                            dto.setZHANID(m.getZHANID());
+                            dto.setZHANTIME(tm);
+                            dto.setZHANDATA(zhanData);
+                            dto.setSOLUTIONID(solutionid);
+                            dto.setDD_FOR(username);
+                            listData.add(dto);
+                        }
                     }
                 });
                 // new javalog().writelog("调度工程边界拼完了，listData的长度："+listData.size(),
@@ -1353,17 +1375,26 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                         new javalog().writelog("⏱ zhanid：" + m.getZHANID() + "，zhanData: " + zhanData, filePathName,
                                 "time");
                     }
-                    for (int i = 1; i < hydroDtNo + 1; i++) {
-                        ES_ZHANDIANDATADto dto = new ES_ZHANDIANDATADto();
-                        dto.setID(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 16));
-                        dto.setZHANID(m.getZHANID());
-                        String tm = dateFormat.format(new Date(finalStimeLong + i * 5 * 60 * 1000));
-                        dto.setZHANTIME(tm);
-                        dto.setZHANDATA(zhanData);
-                        dto.setSOLUTIONID(solutionid);
-                        dto.setDD_FOR(username);
-                        listData.add(dto);
-                    }
+                    ES_ZHANDIANDATADto dto = new ES_ZHANDIANDATADto();
+                    dto.setID(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 16));
+                    dto.setZHANID(m.getZHANID());
+                    String tm = dateFormat.format(new Date(finalStimeLong + 1 * 5 * 60 * 1000));
+                    dto.setZHANTIME(tm);
+                    dto.setZHANDATA(zhanData);
+                    dto.setSOLUTIONID(solutionid);
+                    dto.setDD_FOR(username);
+                    listData.add(dto);
+                    // for (int i = 1; i < hydroDtNo + 1; i++) {
+                    // ES_ZHANDIANDATADto dto = new ES_ZHANDIANDATADto();
+                    // dto.setID(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 16));
+                    // dto.setZHANID(m.getZHANID());
+                    // String tm = dateFormat.format(new Date(finalStimeLong + i * 5 * 60 * 1000));
+                    // dto.setZHANTIME(tm);
+                    // dto.setZHANDATA(zhanData);
+                    // dto.setSOLUTIONID(solutionid);
+                    // dto.setDD_FOR(username);
+                    // listData.add(dto);
+                    // }
                 });
             }
 
@@ -1472,7 +1503,8 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                 String SFYMDH = LocalDateTime.parse(startdate, formatter)
                         .minusDays(3)
                         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                List<ST_FORECAST_FPojo> listFor = st_forecast_fData.selectListFast("太湖局", SFYMDH, enddate, startdate,
+                List<String> unitList = Arrays.asList("太湖局,水利部太湖局".split(","));
+                List<ST_FORECAST_FPojo> listFor = st_forecast_fData.selectListFast(unitList, SFYMDH, enddate, startdate,
                         enddate);// 太湖局预报的潮位边界，1小时一个数据
 
                 for (ES_ZHANDIANPojo obj : list.stream()
@@ -1512,8 +1544,7 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                             List<GetWaterViewNewPojo> listWasTemp = listWas.stream()
                                     .filter(m -> m.getSTCD().equals(finalSwSTCD)).collect(Collectors.toList());
                             if (listWasTemp.size() > 0) {
-                                double upz = Double.parseDouble(listWasTemp.get(listWasTemp.size() - 1).getUPZ())
-                                        - 0.26;
+                                double upz = Double.parseDouble(listWasTemp.get(listWasTemp.size() - 1).getUPZ());
                                 dto.setZHANDATA(String.format("%.2f", upz));
                             }
 
@@ -1522,7 +1553,7 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                                     .filter(m -> m.getSTCD().equals(obj.getZHANID()) && m.getYMDH().equals(finalStime1))
                                     .collect(Collectors.toList());
                             if (listForTemp.size() > 0) {// 就太湖局预报数据就用太湖局的
-                                double upz = listForTemp.get(0).getZ() - 0.26;
+                                double upz = listForTemp.get(0).getZ();
                                 dto.setZHANDATA(String.format("%.2f", upz));
                             }
                         } else {
@@ -1619,7 +1650,9 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                         .minusDays(3)
                         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 long _te6 = System.currentTimeMillis();
-                List<ST_FORECAST_FPojo> listFor = st_forecast_fData.selectListFast("太湖局", SFYMDH, enddate, startdate,
+                List<String> unitList = Arrays.asList("太湖局,水利部太湖局".split(","));
+                List<ST_FORECAST_FPojo> listFor = st_forecast_fData.selectListFast(unitList, SFYMDH, enddate,
+                        startdate,
                         enddate);// 太湖局预报的潮位边界，1小时一个数据
                 long _te7 = System.currentTimeMillis();
                 new javalog().writelog("⏱ 潮位-st_forecast_f: " + (_te7 - _te6) + "ms 共" + listFor.size() + "条",
@@ -1679,8 +1712,7 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                             List<GetWaterViewNewPojo> listWasTemp = listWas.stream()
                                     .filter(m -> m.getSTCD().equals(finalSwSTCD)).collect(Collectors.toList());
                             if (listWasTemp.size() > 0) {
-                                double upz = Double.parseDouble(listWasTemp.get(listWasTemp.size() - 1).getUPZ())
-                                        - 0.26;
+                                double upz = Double.parseDouble(listWasTemp.get(listWasTemp.size() - 1).getUPZ());
                                 Dto.setZHANDATA(String.format("%.2f", upz));
                             }
 
@@ -1699,7 +1731,7 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                                     .filter(m -> m.getSTCD().equals(obj.getZHANID()) && m.getYMDH().equals(finalStime1))
                                     .collect(Collectors.toList());
                             if (listForTemp.size() > 0) {// 就太湖局预报数据就用太湖局的
-                                double upz = listForTemp.get(0).getZ() - 0.26;
+                                double upz = listForTemp.get(0).getZ();
                                 Dto.setZHANDATA(String.format("%.2f", upz));
                             }
                         } else {
@@ -2633,7 +2665,7 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
     }
 
     @Override
-    public Integer ModifyGCSSLLAREAGCGZ_SZHFJL(String solutionid, String stime) {
+    public Integer ModifyGCSSLLAREAGCGZ_SZHFJL(String solutionid, String stime, String etime) {
         // 查询最新的放江量
         List<ES_PUMP_RPojo> listPumpData = es_pump_rData.selectListNew(null, stime, null);
         if (listPumpData.size() == 0) {
@@ -2643,10 +2675,11 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
         List<ES_PUMP_BPojo> listG = es_pump_bData.selectList(null, null, null);
         Set<String> stcdSet = listG.stream().map(ES_PUMP_BPojo::getZHANID).collect(Collectors.toSet());
 
-        // 预索引：listZhanData 按 trim 后的 ZHANID 分组，O(N) 建索引 + O(1) 查找
-        Map<String, List<ES_ZHANDIANDATAPojo>> zhanDataMap = data.selectListGC(solutionid, "3").stream()
-                .filter(n -> stcdSet.contains(n.getZHANID()))
-                .collect(Collectors.groupingBy(n -> n.getZHANID().trim()));
+        // // 预索引：listZhanData 按 trim 后的 ZHANID 分组，O(N) 建索引 + O(1) 查找
+        // Map<String, List<ES_ZHANDIANDATAPojo>> zhanDataMap =
+        // data.selectListGC(solutionid, "3").stream()
+        // .filter(n -> stcdSet.contains(n.getZHANID()))
+        // .collect(Collectors.groupingBy(n -> n.getZHANID().trim()));
 
         // 预索引：listPumpData 按 STCD -> TM -> PMPQ 建二级Map，O(N) 建索引 + O(1) 查找
         Map<String, Map<String, String>> pumpDataMap = new HashMap<>();
@@ -2658,23 +2691,41 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
 
         List<ES_ZHANDIANDATAPojo> listZhanDatanew = new ArrayList<>();
 
-        for (ES_PUMP_BPojo m : listG) {
-            String zhanId = m.getZHANID().trim();
-            List<ES_ZHANDIANDATAPojo> listZhanDataTemp = zhanDataMap.get(zhanId);
-            if (listZhanDataTemp == null || listZhanDataTemp.isEmpty()) {
-                continue;
-            }
+        // 遍历每个站点，按5分钟间隔生成时间序列，有值取值，无值取0
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Calendar startCal = Calendar.getInstance();
+            startCal.setTime(sdf.parse(stime));
+            Calendar endCal = Calendar.getInstance();
+            endCal.setTime(sdf.parse(etime));
 
-            Map<String, String> pumpByTm = pumpDataMap.get(zhanId);
-            if (pumpByTm == null || pumpByTm.isEmpty()) {
-                continue;
+            for (String stcd : stcdSet) {
+                Map<String, String> timeValueMap = pumpDataMap.get(stcd);
+                // pumpDataMap 中完全不存在该站点记录的，跳过不添加
+                if (timeValueMap == null || timeValueMap.isEmpty()) {
+                    continue;
+                }
+                Calendar cal = (Calendar) startCal.clone();
+                cal.add(Calendar.MINUTE, 5); // 开始时间不要，从下一个5分钟开始
+                while (!cal.after(endCal)) {
+                    String timeStr = sdf.format(cal.getTime());
+                    String value = "0";
+                    if (timeValueMap != null && timeValueMap.containsKey(timeStr)) {
+                        value = timeValueMap.get(timeStr);
+                    }
+                    ES_ZHANDIANDATAPojo pojo = new ES_ZHANDIANDATAPojo();
+                    pojo.setID(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 16));
+                    pojo.setZHANID(stcd);
+                    pojo.setZHANTIME(timeStr);
+                    pojo.setZHANDATA(value);
+                    pojo.setSOLUTIONID(solutionid);
+                    listZhanDatanew.add(pojo);
+                    cal.add(Calendar.MINUTE, 5);
+                }
             }
-
-            for (ES_ZHANDIANDATAPojo n : listZhanDataTemp) {
-                String data = pumpByTm.getOrDefault(n.getZHANTIME(), "0");
-                n.setZHANDATA(data);
-                listZhanDatanew.add(n);
-            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return 0;
         }
 
         // 分批入库，避免一次性 MERGE 数据量过大
@@ -2691,7 +2742,7 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
             } else {
                 batch = listZhanDatanew.subList(batchSize * i, batchSize * (i + 1));
             }
-            num += data.updateALL(batch);
+            num += data.updateALLME(batch);
         }
         return num;
     }

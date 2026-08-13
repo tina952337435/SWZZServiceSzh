@@ -116,9 +116,9 @@ public class BDMS_PREDICTServiceImpl implements BDMS_PREDICTService {
             });
         }
 
-        List<BDMS_PREDICTPojo> listBDMS = bdmsPredictData.selectList("", "", "", PLAN_N, Arrays.asList(STCD.split(",")),
+        List<BDMS_PREDICTPojo> listBDMS = bdmsPredictData.selectList("", "", "", PLAN_N, null,
                 DATA_TYPE, null, null,
-                "", null);
+                "", Arrays.asList(STCD.split(",")));
         List<ES_ZHANDIANDATAPojo> _pptn_r = new ArrayList<>();
         if (!"".equals(MKEYID)) {
             _pptn_r = esZhandiandataData.selectList("", null, null, "", Collections.singletonList(MKEYID), null, null)
@@ -249,9 +249,9 @@ public class BDMS_PREDICTServiceImpl implements BDMS_PREDICTService {
             });
         }
 
-        List<BDMS_PREDICTPojo> listBDMS = bdmsPredictData.selectList("", "", "", PLAN_N, Arrays.asList(STCD.split(",")),
+        List<BDMS_PREDICTPojo> listBDMS = bdmsPredictData.selectList("", "", "", PLAN_N, null,
                 DATA_TYPE, null, null,
-                "", null);
+                "", Arrays.asList(STCD.split(",")));
         List<ES_ZHANDIANDATAPojo> _pptn_r = new ArrayList<>();
         if (!"".equals(MKEYID)) {
             _pptn_r = esZhandiandataData.selectList("", null, null, "", Collections.singletonList(MKEYID), null, null)
@@ -482,10 +482,11 @@ public class BDMS_PREDICTServiceImpl implements BDMS_PREDICTService {
     @Override
     public List<WJ_MODELSINGRESULTParam> WJ_MODELSINGRESULT(List<String> SOLUTIONID, List<String> STCD,
             String DATA_TYPE) {
-        System.out.println("WJ_MODELSINGRESULT: SOLUTIONID=" + SOLUTIONID + " STCD=" + STCD + " DATA_TYPE=" + DATA_TYPE);
+        System.out
+                .println("WJ_MODELSINGRESULT: SOLUTIONID=" + SOLUTIONID + " STCD=" + STCD + " DATA_TYPE=" + DATA_TYPE);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        List<BDMS_PREDICTPojo> ListBDMS = bdmsPredictData.selectList("", "", "", SOLUTIONID, STCD, DATA_TYPE, null,
-                null, "", null);
+        List<BDMS_PREDICTPojo> ListBDMS = bdmsPredictData.selectList("", "", "", SOLUTIONID, null, DATA_TYPE, null,
+                null, "", STCD);
         System.out.println("WJ_MODELSINGRESULT: BDMS查询结果=" + (ListBDMS != null ? ListBDMS.size() : 0));
         if (null != STCD && STCD.size() > 0) {
             ListBDMS = ListBDMS.stream().filter(m -> STCD.contains(m.getSTCD().trim())).collect(Collectors.toList());

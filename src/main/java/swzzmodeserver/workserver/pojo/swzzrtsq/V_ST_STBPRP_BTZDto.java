@@ -107,4 +107,9 @@ public class V_ST_STBPRP_BTZDto {
      * 表格
      */
     private String tab;
+
+    /**
+     * 历史最高值，改为用来存基面，镇江吴淞转佘山吴淞-0.26
+     */
+    private Double HIVZ;
 }

@@ -763,10 +763,16 @@ public class SqkbChartUtils {
             plot.setBackgroundPaint(Color.WHITE);
             plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
             plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
+            // 折线加粗
+            for (int i = 0; i < dataset.getSeriesCount(); i++) {
+                plot.getRenderer().setSeriesStroke(i, new java.awt.BasicStroke(2.0f));
+            }
+            // 坐标轴字加大2号
             DateAxis xAxis = (DateAxis) plot.getDomainAxis();
             xAxis.setDateFormatOverride(new SimpleDateFormat("dd HH:mm"));
-            xAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 11));
-            plot.getRangeAxis().setTickLabelFont(new Font("宋体", Font.PLAIN, 11));
+            xAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 16));
+            plot.getRangeAxis().setTickLabelFont(new Font("宋体", Font.PLAIN, 16));
+            chart.getLegend().setItemFont(new Font("宋体", Font.PLAIN, 15));
 
             BufferedImage image = chart.createBufferedImage(900, 500);
             String fileName = "water_multi_" + System.currentTimeMillis() + ".png";

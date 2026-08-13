@@ -1161,6 +1161,23 @@ public class ST_PPTN_RController {
                 String finalADMAUTH = ADMAUTH;
                 List<ST_PPTN_RPojo> stPptnRPojoList = data.querySUMDRPList(finalStime, finalEtime, finalADMAUTH, null);
 
+                // 统计所有片区站码，查询小时雨量用于滑动窗口计算
+                List<String> allStcdList = stBprpBquList.stream()
+                        .map(ST_STBPRP_B_QUPojo::getSTCD)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .collect(Collectors.toList());
+                List<ST_PPTN_RPojo> hourRainList = data.queryHOURDRPList(finalStime, finalEtime, finalADMAUTH, allStcdList);
+                List<ST_STBPRP_BPojo> stationInfoList = stbprpBData.selectList(allStcdList, null);
+                MaxRainResultPojo maxRainResult = pptnServer.calculateMaxSlidingRain(hourRainList, stationInfoList, finalStime, finalEtime);
+                // 构建 STCD → StationItem 快速查找 Map
+                Map<String, MaxRainResultPojo.StationItem> stationItemMap = new HashMap<>();
+                if (maxRainResult.getStations() != null) {
+                    for (MaxRainResultPojo.StationItem item : maxRainResult.getStations()) {
+                        stationItemMap.put(item.getStcd(), item);
+                    }
+                }
+
                 treePojoList.forEach(u -> {
                     // 查询配置的站码
                     List<ST_STBPRP_B_QUPojo> quList = stBprpBquList.stream().filter(o -> o.getPID().equals(u.getID()))
@@ -1180,14 +1197,12 @@ public class ST_PPTN_RController {
                                         return true;
                                     }
                                 }
-
                                 return false;
                             });
                             return _flag;
                         }).collect(Collectors.toList());
-                        System.out.println("mList的长度::::::::::::" + mList.size());
                         if (mList != null && mList.size() > 0) {
-                            // 找出雨量最大的站
+                            // 找出累计雨量最大的站
                             ST_PPTN_RPojo maxDrpPojo = mList.stream()
                                     .filter(p -> p.getDRP() != null)
                                     .max(Comparator.comparing(ST_PPTN_RPojo::getDRP))
@@ -1195,7 +1210,7 @@ public class ST_PPTN_RController {
                             if (maxDrpPojo != null) {
                                 ST_PPTN_RPojo pojo = new ST_PPTN_RPojo();
                                 pojo.setADDVNM(u.getTITLE());
-                                // 找出最大雨量站的站点名称
+                                // 找出最大累计雨量站的站点名称
                                 String maxStnm = quList.stream()
                                         .filter(q -> q.getSTCD().equals(maxDrpPojo.getSTCD()))
                                         .findFirst()
@@ -1203,6 +1218,65 @@ public class ST_PPTN_RController {
                                         .orElse("");
                                 pojo.setSTNM(maxStnm);
                                 pojo.setDRP(maxDrpPojo.getDRP());
+                                // 分组平均雨量
+                                Double avgDrp = mList.stream()
+                                        .filter(p -> p.getDRP() != null)
+                                        .mapToDouble(ST_PPTN_RPojo::getDRP)
+                                        .average()
+                                        .orElse(0.0);
+                                pojo.setDYP(Double.parseDouble(String.format("%.1f", avgDrp)));
+
+                                // 统计片区内各时段最大滑动雨量站点
+                                Double max1hDrp = 0.0, max3hDrp = 0.0, max6hDrp = 0.0, max12hDrp = 0.0, max24hDrp = 0.0;
+                                String max1hStnm = "", max3hStnm = "", max6hStnm = "", max12hStnm = "", max24hStnm = "";
+                                for (String gStcd : stcdList) {
+                                    MaxRainResultPojo.StationItem item = stationItemMap.get(gStcd);
+                                    if (item != null) {
+                                        if (item.getMax60min() != null && item.getMax60min().getDrp() != null && item.getMax60min().getDrp() > max1hDrp) {
+                                            max1hDrp = item.getMax60min().getDrp();
+                                            max1hStnm = item.getMax60min().getStnm();
+                                        }
+                                        if (item.getMax3h() != null && item.getMax3h().getDrp() != null && item.getMax3h().getDrp() > max3hDrp) {
+                                            max3hDrp = item.getMax3h().getDrp();
+                                            max3hStnm = item.getMax3h().getStnm();
+                                        }
+                                        if (item.getMax6h() != null && item.getMax6h().getDrp() != null && item.getMax6h().getDrp() > max6hDrp) {
+                                            max6hDrp = item.getMax6h().getDrp();
+                                            max6hStnm = item.getMax6h().getStnm();
+                                        }
+                                        if (item.getMax12h() != null && item.getMax12h().getDrp() != null && item.getMax12h().getDrp() > max12hDrp) {
+                                            max12hDrp = item.getMax12h().getDrp();
+                                            max12hStnm = item.getMax12h().getStnm();
+                                        }
+                                        if (item.getMax24h() != null && item.getMax24h().getDrp() != null && item.getMax24h().getDrp() > max24hDrp) {
+                                            max24hDrp = item.getMax24h().getDrp();
+                                            max24hStnm = item.getMax24h().getStnm();
+                                        }
+                                    }
+                                }
+                                pojo.setH1DRP(max1hDrp > 0 ? Double.parseDouble(String.format("%.1f", max1hDrp)) : null);
+                                pojo.setH1STNM(StringUtils.isNotEmpty(max1hStnm) ? max1hStnm : null);
+                                pojo.setH3DRP(max3hDrp > 0 ? Double.parseDouble(String.format("%.1f", max3hDrp)) : null);
+                                pojo.setH3STNM(StringUtils.isNotEmpty(max3hStnm) ? max3hStnm : null);
+                                pojo.setH6DRP(max6hDrp > 0 ? Double.parseDouble(String.format("%.1f", max6hDrp)) : null);
+                                pojo.setH6STNM(StringUtils.isNotEmpty(max6hStnm) ? max6hStnm : null);
+                                pojo.setH12DRP(max12hDrp > 0 ? Double.parseDouble(String.format("%.1f", max12hDrp)) : null);
+                                pojo.setH12STNM(StringUtils.isNotEmpty(max12hStnm) ? max12hStnm : null);
+                                pojo.setDRP24(max24hDrp > 0 ? Double.parseDouble(String.format("%.1f", max24hDrp)) : null);
+                                pojo.setH24STNM(StringUtils.isNotEmpty(max24hStnm) ? max24hStnm : null);
+
+                                // 片区内站点数量
+                                pojo.setSTATIONCOUNT(stcdList.size());
+                                // 片区内各站点明细
+                                List<MaxRainResultPojo.StationItem> stationDetails = new ArrayList<>();
+                                for (String gStcd : stcdList) {
+                                    MaxRainResultPojo.StationItem item = stationItemMap.get(gStcd);
+                                    if (item != null) {
+                                        stationDetails.add(item);
+                                    }
+                                }
+                                pojo.setSTATIONLIST(stationDetails);
+
                                 userList.add(pojo);
                             }
                         }
@@ -1211,6 +1285,178 @@ public class ST_PPTN_RController {
                 });
             }
 
+        }
+
+        watch.stop();
+        if (userList.size() > 0) {
+            return new ResultUtils<>(userList, "操作成功", true, userList.size(), watch.getTime());
+        } else {
+            return new ResultUtils<>(userList, "操作成功", false, userList.size(), watch.getTime());
+        }
+    }
+
+    /**
+     * 按树形分组查询各时段（1h/3h/6h/12h/24h）最大滑动雨量站点及雨量（5分钟精度）
+     * 返回片区汇总 + 片区内各站点明细
+     * 与 queryMaxSlidingRainfall 使用相同的数据源和算法，统计结果一致
+     */
+    @RequestMapping("/queryTREEDRP5MinMaxList")
+    public ResultUtils queryTREEDRP5MinMaxList(@RequestBody ColumnName param) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        Date date = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+        String stime = DateUtil.dateFormat(date, "yyyy-MM-dd HH:mm:ss"), etime = "", PID = "", ADMAUTH = "";
+        if (null != param.getPid()) {
+            PID = param.getPid();
+        }
+        if (null != param.getStime()) {
+            stime = param.getStime();
+        }
+        if (null != param.getEtime()) {
+            etime = param.getEtime();
+        }
+        if (null != param.getDatasource()) {
+            ADMAUTH = param.getDatasource();
+        }
+
+        List<TreeGroupRainMaxPojo> userList = new ArrayList<>();
+        if (!CommonUtills.isEmpty(PID)) {
+            // 1. 查询树形子节点
+            ST_STBPRP_B_TREEPojo treePojo = new ST_STBPRP_B_TREEPojo();
+            treePojo.setPID(PID);
+            List<ST_STBPRP_B_TREEPojo> treePojoList = treeData.selectList(treePojo);
+
+            if (treePojoList.size() > 0) {
+                List<String> idList = treePojoList.stream().map(x -> x.getID()).collect(Collectors.toList());
+                List<ST_STBPRP_B_QUPojo> stBprpBquList = quData.queryList("", null, null, idList);
+
+                // 2. 汇总所有片区站码
+                List<String> allStcdList = stBprpBquList.stream()
+                        .map(ST_STBPRP_B_QUPojo::getSTCD)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .collect(Collectors.toList());
+
+                if (!allStcdList.isEmpty()) {
+                    // 3. 分批并行查询5分钟级雨量数据（与 queryMaxSlidingRainfall 一致）
+                    final String finalStime = stime;
+                    final String finalEtime = etime;
+                    int batchSize = 50;
+                    List<List<String>> batches = new ArrayList<>();
+                    for (int i = 0; i < allStcdList.size(); i += batchSize) {
+                        batches.add(allStcdList.subList(i, Math.min(i + batchSize, allStcdList.size())));
+                    }
+                    List<ST_PPTN_RPojo> rainData = batches.parallelStream()
+                            .flatMap(batch -> data.selectListByTimeNull(batch, finalStime, finalEtime, null).stream())
+                            .collect(Collectors.toList());
+
+                    // 4. 查询站点基础信息
+                    List<ST_STBPRP_BPojo> stationInfoList = stbprpBData.selectList(allStcdList, null);
+
+                    // 5. 执行5分钟精度滑动窗口计算
+                    MaxRainResultPojo maxRainResult = pptnServer.calculateMaxSlidingRain(rainData, stationInfoList, finalStime, finalEtime);
+
+                    // 6. 构建 STCD → StationItem 快速查找 Map
+                    Map<String, MaxRainResultPojo.StationItem> stationItemMap = new HashMap<>();
+                    if (maxRainResult.getStations() != null) {
+                        for (MaxRainResultPojo.StationItem item : maxRainResult.getStations()) {
+                            stationItemMap.put(item.getStcd(), item);
+                        }
+                    }
+
+                    // 7. 按片区分组统计
+                    treePojoList.forEach(u -> {
+                        List<ST_STBPRP_B_QUPojo> quList = stBprpBquList.stream()
+                                .filter(o -> o.getPID().equals(u.getID()))
+                                .collect(Collectors.toList());
+                        if (null != quList && quList.size() > 0) {
+                            List<String> stcdList = quList.stream().map(item -> item.getSTCD())
+                                    .collect(Collectors.toList());
+
+                            // 收集片区内有雨量数据的站点
+                            List<MaxRainResultPojo.StationItem> groupItems = new ArrayList<>();
+                            for (String gStcd : stcdList) {
+                                MaxRainResultPojo.StationItem item = stationItemMap.get(gStcd);
+                                if (item != null && item.getTotalDrp() != null && item.getTotalDrp() > 0) {
+                                    groupItems.add(item);
+                                }
+                            }
+
+                            if (!groupItems.isEmpty()) {
+                                TreeGroupRainMaxPojo pojo = new TreeGroupRainMaxPojo();
+                                pojo.setAddvnm(u.getTITLE());
+
+                                // --- 累计雨量最大站 ---
+                                MaxRainResultPojo.StationItem maxTotalItem = groupItems.stream()
+                                        .max(Comparator.comparing(MaxRainResultPojo.StationItem::getTotalDrp))
+                                        .orElse(null);
+                                if (maxTotalItem != null) {
+                                    pojo.setMaxStnm(maxTotalItem.getStnm());
+                                    pojo.setMaxDrp(Double.parseDouble(String.format("%.1f", maxTotalItem.getTotalDrp())));
+                                }
+
+                                // --- 分组平均雨量 ---
+                                Double avgDrp = groupItems.stream()
+                                        .mapToDouble(MaxRainResultPojo.StationItem::getTotalDrp)
+                                        .average()
+                                        .orElse(0.0);
+                                pojo.setAvgDrp(Double.parseDouble(String.format("%.1f", avgDrp)));
+
+                                // --- 片区内各时段最大滑动雨量站点 ---
+                                Double max1hDrp = 0.0, max3hDrp = 0.0, max6hDrp = 0.0, max12hDrp = 0.0, max24hDrp = 0.0;
+                                String max1hStnm = "", max3hStnm = "", max6hStnm = "", max12hStnm = "", max24hStnm = "";
+                                for (MaxRainResultPojo.StationItem item : groupItems) {
+                                    if (item.getMax60min() != null && item.getMax60min().getDrp() != null && item.getMax60min().getDrp() > max1hDrp) {
+                                        max1hDrp = item.getMax60min().getDrp();
+                                        max1hStnm = item.getMax60min().getStnm();
+                                    }
+                                    if (item.getMax3h() != null && item.getMax3h().getDrp() != null && item.getMax3h().getDrp() > max3hDrp) {
+                                        max3hDrp = item.getMax3h().getDrp();
+                                        max3hStnm = item.getMax3h().getStnm();
+                                    }
+                                    if (item.getMax6h() != null && item.getMax6h().getDrp() != null && item.getMax6h().getDrp() > max6hDrp) {
+                                        max6hDrp = item.getMax6h().getDrp();
+                                        max6hStnm = item.getMax6h().getStnm();
+                                    }
+                                    if (item.getMax12h() != null && item.getMax12h().getDrp() != null && item.getMax12h().getDrp() > max12hDrp) {
+                                        max12hDrp = item.getMax12h().getDrp();
+                                        max12hStnm = item.getMax12h().getStnm();
+                                    }
+                                    if (item.getMax24h() != null && item.getMax24h().getDrp() != null && item.getMax24h().getDrp() > max24hDrp) {
+                                        max24hDrp = item.getMax24h().getDrp();
+                                        max24hStnm = item.getMax24h().getStnm();
+                                    }
+                                }
+                                pojo.setMax1hDrp(max1hDrp > 0 ? Double.parseDouble(String.format("%.1f", max1hDrp)) : null);
+                                pojo.setMax1hStnm(StringUtils.isNotEmpty(max1hStnm) ? max1hStnm : null);
+                                pojo.setMax3hDrp(max3hDrp > 0 ? Double.parseDouble(String.format("%.1f", max3hDrp)) : null);
+                                pojo.setMax3hStnm(StringUtils.isNotEmpty(max3hStnm) ? max3hStnm : null);
+                                pojo.setMax6hDrp(max6hDrp > 0 ? Double.parseDouble(String.format("%.1f", max6hDrp)) : null);
+                                pojo.setMax6hStnm(StringUtils.isNotEmpty(max6hStnm) ? max6hStnm : null);
+                                pojo.setMax12hDrp(max12hDrp > 0 ? Double.parseDouble(String.format("%.1f", max12hDrp)) : null);
+                                pojo.setMax12hStnm(StringUtils.isNotEmpty(max12hStnm) ? max12hStnm : null);
+                                pojo.setMax24hDrp(max24hDrp > 0 ? Double.parseDouble(String.format("%.1f", max24hDrp)) : null);
+                                pojo.setMax24hStnm(StringUtils.isNotEmpty(max24hStnm) ? max24hStnm : null);
+
+                                // 片区内站点数量
+                                pojo.setStationCount(stcdList.size());
+
+                                // --- 片区内各站点明细 ---
+                                List<MaxRainResultPojo.StationItem> stationDetails = new ArrayList<>();
+                                for (String gStcd : stcdList) {
+                                    MaxRainResultPojo.StationItem item = stationItemMap.get(gStcd);
+                                    if (item != null) {
+                                        stationDetails.add(item);
+                                    }
+                                }
+                                pojo.setStations(stationDetails);
+
+                                userList.add(pojo);
+                            }
+                        }
+                    });
+                }
+            }
         }
 
         watch.stop();
@@ -2310,11 +2556,25 @@ public class ST_PPTN_RController {
         System.out.println("stime=" + stime + ", etime=" + etime + ", pid=" + PID);
         System.out.println("解析到站点数: " + stcdList.size());
 
-        // 2. 查询 5 分钟级雨量数据（只取有雨的，Java侧重建完整时间网格）
+        // 2. 分批并行查询 5 分钟级雨量数据
+        //    大量站码的 IN 子句在 DM 数据库中索引 seek 合并开销大，
+        //    拆成每批 50 个站并行查询，总耗时 = 单批耗时（约 1/N）
         long dbStart = System.currentTimeMillis();
-        List<ST_PPTN_RPojo> rainData = data.selectListByTimeNull(stcdList, stime, etime, null);
+        int batchSize = 50;
+        List<List<String>> batches = new ArrayList<>();
+        for (int i = 0; i < stcdList.size(); i += batchSize) {
+            batches.add(stcdList.subList(i, Math.min(i + batchSize, stcdList.size())));
+        }
+        System.out.println("分批数: " + batches.size() + " (每批" + batchSize + "站)");
+
+        // lambda 要求 effectively final，提前捕获
+        final String finalStime = stime;
+        final String finalEtime = etime;
+        List<ST_PPTN_RPojo> rainData = batches.parallelStream()
+                .flatMap(batch -> data.selectListByTimeNull(batch, finalStime, finalEtime, null).stream())
+                .collect(Collectors.toList());
         long dbEnd = System.currentTimeMillis();
-        System.out.println("selectListByTimeNull 耗时: " + (dbEnd - dbStart) + "ms, 返回记录数: "
+        System.out.println("分批并行查询 耗时: " + (dbEnd - dbStart) + "ms, 返回记录数: "
                 + (rainData != null ? rainData.size() : 0));
 
         // 3. 查询站点基础信息

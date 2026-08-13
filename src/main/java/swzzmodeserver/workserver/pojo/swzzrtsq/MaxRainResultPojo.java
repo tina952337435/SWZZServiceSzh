@@ -53,6 +53,8 @@ public class MaxRainResultPojo {
         private String addvnm;
         private Double lgtd;
         private Double lttd;
+        /** 整个查询时段内的累计总雨量 */
+        private Double totalDrp;
         private WindowRainInfo max60min;
         private WindowRainInfo max3h;
         private WindowRainInfo max6h;

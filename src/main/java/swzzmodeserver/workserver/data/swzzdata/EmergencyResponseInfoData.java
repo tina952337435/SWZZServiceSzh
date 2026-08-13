@@ -78,5 +78,12 @@ public interface EmergencyResponseInfoData {
     Integer deleteOne(@Param(value = "ID") String ID);
 
     Integer insertAll(@Param(value = "quPojo") List<EmergencyResponseInfoPojo> pojo);
-    
+
+    /**
+     * 按DEPTWX分组，查询每个区域最新的START_TIME记录（返回全部字段）
+     * 性能依赖索引: CREATE INDEX idx_deptwx_starttime ON EMERGENCY_RESPONSE_INFO(DEPTWX, START_TIME DESC);
+     * @return 每个区域最新一条应急响应记录
+     */
+    List<EmergencyResponseInfoPojo> selectLatestByDeptwx();
+
 }

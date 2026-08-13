@@ -31,6 +31,9 @@ public class WaterSituationForecastGenerator extends AbstractReportGenerator {
     @Autowired
     private BDMS_PREDICTService bdmsPredictService;
 
+    @Autowired
+    private swzzmodeserver.workserver.data.swzzmode.DD_SOLUTIONData ddSolutionData;
+
     private static final DecimalFormat df2 = new DecimalFormat("0.00");
     private ReportRequest currentParams; // fillTemplate 中需要用到
 
@@ -123,7 +126,8 @@ public class WaterSituationForecastGenerator extends AbstractReportGenerator {
                 if (webCode != null) {
                     for (TyphoonSummary ts : allTyphoons) {
                         if (webCode.equals(ts.getCode1()) || webCode.equals(ts.getCode2())) {
-                            typhoonSummary = ts; break;
+                            typhoonSummary = ts;
+                            break;
                         }
                     }
                 }
@@ -142,6 +146,7 @@ public class WaterSituationForecastGenerator extends AbstractReportGenerator {
                 typhoonDetail = nmcTyphoonService.getTyphoonDetail(typhoonSummary.getId());
                 latestObs = nmcTyphoonService.getLatestObservation(typhoonDetail);
                 cmaForecast = nmcTyphoonService.getCmaForecast(typhoonDetail);
+                System.out.println("localTimeChinese=" + (latestObs != null ? nmcTyphoonService.getObsTimeString(latestObs) : "null"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -156,10 +161,10 @@ public class WaterSituationForecastGenerator extends AbstractReportGenerator {
 
         // === 通用占位符 ===
         int qihao = calculateNextQihao(params);
-        data.setTitle(typhoonCode + "号台风\"" + typhoonName + "\"分片水情预报");
+        data.setTitle(typhoonCode + "号台风“" + typhoonName + "”分片水情预报");
         data.addPlaceholder("reportNo", currentYear + "年第" + qihao + "期");
         data.addPlaceholder("reportDate", new SimpleDateFormat("yyyy年M月d日H时").format(now));
-        data.addPlaceholder("typhoonTitle", typhoonCode + "号台风\"" + typhoonName + "\"分片水情预报");
+        data.addPlaceholder("typhoonTitle", typhoonCode + "号台风“" + typhoonName + "”分片水情预报");
         data.addPlaceholder("forecaster", params.getAuthor() != null ? params.getAuthor() : "");
 
         // === 台风动态 ===
@@ -180,12 +185,12 @@ public class WaterSituationForecastGenerator extends AbstractReportGenerator {
         // === 台风路径图 ===
         String imagePath = findOrFetchTyphoonImage(params, typhoonCode, typhoonName);
         if (imagePath != null) {
-            String timeStr = formatObsTimeForCaption(latestObs != null ? latestObs.getLocalTimeChinese() : null);
+            String timeStr = formatObsTimeForCaption(latestObs != null ? nmcTyphoonService.getObsTimeString(latestObs) : null);
             String numStr = typhoonCode != null && typhoonCode.length() >= 4
                     ? String.valueOf(Integer.parseInt(typhoonCode.substring(2)))
                     : "";
             data.addImage("typhoonImage", imagePath,
-                    "图1  " + timeStr + "第" + numStr + "号台风\"" + typhoonName + "\"中央气象台路径预报图");
+                    "图1  " + timeStr + "第" + numStr + "号台风“" + typhoonName + "”中央气象台路径预报图");
         }
 
         // === 表1：7片区当前水位 ===
@@ -204,6 +209,7 @@ public class WaterSituationForecastGenerator extends AbstractReportGenerator {
 
         // === 水情预测文字 ===
         data.addPlaceholder("waterPrediction", buildWaterPredictionText(params));
+        data.addPlaceholder("forecastConclusion", buildForecastConclusion(latestObs));
 
         // === 表2：12站点预测水位 ===
         // 在fillTemplate中处理，需要单独填充第二个表格
@@ -371,7 +377,8 @@ public class WaterSituationForecastGenerator extends AbstractReportGenerator {
     }
 
     private String buildDisclaimer(String typhoonName) {
-        return "";
+        return "后续，水文总站将根据气象部门提供的最新风雨影响预报，及时加强"
+                + "会商研判，滚动报告水位预报的最新情况。";
     }
 
     private String buildTable1Caption(ReportRequest params) {
@@ -395,7 +402,45 @@ public class WaterSituationForecastGenerator extends AbstractReportGenerator {
     }
 
     private String buildWaterPredictionText(ReportRequest params) {
-        return "各代表站预测最高水位值见表2。";
+        StringBuilder sb = new StringBuilder();
+        if (params.getDdId() != null && !params.getDdId().isEmpty()) {
+            try {
+                List<swzzmodeserver.workserver.pojo.swzzmode.DD_SOLUTIONPojo> solutions = ddSolutionData
+                        .selectListByDDID(Collections.singletonList(params.getDdId()), null, null);
+                if (solutions != null && !solutions.isEmpty()) {
+                    String ddTm = solutions.get(0).getDD_TM();
+                    String ddTmE = solutions.get(0).getDD_CHECKBY();
+                    if (ddTm != null && ddTm.length() >= 16) {
+                        try {
+                            Date d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(ddTm);
+                            Date dE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(ddTmE);
+                            sb.append("预报时间为：").append(new SimpleDateFormat("M月d日H时").format(d) + "~"
+                                    + new SimpleDateFormat("M月d日H时").format(dE)).append("，");
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        sb.append("预报降水按照上海市气象台网格降水预报，过程雨量为         ，")
+                .append("期间水利闸泵工程按照         进行调度。");
+        return sb.toString();
+    }
+
+    /** 预报结论: "据7月10日15时中央气象台台风预报路径..." */
+    private String buildForecastConclusion(TrackPoint latestObs) {
+        String timeStr = "";
+        if (latestObs != null && nmcTyphoonService.getObsTimeString(latestObs) != null) {
+            try {
+                Date d = new SimpleDateFormat("yyyy年MM月dd日HH时mm分").parse(nmcTyphoonService.getObsTimeString(latestObs));
+                timeStr = new SimpleDateFormat("M月d日H时").format(d);
+            } catch (Exception e) {
+            }
+        }
+        return "据" + timeStr + "中央气象台台风预报路径，综合历史台风增水经验和数值模型预报，"
+                + "黄浦江中上游及个别水利片可能         警戒水位。各代表站点预报时段水位特征值见表2。";
     }
 
     // ===================== 水位过程图 =====================
@@ -404,7 +449,7 @@ public class WaterSituationForecastGenerator extends AbstractReportGenerator {
         try {
             Date now = new Date();
             String stime = params.getStime() != null ? params.getStime()
-                    : new SimpleDateFormat("yyyy-MM-dd HH:00:00").format(new Date(now.getTime() - 86400000L));
+                    : new SimpleDateFormat("yyyy-MM-dd HH:00:00").format(new Date(now.getTime() - 3L * 86400000L));
             String etime = params.getEtime() != null ? params.getEtime()
                     : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now);
             String chartDir = templateFilePath + File.separator + "water_situation" + File.separator + "temp";
@@ -507,7 +552,18 @@ public class WaterSituationForecastGenerator extends AbstractReportGenerator {
     private String stripYear(String timeStr) {
         if (timeStr == null)
             return "";
-        return timeStr.replaceFirst("^\\d{4}[-/]", "");
+        try {
+            String[] fmts = { "yyyy/M/d H:mm", "yyyy-MM-dd HH:mm", "yyyy/M/d HH:mm", "yyyy-MM-dd H:mm" };
+            for (String fmt : fmts) {
+                try {
+                    Date d = new java.text.SimpleDateFormat(fmt).parse(timeStr);
+                    return new java.text.SimpleDateFormat("M/d H:mm").format(d);
+                } catch (Exception ignored) {
+                }
+            }
+        } catch (Exception e) {
+        }
+        return timeStr.replaceFirst("^\\d{4}[-/]", "").replace("-", "/");
     }
 
     private static String qihaoToChinese(int n) {

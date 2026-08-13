@@ -1,6 +1,7 @@
 package swzzmodeserver.tools;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -31,6 +32,18 @@ public class apihelper {
     private static String filePathName;
 
     /**
+     * 全局 HTTP 超时配置。
+     * 原实现未设置任何超时，外部接口卡住会导致调用线程永久阻塞，
+     * 僵尸线程与文件描述符随时间累积，最终拖垮系统（表现为"跑几天慢慢卡死"）。
+     * 连接超时/获取连接 5s，读取数据 60s（保守值，覆盖较慢的预报/模型接口）。
+     */
+    private static final RequestConfig REQUEST_CONFIG = RequestConfig.custom()
+            .setConnectTimeout(5000)
+            .setConnectionRequestTimeout(5000)
+            .setSocketTimeout(60000)
+            .build();
+
+    /**
      * 发送post 请求访问本地应用并根据传递参数的不同返回不同的结果
      * 
      * @param url       访问地址
@@ -41,6 +54,7 @@ public class apihelper {
         // 创建默认的httpClient实例
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(url);
+        httpPost.setConfig(REQUEST_CONFIG);
         if (header != null) {
             header.forEach((key, value) -> {
                 httpPost.addHeader(key, value.toString());
@@ -82,6 +96,7 @@ public class apihelper {
         // 创建默认的httpClient实例
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(url);
+        httpGet.setConfig(REQUEST_CONFIG);
         if (header != null) {
             header.forEach((key, value) -> {
                 httpGet.addHeader(key, value.toString());
@@ -135,6 +150,7 @@ public class apihelper {
                 .build();
         // 剩余逻辑与原方法一致...
         HttpGet httpGet = new HttpGet(url);
+        httpGet.setConfig(REQUEST_CONFIG);
         if (header != null) {
             header.forEach((key, value) -> {
                 httpGet.addHeader(key, value.toString());

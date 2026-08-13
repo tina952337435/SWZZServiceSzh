@@ -17,20 +17,26 @@
                 </foreach>
             </if>
             <if test="FYMDH != null and FYMDH != ''">
-                <![CDATA[ and FYMDH == #{FYMDH} ]]>
+                <![CDATA[ and FYMDH = #{FYMDH} ]]>
             </if>
         </where>
         order by  YMDH asc
     </select>
 
-<!--    距离依据时间最新的一次预报-->
+<!--    距离依据时间最新的一次预报  group BY UNITNAME-->
     <select id="selectListFast" resultType="swzzmodeserver.workserver.pojo.swzzmode.ST_FORECAST_FPojo">
         select * from  ST_FORECAST_F  where 1=1
         and FYMDH in (
         select  max(FYMDH) as FYMDH  from ST_FORECAST_F
         <where>
-            <if test="UNITNAME != null and UNITNAME != ''">
+            <!-- <if test="UNITNAME != null and UNITNAME != ''">
                 and UNITNAME=#{UNITNAME}
+            </if> -->
+            <if test="UNITNAME != null and UNITNAME.size() > 0">
+                and UNITNAME in
+                <foreach collection="UNITNAME" open="(" close=")" item="utitname" separator=",">
+                    #{utitname}
+                </foreach>
             </if>
             <if test="SFYMDH != null and SFYMDH != ''">
                 <![CDATA[ and FYMDH >= #{SFYMDH} ]]>
@@ -39,11 +45,17 @@
                 <![CDATA[ and FYMDH <= #{EFYMDH} ]]>
             </if>
         </where>
-        group BY UNITNAME
+        
          )
-        <if test="UNITNAME != null and UNITNAME != ''">
+        <!-- <if test="UNITNAME != null and UNITNAME != ''">
             and UNITNAME=#{UNITNAME}
-        </if>
+        </if> -->
+        <if test="UNITNAME != null and UNITNAME.size() > 0">
+                and UNITNAME in
+                <foreach collection="UNITNAME" open="(" close=")" item="utitname" separator=",">
+                    #{utitname}
+                </foreach>
+            </if>
         <if test="stime != null and stime != ''">
             <![CDATA[ and YMDH >= #{stime} ]]>
         </if>
@@ -135,8 +147,8 @@
             </if>
         </trim>
     </insert>
-    <insert id="insertALL" parameterType="swzzmodeserver.workserver.pojo.swzzmode.ST_FORECAST_FPojo">
-        insert into ST_FORECAST_F(STCD,UNITNAME,PLCD, FYMDH,IYMDH,YMDH,Z,Q) values
+    <insert id="insertALL" parameterType="list">
+        insert into ST_FORECAST_F(STCD,UNITNAME,PLCD,FYMDH,IYMDH,YMDH,Z,Q) values
         <foreach collection="objList" item="obj" separator=",">
             (
             #{obj.STCD,jdbcType=VARCHAR},
@@ -145,8 +157,8 @@
             #{obj.FYMDH,jdbcType=VARCHAR},
             #{obj.IYMDH,jdbcType=VARCHAR},
             #{obj.YMDH,jdbcType=VARCHAR},
-            #{obj.Z,jdbcType=FLOAT},
-            #{obj.Q,jdbcType=FLOAT}
+            #{obj.Z,jdbcType=DOUBLE},
+            #{obj.Q,jdbcType=DOUBLE}
             )
         </foreach>
     </insert>
@@ -178,17 +190,17 @@
                     STCD = #{obj.STCD,jdbcType=VARCHAR},
                 </if>
                 <if test="obj.Z != null">
-                    Z = #{obj.Z,jdbcType=FLOAT},
+                    Z = #{obj.Z,jdbcType=DOUBLE},
                 </if>
                 <if test="obj.Q != null">
-                    Q = #{obj.Q,jdbcType=FLOAT},
+                    Q = #{obj.Q,jdbcType=DOUBLE},
                 </if>
             </set>
-            where STCD = #{STCD}
-            and UNITNAME=#{UNITNAME}
-            and FYMDH=#{FYMDH}
-            and IYMDH=#{IYMDH}
-            and YMDH=#{YMDH}
+            where STCD = #{obj.STCD}
+            and UNITNAME=#{obj.UNITNAME}
+            and FYMDH=#{obj.FYMDH}
+            and IYMDH=#{obj.IYMDH}
+            and YMDH=#{obj.YMDH}
         </foreach>
     </update>
 
@@ -210,5 +222,9 @@
                 </foreach>
             </if>
         </where>
+    </delete>
+
+    <delete id="deleteByFymdh">
+        delete from ST_FORECAST_F where FYMDH = #{FYMDH}
     </delete>
 </mapper>

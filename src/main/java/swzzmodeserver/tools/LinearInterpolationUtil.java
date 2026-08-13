@@ -25,20 +25,33 @@ public class LinearInterpolationUtil {
             Map<String, Object> current = hourlyData.get(i);
             Map<String, Object> next = hourlyData.get(i + 1);
 
-            String stime=current.get(timeKey).toString();
-            String etime=next.get(timeKey).toString();
+            Object stimeObj = current.get(timeKey);
+            Object etimeObj = next.get(timeKey);
+            if (stimeObj == null || etimeObj == null) {
+                continue;
+            }
+            String stime = stimeObj.toString();
+            String etime = etimeObj.toString();
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
             LocalDateTime startTime = LocalDateTime.parse(stime, formatter);
             LocalDateTime endTime = LocalDateTime.parse(etime, formatter);
-            double startValue = ((Number) current.get(valueKey)).doubleValue();
-            double endValue = ((Number) next.get(valueKey)).doubleValue();
+            Object startObj = current.get(valueKey);
+            Object endObj = next.get(valueKey);
+            if (startObj == null || endObj == null) {
+                continue;
+            }
+            double startValue = Double.parseDouble(startObj.toString());
+            double endValue = Double.parseDouble(endObj.toString());
 
             // 计算两小时之间的分钟数
             long minutesBetween = ChronoUnit.MINUTES.between(startTime, endTime);
             // 计算插值步数(5分钟一个点)
             int steps = (int) (minutesBetween / 5);
+            if (steps <= 0) {
+                continue;
+            }
             double valueStep = (endValue - startValue) / steps;
 
             // 添加原始点和插值点

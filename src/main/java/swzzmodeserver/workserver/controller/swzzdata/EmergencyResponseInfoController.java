@@ -258,4 +258,24 @@ public class EmergencyResponseInfoController {
             return new ResultUtils<>(num, "操作成功", false, num, watch.getTime());
         }
     }
+
+    /**
+     * 按DEPTWX分组，查询每个区域最新的START_TIME记录（返回全部字段）
+     * 性能依赖索引: CREATE INDEX idx_deptwx_starttime ON EMERGENCY_RESPONSE_INFO(DEPTWX,
+     * START_TIME DESC);
+     */
+    @RequestMapping("/findLatestByDeptwx")
+    public ResultUtils findLatestByDeptwx() {
+        StopWatch watch = new StopWatch();
+        watch.start();
+
+        List<EmergencyResponseInfoPojo> list = data.selectLatestByDeptwx();
+        watch.stop();
+
+        if (list != null && list.size() > 0) {
+            return new ResultUtils<>(list, "操作成功", true, list.size(), watch.getTime());
+        } else {
+            return new ResultUtils<>(list, "操作成功", false, 0, watch.getTime());
+        }
+    }
 }

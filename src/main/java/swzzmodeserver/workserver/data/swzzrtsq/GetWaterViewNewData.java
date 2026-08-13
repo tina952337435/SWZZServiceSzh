@@ -49,6 +49,11 @@ public interface GetWaterViewNewData {
     List<GetWaterViewNewPojo> queryByTide(@Param(value = "stcdList") List<String> stcdList,@Param(value = "stime") String stime,@Param(value = "etime") String etime,@Param(value = "DAYHOUR") String DAYHOUR,@Param(value = "mtype") String mtype);
     List<GetWaterViewNewPojo> queryByPump(@Param(value = "stcdList") List<String> stcdList,@Param(value = "stime") String stime,@Param(value = "etime") String etime,@Param(value = "DAYHOUR") String DAYHOUR,@Param(value = "mtype") String mtype);
 
+    List<GetWaterViewNewPojo> queryByRiverMax(@Param(value = "stcdList") List<String> stcdList,@Param(value = "stime") String stime,@Param(value = "etime") String etime,@Param(value = "DAYHOUR") String DAYHOUR,@Param(value = "mtype") String mtype);
+    List<GetWaterViewNewPojo> queryByWasMax(@Param(value = "stcdList") List<String> stcdList,@Param(value = "stime") String stime,@Param(value = "etime") String etime,@Param(value = "DAYHOUR") String DAYHOUR,@Param(value = "mtype") String mtype);
+    List<GetWaterViewNewPojo> queryByTideMax(@Param(value = "stcdList") List<String> stcdList,@Param(value = "stime") String stime,@Param(value = "etime") String etime,@Param(value = "DAYHOUR") String DAYHOUR,@Param(value = "mtype") String mtype);
+    List<GetWaterViewNewPojo> queryByPumpMax(@Param(value = "stcdList") List<String> stcdList,@Param(value = "stime") String stime,@Param(value = "etime") String etime,@Param(value = "DAYHOUR") String DAYHOUR,@Param(value = "mtype") String mtype);
+
     List<GetWaterViewNewPojo> queryByFlow(@Param(value = "stcdList") List<String> stcdList,@Param(value = "stime") String stime,@Param(value = "etime") String etime,@Param(value = "DAYHOUR") String DAYHOUR,@Param(value = "mtype") String mtype);
 
 

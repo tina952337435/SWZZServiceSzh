@@ -31,6 +31,7 @@ public class ST_STBPRP_FCCHPojo {
     private List<ST_GATE_RNEWPojo> gateList;
     private List<ST_GATE_RPojo> gateListHis;
     private String UPZ;
+    private String DWZ;
     private List<GetWaterViewNewPojo> waterHisList;
     private String STATUS;//开关状态
 

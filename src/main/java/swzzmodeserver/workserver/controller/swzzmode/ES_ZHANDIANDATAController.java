@@ -998,14 +998,17 @@ public class ES_ZHANDIANDATAController {
     public ResultUtils ModifyGCSSLLAREAGCGZ_SZHFJL(@RequestBody ParamFields bpPojo) {
         StopWatch watch = new StopWatch();
         watch.start();
-        String solutionid = "", stime = "";
+        String solutionid = "", stime = "", etime = "";
         if (null != bpPojo.getSolutionid()) {
             solutionid = bpPojo.getSolutionid();
         }
         if (null != bpPojo.getTM()) {
             stime = bpPojo.getTM();
         }
-        Integer num = service.ModifyGCSSLLAREAGCGZ_SZHFJL(solutionid, stime);
+        if (null != bpPojo.getEnddate()) {
+            etime = bpPojo.getEnddate();
+        }
+        Integer num = service.ModifyGCSSLLAREAGCGZ_SZHFJL(solutionid, stime, etime);
         watch.stop();
         if (num > 0) {
             return new ResultUtils<>(num, "操作成功", true, num, watch.getTime());

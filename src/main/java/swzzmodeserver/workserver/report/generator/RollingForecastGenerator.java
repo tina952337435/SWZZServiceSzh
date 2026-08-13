@@ -99,8 +99,8 @@ public class RollingForecastGenerator extends AbstractReportGenerator {
         int qihao = calculateNextQihao(params);
 
         // 占位符
-        data.setTitle(typhoonCode + "号台风\"" + typhoonName + "\"风暴潮滚动预报单");
-        data.addPlaceholder("typhoonTitle", typhoonCode + "号台风\"" + typhoonName + "\"风暴潮滚动预报单");
+        data.setTitle(typhoonCode + "号台风“" + typhoonName + "”风暴潮滚动预报单");
+        data.addPlaceholder("typhoonTitle", typhoonCode + "号台风“" + typhoonName + "”风暴潮滚动预报单");
         data.addPlaceholder("reportNo", currentYear + "-" + String.format("%02d", qihao));
         data.addPlaceholder("reportDate", new SimpleDateFormat("yyyy年M月d日H时").format(now));
         data.addPlaceholder("forecaster", params.getAuthor() != null ? params.getAuthor() : "");
@@ -124,11 +124,15 @@ public class RollingForecastGenerator extends AbstractReportGenerator {
     }
 
     private static String qihaoToChinese(int n) {
-        String[] d = {"", "一", "二", "三", "四", "五", "六", "七", "八", "九"};
-        if (n < 1) return String.valueOf(n);
-        if (n <= 9) return d[n];
-        if (n == 10) return "十";
-        if (n < 20) return "十" + d[n % 10];
+        String[] d = { "", "一", "二", "三", "四", "五", "六", "七", "八", "九" };
+        if (n < 1)
+            return String.valueOf(n);
+        if (n <= 9)
+            return d[n];
+        if (n == 10)
+            return "十";
+        if (n < 20)
+            return "十" + d[n % 10];
         return String.valueOf(n);
     }
 }

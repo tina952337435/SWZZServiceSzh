@@ -79,7 +79,8 @@ public class StormSurgeForecastGenerator extends AbstractReportGenerator {
                 if (webCode != null) {
                     for (TyphoonSummary ts : allTyphoons) {
                         if (webCode.equals(ts.getCode1()) || webCode.equals(ts.getCode2())) {
-                            typhoonSummary = ts; break;
+                            typhoonSummary = ts;
+                            break;
                         }
                     }
                 }
@@ -124,7 +125,7 @@ public class StormSurgeForecastGenerator extends AbstractReportGenerator {
 
         // 3. 构建报告标题
         String typhoonTitle = (resolvedCode != null ? resolvedCode : "") + "号台风"
-                + (resolvedName != null ? "\"" + resolvedName + "\"" : "") + "风暴潮预报";
+                + (resolvedName != null ? "“" + resolvedName + "”" : "") + "风暴潮预报";
         data.setTitle(typhoonTitle);
 
         // 4. 报告期号和日期
@@ -186,15 +187,15 @@ public class StormSurgeForecastGenerator extends AbstractReportGenerator {
         if (imagePath != null && !imagePath.isEmpty()) {
             // 图题格式: "图1 7月8日9时第9号台风"巴威"中央气象台路径预报图"
             String timeStr = "";
-            if (latestObs != null && latestObs.getLocalTimeChinese() != null) {
-                timeStr = formatObsTimeForCaption(latestObs.getLocalTimeChinese());
+            if (latestObs != null && nmcTyphoonService.getObsTimeString(latestObs) != null) {
+                timeStr = formatObsTimeForCaption(nmcTyphoonService.getObsTimeString(latestObs));
             }
             String numStr = "";
             if (resolvedCode != null && resolvedCode.length() >= 4) {
                 numStr = String.valueOf(Integer.parseInt(resolvedCode.substring(2))); // 2609→9, 2613→13
             }
-            String caption = "图1  " + timeStr + "第" + numStr + "号台风\""
-                    + (resolvedName != null ? resolvedName : "") + "\"中央气象台路径预报图";
+            String caption = "图1  " + timeStr + "第" + numStr + "号台风“"
+                    + (resolvedName != null ? resolvedName : "") + "”中央气象台路径预报图";
             data.addImage("typhoonImage", imagePath, caption);
         }
 
@@ -355,11 +356,15 @@ public class StormSurgeForecastGenerator extends AbstractReportGenerator {
 
     /** 1→一, 2→二, ... 11→十一 */
     private static String qihaoToChinese(int n) {
-        String[] digits = {"", "一", "二", "三", "四", "五", "六", "七", "八", "九"};
-        if (n < 1) return String.valueOf(n);
-        if (n <= 9) return digits[n];
-        if (n == 10) return "十";
-        if (n < 20) return "十" + (n % 10 == 0 ? "" : digits[n % 10]);
+        String[] digits = { "", "一", "二", "三", "四", "五", "六", "七", "八", "九" };
+        if (n < 1)
+            return String.valueOf(n);
+        if (n <= 9)
+            return digits[n];
+        if (n == 10)
+            return "十";
+        if (n < 20)
+            return "十" + (n % 10 == 0 ? "" : digits[n % 10]);
         return String.valueOf(n); // 超出范围直接返回数字
     }
 

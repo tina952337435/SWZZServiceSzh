@@ -51,7 +51,6 @@ public class PdfUtil {
             FileOutputStream os = new FileOutputStream(file);
             //Address是将要被转化的word文档
             Document doc = new Document(wordPath);
-            //全面支持DOC, DOCX, OOXML, RTF HTML, OpenDocument, PDF, EPUB, XPS, SWF 相互转换
             doc.save(os, SaveFormat.PDF);
             long now = System.currentTimeMillis();
             os.close();
