@@ -81,7 +81,7 @@
         select STCD,TM,DRP from ST_PPTN_R
         <where>
             <if test="stime != null and stime != ''">
-                <![CDATA[ and TM >=to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
+                <![CDATA[ and TM >to_date(#{stime},'YYYY-MM-DD HH24:MI:SS') ]]>
             </if>
             <if test="etime != null and etime != ''">
                 <![CDATA[ and TM <= to_date(#{etime},'YYYY-MM-DD HH24:MI:SS') ]]>

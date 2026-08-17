@@ -14,6 +14,7 @@ public interface ST_VEL_RData {
     List<ST_VEL_RPojo> selectHis(@Param(value = "stcdList") List<String> stcdList, @Param(value = "stime") String stime, @Param(value = "etime") String etime);
 
     Integer insertAll(@Param(value = "quPojo") List<ST_VEL_RPojo> quPojo);
+    Integer upsertAll(@Param(value = "quPojo") List<ST_VEL_RPojo> quPojo);
 
     List<ST_VEL_RPojo> selectHisAll(
         @Param(value = "stcdList") List<String> stcdList,

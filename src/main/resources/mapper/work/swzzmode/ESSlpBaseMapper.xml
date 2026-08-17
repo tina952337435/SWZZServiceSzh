@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="swzzmodeserver.workserver.data.swzzmode.ESSlpBaseData">
+    <select id="selectList" resultType="swzzmodeserver.workserver.pojo.swzzmode.ESSlpBasePojo">
+        select * from ES_SLP_BASE order by XH
+    </select>
+    <select id="selectOne" resultType="swzzmodeserver.workserver.pojo.swzzmode.ESSlpBasePojo">
+        select * from ES_SLP_BASE where ID = #{ID}
+    </select>
+    <insert id="insertOne">
+        insert into ES_SLP_BASE
+        (ID, XH, SLP_NAME, AREA, HH_AREA, STCD_LIST, STNM_LIST, YJ_SW, C_SW, XJJ_SW, BZ_SW, FORMULA_A, FORMULA_B, FORMULA_C, REMARK, MODITIME)
+        values
+        (#{ID}, #{XH}, #{SLP_NAME}, #{AREA}, #{HH_AREA}, #{STCD_LIST}, #{STNM_LIST}, #{YJ_SW}, #{C_SW}, #{XJJ_SW}, #{BZ_SW}, #{FORMULA_A}, #{FORMULA_B}, #{FORMULA_C}, #{REMARK}, sysdate)
+    </insert>
+    <update id="updateOne">
+        update ES_SLP_BASE
+        <set>
+            <if test="XH != null">XH = #{XH},</if>
+            <if test="SLP_NAME != null">SLP_NAME = #{SLP_NAME},</if>
+            <if test="AREA != null">AREA = #{AREA},</if>
+            <if test="HH_AREA != null">HH_AREA = #{HH_AREA},</if>
+            <if test="STCD_LIST != null">STCD_LIST = #{STCD_LIST},</if>
+            <if test="STNM_LIST != null">STNM_LIST = #{STNM_LIST},</if>
+            <if test="YJ_SW != null">YJ_SW = #{YJ_SW},</if>
+            <if test="C_SW != null">C_SW = #{C_SW},</if>
+            <if test="XJJ_SW != null">XJJ_SW = #{XJJ_SW},</if>
+            <if test="BZ_SW != null">BZ_SW = #{BZ_SW},</if>
+            <if test="FORMULA_A != null">FORMULA_A = #{FORMULA_A},</if>
+            <if test="FORMULA_B != null">FORMULA_B = #{FORMULA_B},</if>
+            <if test="FORMULA_C != null">FORMULA_C = #{FORMULA_C},</if>
+            <if test="REMARK != null">REMARK = #{REMARK},</if>
+            MODITIME = sysdate
+        </set>
+        where ID = #{ID}
+    </update>
+    <delete id="deleteOne">
+        delete from ES_SLP_BASE where ID = #{ID}
+    </delete>
+</mapper>

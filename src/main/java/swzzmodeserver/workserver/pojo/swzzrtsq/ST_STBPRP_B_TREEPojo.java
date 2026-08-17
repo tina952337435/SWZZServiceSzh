@@ -17,4 +17,7 @@ public class ST_STBPRP_B_TREEPojo {
     private Double ORDERBYID;
     private String PATHNAME;
     private List<ST_STBPRP_B_TREEPojo> TreePojoList;
+
+    private Double LGTD;
+    private Double LTTD;
 }

@@ -9,4 +9,5 @@ import java.util.List;
 @Mapper
 public interface RTSQST_TIDE_RData {
     Integer insertAll(@Param(value = "quPojo") List<ST_TIDE_RPojo> quPojo);
+    Integer upsertAll(@Param(value = "quPojo") List<ST_TIDE_RPojo> quPojo);
 }

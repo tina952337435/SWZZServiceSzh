@@ -49,7 +49,6 @@ public class ST_GATE_RNEWController {
 
     @Autowired
     private RTSQST_WAS_RData rtsqstWasRData;
-    
 
     @RequestMapping("/selectGQList")
     public List<ST_STBPRP_FCCHPojo> selectGQList(@RequestBody ColumnName param) {
@@ -179,7 +178,8 @@ public class ST_GATE_RNEWController {
         List<ST_GATE_RNEWPojo> gateList = data.selectGateListNew(stcdList);
 
         // 查询各站最新水位（闸上UPZ、闸下DWZ），限定最近24小时避免全表扫描
-        String wasStime = DateUtil.dateFormat(new Date(new Date().getTime() - 24 * 60 * 60 * 1000), "yyyy-MM-dd HH:mm:ss");
+        String wasStime = DateUtil.dateFormat(new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
+                "yyyy-MM-dd HH:mm:ss");
         String wasEtime = DateUtil.dateFormat(new Date(), "yyyy-MM-dd HH:mm:ss");
         List<ST_WAS_RPojo> wasList = rtsqstWasRData.selectNew(stcdList, wasStime, wasEtime);
 
@@ -278,6 +278,8 @@ public class ST_GATE_RNEWController {
                         double bili = (kaiCount.get() / total) * 100;
                         pojo.setSTCD(u.getID());
                         pojo.setSTNM(u.getTITLE());
+                        pojo.setLGTD(u.getLGTD() != null ? u.getLGTD().toString() : null);
+                        pojo.setLTTD(u.getLTTD() != null ? u.getLTTD().toString() : null);
                         pojo.setNUM(kaiCount.get() + "/" + quList.size());// 开起的工程数/总工程数
                         pojo.setROTATE(String.valueOf(bili));
                         pojo.setStGateR(gateList);
@@ -343,5 +345,5 @@ public class ST_GATE_RNEWController {
         watch.stop();
         return new ResultUtils<>(null, token, true, 0, watch.getTime());
     }
-    
+
 }

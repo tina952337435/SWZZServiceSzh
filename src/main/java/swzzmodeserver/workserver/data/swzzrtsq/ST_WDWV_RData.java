@@ -16,6 +16,7 @@ public interface ST_WDWV_RData {
     List<ST_WDWV_RPojo> selectHis(@Param(value = "stcdList") List<String> stcdList,@Param(value = "stime") String stime,@Param(value = "etime") String etime);
 
     Integer insertAll(@Param(value = "quPojo") List<ST_WDWV_RPojo> quPojo);
+    Integer upsertAll(@Param(value = "quPojo") List<ST_WDWV_RPojo> quPojo);
 
 
     List<tb_fengsufengxiangPojo> selecttb_fengsufengxiangList(@Param(value = "stcdList") List<String> stcdList,@Param(value = "stime") String stime,@Param(value = "etime") String etime);

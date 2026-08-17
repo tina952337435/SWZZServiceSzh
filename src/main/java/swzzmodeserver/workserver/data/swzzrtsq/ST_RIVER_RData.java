@@ -9,6 +9,7 @@ import java.util.List;
 @Mapper
 public interface ST_RIVER_RData {
     Integer insertAll(@Param(value = "quPojo") List<ST_RIVER_RPojo> quPojo);
+    Integer upsertAll(@Param(value = "quPojo") List<ST_RIVER_RPojo> quPojo);
     Integer upDateMaxRiver(ST_RIVER_RPojo mode);
 
     /**

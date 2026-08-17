@@ -617,7 +617,6 @@ public class TongbuServer {
                     String tm = entry.getKey(); // 获取分组的键（即 TM 时间）
                     List<ST_WAS_RPojo> st_was_r = entry.getValue(); // 获取该时间下的对象列表
 
-                    System.out.println("当前时间: " + tm + "，该时间点的数据条数: " + list.size());
                     flag = true;
                     // 继续对 st_was_r进行业务处理...
                     Double windSpeed = 0.0, pressure = 0.0, direction = 0.0;
@@ -816,7 +815,8 @@ public class TongbuServer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        List<TSDBPojo> listTsdb = rtsqstPptnRData.selectTSDBList(stcdList, stimeH, etime);
+        // 与实时同步同源：老水情库 wds.TSDB（HPJSQ.TSDB 达梦旧库已弃用，补录会拉不到数据）
+        List<TSDBPojo> listTsdb = tsdbData.selectList(stimeH, etime, stcdList);
         try {
             stcdList.forEach(stcd -> {
                 List<TSDBPojo> listTsdbT = listTsdb.stream().filter(p -> p.getSenid().equals(stcd))
@@ -1695,52 +1695,317 @@ public class TongbuServer {
             return result;
         }
 
-        // 2. 遍历每个站点，拉取源数据并 upsert
+        // 2. 按来源汇总设备码，一次性批量预取，避免逐站查库
+        Set<String> swDev = new LinkedHashSet<>(); // 上海水文总站 设备码
+        Set<String> qxDev = new LinkedHashSet<>(); // 市气象局 设备码(=入库站码)
+        Map<String, String> swDeviceToStation = new HashMap<>(); // 上海水文总站：设备码 → 站码
         for (V_ST_STBPRP_BTZDto station : stations) {
-            String stcd = station.getStcd();
             String source = station.getSource();
             String admauth = station.getAdmauth();
-            List<String> deviceCodes = Arrays.asList(admauth.split(","));
+            if (admauth == null) {
+                continue;
+            }
+            for (String code : admauth.split(",")) {
+                String c = code.trim();
+                if (c.isEmpty()) {
+                    continue;
+                }
+                if ("上海水文总站".equals(source)) {
+                    swDev.add(c);
+                    swDeviceToStation.put(c, station.getStcd());
+                } else if ("市气象局".equals(source)) {
+                    qxDev.add(c);
+                }
+            }
+        }
 
+        // 上海水文总站：一次拉取所有设备码 5 分钟数据，设备码→站码，再按站码分组
+        Map<String, List<ST_PPTN_RPojo>> swByStation = new HashMap<>();
+        if (!swDev.isEmpty()) {
+            List<ST_PPTN_RPojo> rows = getRTSQ_5MINXZYLNew(new ArrayList<>(swDev), stime, etime);
+            for (ST_PPTN_RPojo d : rows) {
+                String stcd = swDeviceToStation.get(d.getSTCD());
+                if (stcd != null) {
+                    d.setSTCD(stcd);
+                }
+            }
+            swByStation = rows.stream().collect(Collectors.groupingBy(ST_PPTN_RPojo::getSTCD));
+        }
+
+        // 市气象局：一次拉取（无 top 限制，避免截断），STCD 即入库站码
+        Map<String, List<ST_PPTN_RPojo>> qxByDev = new HashMap<>();
+        if (!qxDev.isEmpty()) {
+            qxByDev = rtsqstPptnRData.selectListSL323NoLimit(new ArrayList<>(qxDev), stime, etime).stream()
+                    .collect(Collectors.groupingBy(ST_PPTN_RPojo::getSTCD));
+        }
+
+        // 3. 逐站从批量结果取数据，分批 upsert（不再逐站查库）
+        List<Map<String, Object>> details = new ArrayList<>();
+        for (V_ST_STBPRP_BTZDto station : stations) {
+            String stcd = station.getStcd();
+            String stnm = station.getStnm();
+            String source = station.getSource();
+            String admauth = station.getAdmauth();
+
+            int fetched = 0;
+            int affected = 0;
             try {
                 List<ST_PPTN_RPojo> sourceData = new ArrayList<>();
-
-                // 2a. 根据数据来源拉取源数据
                 if ("上海水文总站".equals(source)) {
-                    // 从遥测库 TSDB 拉取5分钟数据，映射设备码→站点码
-                    sourceData = getRTSQ_5MINXZYLNew(deviceCodes, stime, etime);
-                    for (ST_PPTN_RPojo d : sourceData) {
-                        d.setSTCD(stcd);
+                    List<ST_PPTN_RPojo> rows = swByStation.get(stcd);
+                    if (rows != null) {
+                        sourceData.addAll(rows);
                     }
                 } else if ("市气象局".equals(source)) {
-                    // 从市气象局 SL323 拉取数据
-                    sourceData = rtsqstPptnRData.selectListSL323(deviceCodes, stime, etime);
+                    if (admauth != null) {
+                        for (String code : admauth.split(",")) {
+                            List<ST_PPTN_RPojo> rows = qxByDev.get(code.trim());
+                            if (rows != null) {
+                                sourceData.addAll(rows);
+                            }
+                        }
+                    }
                 }
 
-                totalFetched += sourceData.size();
+                fetched = sourceData.size();
+                totalFetched += fetched;
 
-                // 2b. 分批 upsert，每批500条
+                // 分批 upsert，每批500条
                 if (!sourceData.isEmpty()) {
                     int batchSize = 500;
                     for (int i = 0; i < sourceData.size(); i += batchSize) {
                         int end = Math.min(i + batchSize, sourceData.size());
                         List<ST_PPTN_RPojo> batch = sourceData.subList(i, end);
-                        totalAffected += rtsqstPptnRData.upsertAll(batch);
+                        affected += rtsqstPptnRData.upsertAll(batch);
                     }
+                    totalAffected += affected;
                 }
+                new javalog().writelog(
+                        "历史雨量补录：" + stnm + "(" + stcd + ")[来源:" + source + "] 拉取" + fetched + "条，入库" + affected + "条",
+                        filePathName, "SWZZServiceYL");
             } catch (Exception e) {
                 new javalog().writelog(
-                        "历史雨量补录异常：" + station.getStnm() + "(" + stcd + ") - " + e.getMessage(),
+                        "历史雨量补录异常：" + stnm + "(" + stcd + ") - " + e.getMessage(),
                         filePathName, "SWZZServiceYL");
-                errors.add(station.getStnm() + "(" + stcd + "): " + e.getMessage());
+                errors.add(stnm + "(" + stcd + "): " + e.getMessage());
             }
+
+            Map<String, Object> detail = new HashMap<>();
+            detail.put("stcd", stcd);
+            detail.put("stnm", stnm);
+            detail.put("source", source);
+            detail.put("fetched", fetched);
+            detail.put("affected", affected);
+            details.add(detail);
         }
 
         result.put("fetchedCount", totalFetched);
         result.put("affectedCount", totalAffected);
         result.put("stationCount", stations.size());
+        result.put("details", details);
         result.put("errors", errors);
         return result;
+    }
+
+    /**
+     * 历史实时水文要素补录（水位/流量/风速风向/流速）
+     * 从南瑞遥测库 wds.rtsq 拉取指定时间范围的数据，对
+     * ST_RIVER_R / ST_TIDE_R / ST_FLOW_R / ST_WDWV_R / ST_VEL_R 做 MERGE upsert（存在覆盖，不存在插入）。
+     *
+     * @param stime    开始时间 yyyy-MM-dd HH:mm:ss
+     * @param etime    结束时间 yyyy-MM-dd HH:mm:ss
+     * @param stcdList 站点列表（null 或空则补全部）
+     * @param typeList 数据类型列表（1水位/5流量/8风速风向/9流速，null 或空则默认全部）
+     * @return 补录统计结果 Map
+     */
+    public Map<String, Object> repairHistoryRealData(String stime, String etime, List<String> stcdList,
+            List<String> typeList) {
+        Map<String, Object> result = new HashMap<>();
+        int totalFetched = 0;
+        int totalAffected = 0;
+        List<String> errors = new ArrayList<>();
+
+        // 1. 获取实时要素站配置（来源=上海水文总站）
+        List<String> types = (typeList != null && !typeList.isEmpty()) ? typeList
+                : Arrays.asList("1", "5", "8", "9");
+        List<V_ST_STBPRP_BTZDto> stations = rtsqstStbprpBData.GetSyncSTCD(
+                (stcdList != null && !stcdList.isEmpty()) ? stcdList : null,
+                types, "1", Arrays.asList("上海水文总站"));
+
+        if (stations == null || stations.isEmpty()) {
+            result.put("fetchedCount", 0);
+            result.put("affectedCount", 0);
+            result.put("stationCount", 0);
+            result.put("details", new ArrayList<>());
+            result.put("errors", errors);
+            return result;
+        }
+
+        // 2. 按查询类型汇总所有设备码，一次性批量预取，避免逐站查库
+        Set<String> waterDev = new LinkedHashSet<>();   // 水位 type=1
+        Set<String> flowVelDev = new LinkedHashSet<>(); // 流量/流速 type=5/9
+        Set<String> windDev = new LinkedHashSet<>();    // 风速风向 type=8
+        for (V_ST_STBPRP_BTZDto station : stations) {
+            String type = station.getType();
+            String admauth = station.getAdmauth();
+            if (admauth == null) {
+                continue;
+            }
+            for (String code : admauth.split(",")) {
+                String c = code.trim();
+                if (c.isEmpty()) {
+                    continue;
+                }
+                if ("1".equals(type)) {
+                    waterDev.add(c);
+                } else if ("5".equals(type) || "9".equals(type)) {
+                    flowVelDev.add(c);
+                } else if ("8".equals(type)) {
+                    windDev.add(c);
+                }
+            }
+        }
+
+        Map<String, List<ST_WAS_RPojo>> waterByDev = new HashMap<>();
+        Map<String, List<ST_WAS_RPojo>> flowVelByDev = new HashMap<>();
+        Map<String, List<ST_WAS_RPojo>> windByDev = new HashMap<>();
+        if (!waterDev.isEmpty()) {
+            List<ST_WAS_RPojo> rows = rtevData.GetWaterDataHis(new ArrayList<>(waterDev), stime, etime);
+            // 水位过滤异常值（与实时同步一致：UPZ 在 -15 ~ 15 之间）
+            rows = rows.stream().filter(item -> {
+                try {
+                    double upz = Double.parseDouble(item.getUPZ());
+                    return upz < 15 && upz > -15;
+                } catch (Exception e) {
+                    return false;
+                }
+            }).collect(Collectors.toList());
+            waterByDev = rows.stream().collect(Collectors.groupingBy(ST_WAS_RPojo::getSTCD));
+        }
+        if (!flowVelDev.isEmpty()) {
+            flowVelByDev = rtevData.GetWaterDataLLHis(new ArrayList<>(flowVelDev), stime, etime).stream()
+                    .collect(Collectors.groupingBy(ST_WAS_RPojo::getSTCD));
+        }
+        if (!windDev.isEmpty()) {
+            windByDev = rtevData.GetWaterDataFX(new ArrayList<>(windDev), stime, etime).stream()
+                    .collect(Collectors.groupingBy(ST_WAS_RPojo::getSTCD));
+        }
+
+        // 3. 逐站从批量结果取自己的设备数据，变换 + upsert（不再逐站查库）
+        List<Map<String, Object>> details = new ArrayList<>();
+        for (V_ST_STBPRP_BTZDto station : stations) {
+            String stcd = station.getStcd();
+            String stnm = station.getStnm();
+            String type = station.getType();
+            String tab = station.getTab();
+            String admauth = station.getAdmauth();
+
+            int fetched = 0;
+            int affected = 0;
+            try {
+                Map<String, List<ST_WAS_RPojo>> byDev = "1".equals(type) ? waterByDev
+                        : ("8".equals(type) ? windByDev : flowVelByDev);
+                List<ST_WAS_RPojo> sourceData = new ArrayList<>();
+                if (admauth != null) {
+                    for (String code : admauth.split(",")) {
+                        List<ST_WAS_RPojo> rows = byDev.get(code.trim());
+                        if (rows != null) {
+                            sourceData.addAll(rows);
+                        }
+                    }
+                }
+                fetched = sourceData.size();
+                totalFetched += fetched;
+
+                if (!sourceData.isEmpty()) {
+                    if ("1".equals(type)) {
+                        if ("st_tide_r".equals(tab)) {
+                            affected = batchUpsertTide(SyncWaterDataToListTide(sourceData, station));
+                        } else {
+                            affected = batchUpsertRiver(SyncWaterDataToListRiver(sourceData, station));
+                        }
+                    } else if ("5".equals(type)) {
+                        affected = batchUpsertFlow(SyncWaterDataToListFlow(sourceData, station));
+                    } else if ("8".equals(type)) {
+                        affected = batchUpsertWdwv(SyncWaterDataToListFengRtev(sourceData, station));
+                    } else if ("9".equals(type)) {
+                        affected = batchUpsertVel(SyncWaterDataToListVel(sourceData, station));
+                    }
+                    totalAffected += affected;
+                }
+                new javalog().writelog("历史实时要素补录：" + stnm + "(" + stcd + ")[类型:" + type + "] 拉取" + fetched
+                        + "条，入库" + affected + "条", filePathName, "SWZZServiceBL");
+            } catch (Exception e) {
+                new javalog().writelog("历史实时要素补录异常：" + stnm + "(" + stcd + ")[类型:" + type + "] - " + e.getMessage(),
+                        filePathName, "SWZZServiceBL");
+                errors.add(stnm + "(" + stcd + ")[类型:" + type + "]: " + e.getMessage());
+            }
+
+            Map<String, Object> detail = new HashMap<>();
+            detail.put("stcd", stcd);
+            detail.put("stnm", stnm);
+            detail.put("type", type);
+            detail.put("fetched", fetched);
+            detail.put("affected", affected);
+            details.add(detail);
+        }
+
+        result.put("fetchedCount", totalFetched);
+        result.put("affectedCount", totalAffected);
+        result.put("stationCount", stations.size());
+        result.put("details", details);
+        result.put("errors", errors);
+        return result;
+    }
+
+    private int batchUpsertRiver(List<ST_RIVER_RPojo> list) {
+        int total = 0;
+        int batchSize = 500;
+        for (int i = 0; i < list.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, list.size());
+            total += stRiverRData.upsertAll(list.subList(i, end));
+        }
+        return total;
+    }
+
+    private int batchUpsertTide(List<ST_TIDE_RPojo> list) {
+        int total = 0;
+        int batchSize = 500;
+        for (int i = 0; i < list.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, list.size());
+            total += stTideRData.upsertAll(list.subList(i, end));
+        }
+        return total;
+    }
+
+    private int batchUpsertFlow(List<ST_FLOW_RPojo> list) {
+        int total = 0;
+        int batchSize = 500;
+        for (int i = 0; i < list.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, list.size());
+            total += stFlowRData.upsertAll(list.subList(i, end));
+        }
+        return total;
+    }
+
+    private int batchUpsertWdwv(List<ST_WDWV_RPojo> list) {
+        int total = 0;
+        int batchSize = 500;
+        for (int i = 0; i < list.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, list.size());
+            total += stWdwvRData.upsertAll(list.subList(i, end));
+        }
+        return total;
+    }
+
+    private int batchUpsertVel(List<ST_VEL_RPojo> list) {
+        int total = 0;
+        int batchSize = 500;
+        for (int i = 0; i < list.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, list.size());
+            total += stVelRData.upsertAll(list.subList(i, end));
+        }
+        return total;
     }
 
     /**

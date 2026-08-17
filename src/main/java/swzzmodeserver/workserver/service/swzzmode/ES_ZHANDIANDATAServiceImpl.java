@@ -597,11 +597,14 @@ public class ES_ZHANDIANDATAServiceImpl implements ES_ZHANDIANDATAService {
                         String newDate = obj.getZHANTIME();// .substring(0,obj.getZHANTIME().indexOf(":")) + ":00:00";
                         List<St_tide_rybPojo> listTideTemp = listTide.stream().filter(m -> m.getTM().equals(newDate))
                                 .collect(Collectors.toList());
-                        if (listTideTemp.size() > 0) {
+                        if (listTideTemp.size() > 0 && listXSTemp.size() > 0) {
                             Double tdz = listTideTemp.get(0).getTDZ();
                             Double xs = listXSTemp.get(0).getXS();
-                            String DATA = String.format("%.2f", Double.parseDouble(obj.getZHANDATA()) + (tdz * xs));
-                            obj.setZHANDATA(DATA);
+                            String zhandata = obj.getZHANDATA();
+                            if (tdz != null && xs != null && zhandata != null) {
+                                String DATA = String.format("%.2f", Double.parseDouble(zhandata) + (tdz * xs));
+                                obj.setZHANDATA(DATA);
+                            }
                         }
                         newzhandiandataList.add(obj);
                     }

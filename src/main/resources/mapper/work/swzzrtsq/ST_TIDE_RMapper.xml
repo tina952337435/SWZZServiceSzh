@@ -7,4 +7,20 @@
             (#{pojo.STCD}, #{pojo.TM}, #{pojo.TDZ}, #{pojo.AIRP}, #{pojo.TDCHRCD}, #{pojo.TDPTN}, #{pojo.HLTDMK}, #{pojo.INTM})
         </foreach>
     </insert>
+
+    <!-- 历史潮位补录：达梦 MERGE INTO 批量 upsert -->
+    <insert id="upsertAll" parameterType="java.util.List">
+        MERGE INTO ST_TIDE_R t
+        USING (
+            <foreach collection="quPojo" item="pojo" separator=" UNION ALL ">
+                SELECT
+                    #{pojo.STCD} AS STCD,
+                    TO_DATE(#{pojo.TM}, 'YYYY-MM-DD HH24:MI:SS') AS TM,
+                    #{pojo.TDZ} AS TDZ
+                FROM DUAL
+            </foreach>
+        ) s ON (t.STCD = s.STCD AND t.TM = s.TM)
+        WHEN MATCHED THEN UPDATE SET t.TDZ = s.TDZ
+        WHEN NOT MATCHED THEN INSERT (STCD, TM, TDZ) VALUES (s.STCD, s.TM, s.TDZ)
+    </insert>
 </mapper>

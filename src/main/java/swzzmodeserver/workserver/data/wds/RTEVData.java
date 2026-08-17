@@ -15,7 +15,11 @@ public interface RTEVData {
 
     List<ST_WAS_RPojo> GetWaterData(@Param("idList") List<String> idList, @Param("stime") String stime);
 
+    List<ST_WAS_RPojo> GetWaterDataHis(@Param("idList") List<String> idList, @Param("stime") String stime, @Param("etime") String etime);
+
     List<ST_WAS_RPojo> GetWaterDataLL(@Param("idList") List<String> idList, @Param("stime") String stime);
+
+    List<ST_WAS_RPojo> GetWaterDataLLHis(@Param("idList") List<String> idList, @Param("stime") String stime, @Param("etime") String etime);
 
     List<ST_WAS_RPojo> GetWaterDataFX(@Param("idList") List<String> idList, @Param("stime") String stime, @Param("etime") String etime);
 

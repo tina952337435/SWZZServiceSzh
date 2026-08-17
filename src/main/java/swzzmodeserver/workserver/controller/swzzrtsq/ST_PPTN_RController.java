@@ -1167,9 +1167,11 @@ public class ST_PPTN_RController {
                         .filter(Objects::nonNull)
                         .distinct()
                         .collect(Collectors.toList());
-                List<ST_PPTN_RPojo> hourRainList = data.queryHOURDRPList(finalStime, finalEtime, finalADMAUTH, allStcdList);
+                List<ST_PPTN_RPojo> hourRainList = data.queryHOURDRPList(finalStime, finalEtime, finalADMAUTH,
+                        allStcdList);
                 List<ST_STBPRP_BPojo> stationInfoList = stbprpBData.selectList(allStcdList, null);
-                MaxRainResultPojo maxRainResult = pptnServer.calculateMaxSlidingRain(hourRainList, stationInfoList, finalStime, finalEtime);
+                MaxRainResultPojo maxRainResult = pptnServer.calculateMaxSlidingRain(hourRainList, stationInfoList,
+                        finalStime, finalEtime);
                 // 构建 STCD → StationItem 快速查找 Map
                 Map<String, MaxRainResultPojo.StationItem> stationItemMap = new HashMap<>();
                 if (maxRainResult.getStations() != null) {
@@ -1232,37 +1234,47 @@ public class ST_PPTN_RController {
                                 for (String gStcd : stcdList) {
                                     MaxRainResultPojo.StationItem item = stationItemMap.get(gStcd);
                                     if (item != null) {
-                                        if (item.getMax60min() != null && item.getMax60min().getDrp() != null && item.getMax60min().getDrp() > max1hDrp) {
+                                        if (item.getMax60min() != null && item.getMax60min().getDrp() != null
+                                                && item.getMax60min().getDrp() > max1hDrp) {
                                             max1hDrp = item.getMax60min().getDrp();
                                             max1hStnm = item.getMax60min().getStnm();
                                         }
-                                        if (item.getMax3h() != null && item.getMax3h().getDrp() != null && item.getMax3h().getDrp() > max3hDrp) {
+                                        if (item.getMax3h() != null && item.getMax3h().getDrp() != null
+                                                && item.getMax3h().getDrp() > max3hDrp) {
                                             max3hDrp = item.getMax3h().getDrp();
                                             max3hStnm = item.getMax3h().getStnm();
                                         }
-                                        if (item.getMax6h() != null && item.getMax6h().getDrp() != null && item.getMax6h().getDrp() > max6hDrp) {
+                                        if (item.getMax6h() != null && item.getMax6h().getDrp() != null
+                                                && item.getMax6h().getDrp() > max6hDrp) {
                                             max6hDrp = item.getMax6h().getDrp();
                                             max6hStnm = item.getMax6h().getStnm();
                                         }
-                                        if (item.getMax12h() != null && item.getMax12h().getDrp() != null && item.getMax12h().getDrp() > max12hDrp) {
+                                        if (item.getMax12h() != null && item.getMax12h().getDrp() != null
+                                                && item.getMax12h().getDrp() > max12hDrp) {
                                             max12hDrp = item.getMax12h().getDrp();
                                             max12hStnm = item.getMax12h().getStnm();
                                         }
-                                        if (item.getMax24h() != null && item.getMax24h().getDrp() != null && item.getMax24h().getDrp() > max24hDrp) {
+                                        if (item.getMax24h() != null && item.getMax24h().getDrp() != null
+                                                && item.getMax24h().getDrp() > max24hDrp) {
                                             max24hDrp = item.getMax24h().getDrp();
                                             max24hStnm = item.getMax24h().getStnm();
                                         }
                                     }
                                 }
-                                pojo.setH1DRP(max1hDrp > 0 ? Double.parseDouble(String.format("%.1f", max1hDrp)) : null);
+                                pojo.setH1DRP(
+                                        max1hDrp > 0 ? Double.parseDouble(String.format("%.1f", max1hDrp)) : null);
                                 pojo.setH1STNM(StringUtils.isNotEmpty(max1hStnm) ? max1hStnm : null);
-                                pojo.setH3DRP(max3hDrp > 0 ? Double.parseDouble(String.format("%.1f", max3hDrp)) : null);
+                                pojo.setH3DRP(
+                                        max3hDrp > 0 ? Double.parseDouble(String.format("%.1f", max3hDrp)) : null);
                                 pojo.setH3STNM(StringUtils.isNotEmpty(max3hStnm) ? max3hStnm : null);
-                                pojo.setH6DRP(max6hDrp > 0 ? Double.parseDouble(String.format("%.1f", max6hDrp)) : null);
+                                pojo.setH6DRP(
+                                        max6hDrp > 0 ? Double.parseDouble(String.format("%.1f", max6hDrp)) : null);
                                 pojo.setH6STNM(StringUtils.isNotEmpty(max6hStnm) ? max6hStnm : null);
-                                pojo.setH12DRP(max12hDrp > 0 ? Double.parseDouble(String.format("%.1f", max12hDrp)) : null);
+                                pojo.setH12DRP(
+                                        max12hDrp > 0 ? Double.parseDouble(String.format("%.1f", max12hDrp)) : null);
                                 pojo.setH12STNM(StringUtils.isNotEmpty(max12hStnm) ? max12hStnm : null);
-                                pojo.setDRP24(max24hDrp > 0 ? Double.parseDouble(String.format("%.1f", max24hDrp)) : null);
+                                pojo.setDRP24(
+                                        max24hDrp > 0 ? Double.parseDouble(String.format("%.1f", max24hDrp)) : null);
                                 pojo.setH24STNM(StringUtils.isNotEmpty(max24hStnm) ? max24hStnm : null);
 
                                 // 片区内站点数量
@@ -1354,7 +1366,8 @@ public class ST_PPTN_RController {
                     List<ST_STBPRP_BPojo> stationInfoList = stbprpBData.selectList(allStcdList, null);
 
                     // 5. 执行5分钟精度滑动窗口计算
-                    MaxRainResultPojo maxRainResult = pptnServer.calculateMaxSlidingRain(rainData, stationInfoList, finalStime, finalEtime);
+                    MaxRainResultPojo maxRainResult = pptnServer.calculateMaxSlidingRain(rainData, stationInfoList,
+                            finalStime, finalEtime);
 
                     // 6. 构建 STCD → StationItem 快速查找 Map
                     Map<String, MaxRainResultPojo.StationItem> stationItemMap = new HashMap<>();
@@ -1392,7 +1405,8 @@ public class ST_PPTN_RController {
                                         .orElse(null);
                                 if (maxTotalItem != null) {
                                     pojo.setMaxStnm(maxTotalItem.getStnm());
-                                    pojo.setMaxDrp(Double.parseDouble(String.format("%.1f", maxTotalItem.getTotalDrp())));
+                                    pojo.setMaxDrp(
+                                            Double.parseDouble(String.format("%.1f", maxTotalItem.getTotalDrp())));
                                 }
 
                                 // --- 分组平均雨量 ---
@@ -1406,36 +1420,46 @@ public class ST_PPTN_RController {
                                 Double max1hDrp = 0.0, max3hDrp = 0.0, max6hDrp = 0.0, max12hDrp = 0.0, max24hDrp = 0.0;
                                 String max1hStnm = "", max3hStnm = "", max6hStnm = "", max12hStnm = "", max24hStnm = "";
                                 for (MaxRainResultPojo.StationItem item : groupItems) {
-                                    if (item.getMax60min() != null && item.getMax60min().getDrp() != null && item.getMax60min().getDrp() > max1hDrp) {
+                                    if (item.getMax60min() != null && item.getMax60min().getDrp() != null
+                                            && item.getMax60min().getDrp() > max1hDrp) {
                                         max1hDrp = item.getMax60min().getDrp();
                                         max1hStnm = item.getMax60min().getStnm();
                                     }
-                                    if (item.getMax3h() != null && item.getMax3h().getDrp() != null && item.getMax3h().getDrp() > max3hDrp) {
+                                    if (item.getMax3h() != null && item.getMax3h().getDrp() != null
+                                            && item.getMax3h().getDrp() > max3hDrp) {
                                         max3hDrp = item.getMax3h().getDrp();
                                         max3hStnm = item.getMax3h().getStnm();
                                     }
-                                    if (item.getMax6h() != null && item.getMax6h().getDrp() != null && item.getMax6h().getDrp() > max6hDrp) {
+                                    if (item.getMax6h() != null && item.getMax6h().getDrp() != null
+                                            && item.getMax6h().getDrp() > max6hDrp) {
                                         max6hDrp = item.getMax6h().getDrp();
                                         max6hStnm = item.getMax6h().getStnm();
                                     }
-                                    if (item.getMax12h() != null && item.getMax12h().getDrp() != null && item.getMax12h().getDrp() > max12hDrp) {
+                                    if (item.getMax12h() != null && item.getMax12h().getDrp() != null
+                                            && item.getMax12h().getDrp() > max12hDrp) {
                                         max12hDrp = item.getMax12h().getDrp();
                                         max12hStnm = item.getMax12h().getStnm();
                                     }
-                                    if (item.getMax24h() != null && item.getMax24h().getDrp() != null && item.getMax24h().getDrp() > max24hDrp) {
+                                    if (item.getMax24h() != null && item.getMax24h().getDrp() != null
+                                            && item.getMax24h().getDrp() > max24hDrp) {
                                         max24hDrp = item.getMax24h().getDrp();
                                         max24hStnm = item.getMax24h().getStnm();
                                     }
                                 }
-                                pojo.setMax1hDrp(max1hDrp > 0 ? Double.parseDouble(String.format("%.1f", max1hDrp)) : null);
+                                pojo.setMax1hDrp(
+                                        max1hDrp > 0 ? Double.parseDouble(String.format("%.1f", max1hDrp)) : null);
                                 pojo.setMax1hStnm(StringUtils.isNotEmpty(max1hStnm) ? max1hStnm : null);
-                                pojo.setMax3hDrp(max3hDrp > 0 ? Double.parseDouble(String.format("%.1f", max3hDrp)) : null);
+                                pojo.setMax3hDrp(
+                                        max3hDrp > 0 ? Double.parseDouble(String.format("%.1f", max3hDrp)) : null);
                                 pojo.setMax3hStnm(StringUtils.isNotEmpty(max3hStnm) ? max3hStnm : null);
-                                pojo.setMax6hDrp(max6hDrp > 0 ? Double.parseDouble(String.format("%.1f", max6hDrp)) : null);
+                                pojo.setMax6hDrp(
+                                        max6hDrp > 0 ? Double.parseDouble(String.format("%.1f", max6hDrp)) : null);
                                 pojo.setMax6hStnm(StringUtils.isNotEmpty(max6hStnm) ? max6hStnm : null);
-                                pojo.setMax12hDrp(max12hDrp > 0 ? Double.parseDouble(String.format("%.1f", max12hDrp)) : null);
+                                pojo.setMax12hDrp(
+                                        max12hDrp > 0 ? Double.parseDouble(String.format("%.1f", max12hDrp)) : null);
                                 pojo.setMax12hStnm(StringUtils.isNotEmpty(max12hStnm) ? max12hStnm : null);
-                                pojo.setMax24hDrp(max24hDrp > 0 ? Double.parseDouble(String.format("%.1f", max24hDrp)) : null);
+                                pojo.setMax24hDrp(
+                                        max24hDrp > 0 ? Double.parseDouble(String.format("%.1f", max24hDrp)) : null);
                                 pojo.setMax24hStnm(StringUtils.isNotEmpty(max24hStnm) ? max24hStnm : null);
 
                                 // 片区内站点数量
@@ -2557,8 +2581,8 @@ public class ST_PPTN_RController {
         System.out.println("解析到站点数: " + stcdList.size());
 
         // 2. 分批并行查询 5 分钟级雨量数据
-        //    大量站码的 IN 子句在 DM 数据库中索引 seek 合并开销大，
-        //    拆成每批 50 个站并行查询，总耗时 = 单批耗时（约 1/N）
+        // 大量站码的 IN 子句在 DM 数据库中索引 seek 合并开销大，
+        // 拆成每批 50 个站并行查询，总耗时 = 单批耗时（约 1/N）
         long dbStart = System.currentTimeMillis();
         int batchSize = 50;
         List<List<String>> batches = new ArrayList<>();

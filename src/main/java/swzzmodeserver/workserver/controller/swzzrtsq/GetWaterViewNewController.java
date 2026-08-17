@@ -2039,6 +2039,51 @@ public class GetWaterViewNewController {
     }
 
     /**
+     * 历史实时水文要素补录接口（水位/流量/风速风向/流速）
+     * 传入开始和结束时间，对 st_river_r / st_tide_r / st_flow_r / st_wdwv_r / st_vel_r
+     * 表中缺失的数据插入，已存在的数据覆盖更新。
+     *
+     * 请求参数（ColumnName）：
+     * stime: 开始时间 yyyy-MM-dd HH:mm:ss (必填)
+     * etime: 结束时间 yyyy-MM-dd HH:mm:ss (必填)
+     * stcd: 站点列表，逗号分隔 (选填，不传则补全部)
+     * pathname: 数据类型列表，逗号分隔，1水位/5流量/8风速风向/9流速 (选填，不传则默认全部)
+     *
+     * 返回（ResultUtils.data 为 Map）：
+     * fetchedCount: 从源系统拉取的总记录数
+     * affectedCount: 实际写入的记录数
+     * stationCount: 处理的站点数
+     * details: 逐站明细（stcd/stnm/type/fetched/affected）
+     * errors: 错误列表
+     */
+    @RequestMapping("/repairHistoryRealData")
+    public ResultUtils repairHistoryRealData(@RequestBody ColumnName param) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+
+        String stime = param.getStime();
+        String etime = param.getEtime();
+        List<String> stcdList = new ArrayList<>();
+        if (param.getStcd() != null && !param.getStcd().isEmpty()) {
+            stcdList = Arrays.asList(param.getStcd().split(","));
+        }
+        List<String> typeList = new ArrayList<>();
+        if (param.getPathname() != null && !param.getPathname().isEmpty()) {
+            typeList = Arrays.asList(param.getPathname().split(","));
+        }
+
+        // 参数校验
+        if (stime == null || stime.isEmpty() || etime == null || etime.isEmpty()) {
+            return new ResultUtils<>(null, "开始时间和结束时间不能为空", false, 0L, watch.getTime());
+        }
+
+        Map<String, Object> result = tongbuServer.repairHistoryRealData(stime, etime, stcdList, typeList);
+        watch.stop();
+        int affected = (int) result.getOrDefault("affectedCount", 0);
+        return new ResultUtils<>(result, "实时要素补录完成", true, affected, watch.getTime());
+    }
+
+    /**
      * 市气象局雨量补录同步接口
      * 每3分钟由外部定时器调用，查询所有市气象局站点指定时间段的雨量数据
      * 仅更新已存在的 (STCD, TM) 记录，不插入新记录

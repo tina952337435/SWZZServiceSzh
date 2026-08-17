@@ -1488,7 +1488,9 @@ public class SqkbServer {
         }
 
         result.put("maxDrp", maxSum);
-        result.put("timeRange", formatMax60TimeRange(times[maxLeft], times[maxRight]));
+        // 起点往前推一个 5 分钟间隔，还原真实降雨起始时间（首点时刻代表前5分钟的累积）
+        long displayStart = times[maxLeft] - gridStep;
+        result.put("timeRange", formatMax60TimeRange(displayStart, times[maxRight]));
 
         return result;
     }
